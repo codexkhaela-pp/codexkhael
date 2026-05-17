@@ -398,7 +398,7 @@ export function getQuickInterpretation({
   tone,
 }: QuickInterpretationInput): QuickInterpretationOutput {
   if (cards.length === 0) {
-    return { paragraphs: [] };
+    return { sections: [], finalMessage: "", paragraphs: [] };
   }
 
   const contextCard = getRoleCard(cards, "context");

@@ -21,7 +21,13 @@ export type TarotSpread = {
     | "horseshoe"
     | "cross-simple"
     | "celtic-cross"
-    | "custom-grid";
+    | "custom-grid"
+    | "tree-of-life"
+    | "decision"
+    | "relationships"
+    | "work-finance"
+    | "full-moon"
+    | "pendulum";
   positions: TarotSpreadPosition[];
 };
 
