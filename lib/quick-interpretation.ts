@@ -3,7 +3,7 @@ import type { TarotCard } from "@/src/data/tarotCards";
 export type InterpretationTone = "mystic" | "psychological" | "direct";
 
 export type SpreadInterpretationCard = {
-  position: string | { label: string };
+  position: string | { id?: number; label: string };
   card: TarotCard;
   reversed: boolean;
 };
@@ -270,6 +270,7 @@ const closingByTone: Record<InterpretationTone, string> = {
 };
 
 type QuickInterpretationInput = {
+  spreadId: string;
   cards: SpreadInterpretationCard[];
   tone: InterpretationTone;
 };
@@ -393,12 +394,99 @@ function getOpeningByTone(tone: InterpretationTone): string {
   return "La lectura es directa:";
 }
 
+function getCardReference(card: SpreadInterpretationCard): string {
+  return `${card.card.nameEs}${card.reversed ? " invertida" : ""}`;
+}
+
+function getCardByPositionId(
+  cards: SpreadInterpretationCard[],
+  positionId: number,
+): SpreadInterpretationCard | null {
+  const found = cards.find((entry) => {
+    if (typeof entry.position === "string") return false;
+    return entry.position.id === positionId;
+  });
+
+  return found ?? null;
+}
+
+function buildCelticCrossInterpretation(
+  cards: SpreadInterpretationCard[],
+  tone: InterpretationTone,
+): QuickInterpretationOutput {
+  const situation = getCardByPositionId(cards, 1) ?? cards[0];
+  const cross = getCardByPositionId(cards, 2) ?? cards[1] ?? cards[0];
+  const root = getCardByPositionId(cards, 3) ?? cards[2] ?? cards[0];
+  const conscious = getCardByPositionId(cards, 5) ?? cards[3] ?? cards[0];
+  const nearFuture = getCardByPositionId(cards, 6) ?? cards[4] ?? cards[cards.length - 1];
+  const result = getCardByPositionId(cards, 10) ?? cards[cards.length - 1];
+
+  const general = [
+    `${getOpeningByTone(tone)} en Situación actual aparece ${getCardReference(situation)}, que señala que ${getRolePhrase(
+      situation,
+      "context",
+      tone,
+    )}.`,
+    `En la raíz, ${getCardReference(root)} muestra que ${getRolePhrase(root, "challenge", tone)}.`,
+    `Tu meta consciente con ${getCardReference(conscious)} indica que ${getRolePhrase(
+      conscious,
+      "advice",
+      tone,
+    )}.`,
+  ].join(" ");
+
+  const blockage = `El cruce principal lo marca ${getCardReference(cross)}: ${getRolePhrase(
+    cross,
+    "challenge",
+    tone,
+  )}.`;
+
+  const advice = `Para avanzar, el Futuro próximo con ${getCardReference(
+    nearFuture,
+  )} sugiere que ${getRolePhrase(
+    nearFuture,
+    "advice",
+    tone,
+  )}. El resultado con ${getCardReference(result)} confirma que ${getRolePhrase(
+    result,
+    "advice",
+    tone,
+  )}.`;
+
+  return {
+    sections: [
+      {
+        title: "Lectura general",
+        icon: "✨",
+        content: general,
+      },
+      {
+        title: "Dónde está el bloqueo",
+        icon: "🔒",
+        content: blockage,
+      },
+      {
+        title: "Consejo para avanzar",
+        icon: "🔥",
+        content: advice,
+      },
+    ],
+    finalMessage: closingByTone[tone],
+    paragraphs: [general, blockage, advice],
+  };
+}
+
 export function getQuickInterpretation({
+  spreadId,
   cards,
   tone,
 }: QuickInterpretationInput): QuickInterpretationOutput {
   if (cards.length === 0) {
     return { sections: [], finalMessage: "", paragraphs: [] };
+  }
+
+  if (spreadId === "celtic-cross") {
+    return buildCelticCrossInterpretation(cards, tone);
   }
 
   const contextCard = getRoleCard(cards, "context");
@@ -409,13 +497,17 @@ export function getQuickInterpretation({
   const challengePhrase = getRolePhrase(challengeCard, "challenge", tone);
   const advicePhrase = getRolePhrase(adviceCard, "advice", tone);
 
-  const introParagraph = `${getOpeningByTone(tone)} ${contextPhrase}.`;
+  const introParagraph = `${getOpeningByTone(tone)} con ${getCardReference(contextCard)}: ${contextPhrase}.`;
   
   const challengeTitle = getPositionLabel(challengeCard.position);
-  const challengeText = challengePhrase.charAt(0).toUpperCase() + challengePhrase.slice(1) + ".";
+  const challengeText = `${getCardReference(challengeCard)} indica que ${
+    challengePhrase.charAt(0).toUpperCase() + challengePhrase.slice(1)
+  }.`;
   
   const adviceTitle = getPositionLabel(adviceCard.position);
-  const adviceText = advicePhrase.charAt(0).toUpperCase() + advicePhrase.slice(1) + ".";
+  const adviceText = `${getCardReference(adviceCard)} sugiere que ${
+    advicePhrase.charAt(0).toUpperCase() + advicePhrase.slice(1)
+  }.`;
 
   return {
     sections: [

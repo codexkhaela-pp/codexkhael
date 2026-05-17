@@ -1,19 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getQuickInterpretation, type InterpretationTone } from "@/lib/quick-interpretation";
 import { tarotCards, type TarotCard } from "@/src/data/tarotCards";
-import { tarotSpreads, type TarotSpreadPosition } from "@/src/data/tarotSpreads";
-
-type ReadingStatus = "inicial" | "barajando" | "revelando" | "completada";
-
-type DrawnCard = {
-  position: TarotSpreadPosition;
-  card: TarotCard;
-  reversed: boolean;
-};
+import { tarotSpreads } from "@/src/data/tarotSpreads";
+import { SpreadLayout } from "@/app/tiradas/components/spread-layout";
+import type { DrawnCard, ReadingStatus } from "@/app/tiradas/types";
 
 type ReadingResult = {
   spreadId: string;
@@ -31,8 +24,8 @@ const SHUFFLE_TIME_MS = 900;
 const INTERPRETATION_DEPTH_DELAY_MS = 850;
 
 const interpretationToneOptions: Array<{ value: InterpretationTone; label: string }> = [
-  { value: "mystic", label: "Místico" },
-  { value: "psychological", label: "Psicológico" },
+  { value: "mystic", label: "Mistico" },
+  { value: "psychological", label: "Psicologico" },
   { value: "direct", label: "Directo" },
 ];
 
@@ -45,40 +38,8 @@ function pickUniqueRandomCards(cards: TarotCard[], count: number): TarotCard[] {
   return pool.slice(0, count);
 }
 
-function getDrawSizeClass(cardCount: number): string {
-  if (cardCount <= 3) {
-    return "draw-grid-size-large";
-  }
-  if (cardCount <= 5) {
-    return "draw-grid-size-medium";
-  }
-  if (cardCount <= 7) {
-    return "draw-grid-size-small";
-  }
-  return "draw-grid-size-compact";
-}
-
-function getLayoutClass(layout: string): string {
-  if (layout === "horseshoe") {
-    return "draw-grid-layout-horseshoe";
-  }
-  if (layout === "celtic-cross") {
-    return "draw-grid-layout-celtic";
-  }
-  if (layout === "cross-simple") {
-    return "draw-grid-layout-cross";
-  }
-  if (layout === "line" || layout === "row") {
-    return "draw-grid-layout-line";
-  }
-  return "draw-grid-layout-custom";
-}
-
 export function SpreadReader() {
-  const riderWaiteDeck = useMemo(
-    () => tarotCards.filter((card) => card.deck === "rider-waite"),
-    [],
-  );
+  const riderWaiteDeck = useMemo(() => tarotCards.filter((card) => card.deck === "rider-waite"), []);
 
   const [spreadId, setSpreadId] = useState(tarotSpreads[0]?.id ?? "");
   const [status, setStatus] = useState<ReadingStatus>("inicial");
@@ -88,6 +49,7 @@ export function SpreadReader() {
   const [readingResult, setReadingResult] = useState<ReadingResult | null>(null);
   const [interpretationTone, setInterpretationTone] = useState<InterpretationTone>("psychological");
   const [aiDepthState, setAiDepthState] = useState<"idle" | "loading" | "ready">("idle");
+  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
   const timersRef = useRef<number[]>([]);
   const aiDepthTimerRef = useRef<number | null>(null);
@@ -98,25 +60,7 @@ export function SpreadReader() {
   );
 
   const spreadPositions = selectedSpread?.positions ?? [];
-  const spreadGridMetrics = useMemo(() => {
-    const columns = Math.max(...spreadPositions.map((position) => position.x), 0) + 1;
-    const rows = Math.max(...spreadPositions.map((position) => position.y), 0) + 1;
-    return { columns, rows };
-  }, [spreadPositions]);
-
   const isBusy = status === "barajando" || status === "revelando";
-  const drawGridClass = `${getLayoutClass(selectedSpread.layout)} ${getDrawSizeClass(
-    selectedSpread.cardCount,
-  )}`;
-
-  const drawGridStyle = useMemo(
-    () =>
-      ({
-        "--spread-cols": String(spreadGridMetrics.columns),
-        "--spread-rows": String(spreadGridMetrics.rows),
-      }) as CSSProperties,
-    [spreadGridMetrics.columns, spreadGridMetrics.rows],
-  );
 
   const quickInterpretation = useMemo(() => {
     if (status !== "completada" || drawnCards.length === 0) {
@@ -124,10 +68,11 @@ export function SpreadReader() {
     }
 
     return getQuickInterpretation({
+      spreadId: selectedSpread.id,
       cards: drawnCards,
       tone: interpretationTone,
     });
-  }, [drawnCards, interpretationTone, status]);
+  }, [drawnCards, interpretationTone, selectedSpread.id, status]);
 
   useEffect(() => {
     return () => {
@@ -172,6 +117,7 @@ export function SpreadReader() {
     setActiveRevealIndex(null);
     setReadingResult(null);
     setAiDepthState("idle");
+    setFlippedCards(new Set());
     if (aiDepthTimerRef.current !== null) {
       window.clearTimeout(aiDepthTimerRef.current);
       aiDepthTimerRef.current = null;
@@ -219,6 +165,18 @@ export function SpreadReader() {
     aiDepthTimerRef.current = window.setTimeout(() => {
       setAiDepthState("ready");
     }, INTERPRETATION_DEPTH_DELAY_MS);
+  }
+
+  function toggleFlip(index: number) {
+    setFlippedCards((previous) => {
+      const next = new Set(previous);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
   }
 
   useEffect(() => {
@@ -277,20 +235,10 @@ export function SpreadReader() {
           </div>
 
           <div className="reading-actions">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={startReading}
-              disabled={isBusy}
-            >
+            <button type="button" className="btn btn-primary" onClick={startReading} disabled={isBusy}>
               {status === "barajando" ? "Barajando..." : "Barajar y sacar cartas"}
             </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={startReading}
-              disabled={isBusy}
-            >
+            <button type="button" className="btn btn-secondary" onClick={startReading} disabled={isBusy}>
               Nueva tirada
             </button>
             <Link className="btn btn-secondary" href="/dashboard">
@@ -299,96 +247,32 @@ export function SpreadReader() {
           </div>
         </aside>
 
-        <section
-          className={`reading-main${status === "completada" ? " reading-main-complete" : ""}`}
-          aria-label="Resultado de tirada"
-        >
+        <section className={`reading-main${status === "completada" ? " reading-main-complete" : ""}`} aria-label="Resultado de tirada">
           <p className="reading-guidance">
             {status === "inicial" && "Elige una tirada y respira antes de comenzar."}
             {status === "barajando" && "Preparando la lectura..."}
-            {status === "revelando" && "La lectura se está revelando carta por carta..."}
-            {status === "completada" && "Las cartas han hablado. Observa cómo dialogan entre sí."}
+            {status === "revelando" && "La lectura se esta revelando carta por carta..."}
+            {status === "completada" && "Las cartas han hablado. Observa como dialogan entre si."}
           </p>
-          <div className="draw-grid-wrapper">
-            <div className={`draw-grid draw-grid-pattern ${drawGridClass}`} style={drawGridStyle}>
-              {spreadPositions.map((position, index) => {
-                const entry = drawnCards[index];
-                const isVisible = visibleCards > index;
-                const isActive = status === "revelando" && activeRevealIndex === index;
-                const isMuted =
-                  status === "revelando" && activeRevealIndex !== null && activeRevealIndex !== index;
 
-                return (
-                  <article
-                    key={position.id}
-                    className={`draw-slot${isVisible ? " draw-slot-visible" : ""}${
-                      isActive ? " draw-slot-active" : ""
-                    }${isMuted ? " draw-slot-muted" : ""}${
-                      position.overlay ? " draw-slot-overlay" : ""
-                    }`}
-                    style={{
-                      gridColumnStart: position.x + 1,
-                      gridRowStart: position.y + 1,
-                    }}
-                    aria-live="polite"
-                  >
-                    <div className="draw-slot-header">
-                      <span className="draw-position-index" aria-label={`Posición ${position.id}`}>
-                        {position.id}
-                      </span>
-                      <div className="draw-position-titles">
-                        <p className="draw-position">{position.label}</p>
-                        {position.subtitle && <p className="draw-subtitle">{position.subtitle}</p>}
-                      </div>
-                    </div>
-
-                    {entry && isVisible ? (
-                      <div className="draw-card-row">
-                        <div className={`draw-card-image-wrap${position.rotate ? " draw-card-rotate-cross" : ""}`}>
-                          <Image
-                            src={entry.card.image}
-                            alt={entry.card.nameEs}
-                            width={176}
-                            height={304}
-                            className={`draw-card-image${entry.reversed ? " draw-card-image-reversed" : ""}`}
-                          />
-                        </div>
-                        <div className="draw-meta">
-                          <h3>{entry.card.nameEs}</h3>
-                          <p className="draw-state">
-                            Estado:
-                            {entry.reversed ? (
-                              <span className="draw-state-badge" aria-label="Carta invertida">
-                                ↓ Invertida
-                              </span>
-                            ) : (
-                              " Derecha"
-                            )}
-                          </p>
-                          <p className="draw-keywords">
-                            {(entry.reversed ? entry.card.keywordsReversed : entry.card.keywordsUpright)
-                              .split(",")
-                              .map(k => k.trim())
-                              .slice(0, 3)
-                              .join(", ")}
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className={`draw-placeholder${position.rotate ? " draw-card-rotate-cross" : ""}`} aria-hidden="true">
-                        Carta por revelar
-                      </div>
-                    )}
-                  </article>
-                );
-              })}
+          <div className="reading-main-panel">
+            <div className="reading-canvas">
+              <SpreadLayout
+                spread={selectedSpread}
+                drawnCards={drawnCards}
+                visibleCards={visibleCards}
+                status={status}
+                activeRevealIndex={activeRevealIndex}
+                flippedCards={flippedCards}
+                onToggleFlip={toggleFlip}
+              />
             </div>
 
             {quickInterpretation && (
-              <section className="interpretation-panel" aria-label="Interpretación de la lectura">
+              <section className="interpretation-panel" aria-label="Interpretacion de la lectura">
                 <header className="interpretation-header">
-                  <h3>Interpretación de tu lectura</h3>
-                  <p>Lectura rápida conectada de toda la tirada.</p>
+                  <h3>Interpretacion de tu lectura</h3>
+                  <p>Lectura rapida conectada de toda la tirada.</p>
                 </header>
 
                 <div className="interpretation-tone-selector" role="radiogroup" aria-label="Tono de respuesta">
@@ -418,14 +302,13 @@ export function SpreadReader() {
                       <p>{section.content}</p>
                     </div>
                   ))}
-                  
+
                   {quickInterpretation.finalMessage && (
                     <div className="interpretation-highlight-block">
                       <p>{quickInterpretation.finalMessage}</p>
                     </div>
                   )}
 
-                  {/* Legacy fallback in case quickInterpretation is still just paragraphs */}
                   {!quickInterpretation.sections && quickInterpretation.paragraphs?.map((paragraph, index) => (
                     <p key={`${index}-${paragraph.slice(0, 20)}`}>{paragraph}</p>
                   ))}
@@ -439,15 +322,15 @@ export function SpreadReader() {
                     disabled={aiDepthState === "loading"}
                   >
                     {aiDepthState === "loading"
-                      ? "Preparando interpretación profunda..."
+                      ? "Preparando interpretacion profunda..."
                       : "Usar IA para mayor profundidad"}
                   </button>
                   {aiDepthState === "loading" && (
-                    <p className="interpretation-ai-message">Preparando una interpretación más profunda...</p>
+                    <p className="interpretation-ai-message">Preparando una interpretacion mas profunda...</p>
                   )}
                   {aiDepthState === "ready" && (
                     <p className="interpretation-ai-message">
-                      La interpretación profunda con IA estará disponible en una siguiente fase.
+                      La interpretacion profunda con IA estara disponible en una siguiente fase.
                     </p>
                   )}
                 </div>
