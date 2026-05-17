@@ -1,4 +1,4 @@
-export type DashboardCard = {
+﻿export type DashboardCard = {
   title: string;
   description: string;
   href: string | null;
@@ -34,7 +34,7 @@ export const dashboardCards: DashboardCard[] = [
     href: "/tiradas",
   },
   {
-    title: "Diario",
+    title: "Diario / Bitácora",
     description: "Registra avances, dudas y aprendizajes de cada sesión.",
     href: "/diario",
   },
@@ -77,4 +77,3 @@ export const journalMock: JournalEntry[] = [
     note: "Mejoró al definir la pregunta antes de sacar cartas.",
   },
 ];
-

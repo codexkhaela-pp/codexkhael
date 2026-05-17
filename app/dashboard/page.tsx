@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { InternalNav } from "@/app/components/internal-nav";
 import { dashboardCards } from "@/lib/mock-data";
 
@@ -35,4 +35,3 @@ export default function DashboardPage() {
     </main>
   );
 }
-

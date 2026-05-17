@@ -1,6 +1,6 @@
 import { BackButton } from "@/app/components/back-button";
 import { InternalNav } from "@/app/components/internal-nav";
-import { journalMock } from "@/lib/mock-data";
+import { DiarioHub } from "@/app/diario/diario-hub";
 
 export default function DiarioPage() {
   return (
@@ -9,22 +9,15 @@ export default function DiarioPage() {
       <section className="app-header">
         <div className="app-header-top">
           <BackButton />
-          <p className="app-kicker">Diario</p>
+          <p className="app-kicker">Diario / Bitacora</p>
         </div>
-        <h1>Diario de aprendizaje</h1>
-        <p>Entradas simuladas para conservar la estructura sin base de datos.</p>
+        <h1>Diario / Bitacora</h1>
+        <p>
+          Historial de lecturas y registro personal con mapa de tirada, interpretacion y relecturas futuras.
+        </p>
       </section>
 
-      <section className="stack" aria-label="Entradas de diario">
-        {journalMock.map((entry) => (
-          <article key={`${entry.date}-${entry.title}`} className="stack-card">
-            <h2>{entry.title}</h2>
-            <p>{entry.note}</p>
-            <span>{entry.date}</span>
-          </article>
-        ))}
-      </section>
+      <DiarioHub />
     </main>
   );
 }
-

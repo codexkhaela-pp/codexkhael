@@ -24,8 +24,8 @@ const SHUFFLE_TIME_MS = 900;
 const INTERPRETATION_DEPTH_DELAY_MS = 850;
 
 const interpretationToneOptions: Array<{ value: InterpretationTone; label: string }> = [
-  { value: "mystic", label: "Mistico" },
-  { value: "psychological", label: "Psicologico" },
+  { value: "mystic", label: "Místico" },
+  { value: "psychological", label: "Psicológico" },
   { value: "direct", label: "Directo" },
 ];
 
@@ -36,6 +36,93 @@ function pickUniqueRandomCards(cards: TarotCard[], count: number): TarotCard[] {
     [pool[index], pool[randomIndex]] = [pool[randomIndex], pool[index]];
   }
   return pool.slice(0, count);
+}
+
+function fixEncoding(text: string) {
+  try {
+    return decodeURIComponent(escape(text));
+  } catch {
+    return text;
+  }
+}
+
+function normalizeSpanish(text: string): string {
+  const corrections: Record<string, string> = {
+    'dinamica': 'dinámica',
+    'direccion': 'dirección',
+    'practica': 'práctica',
+    'tension': 'tensión',
+    'emocion': 'emoción',
+    'decision': 'decisión',
+    'energia': 'energía',
+    'accion': 'acción',
+    'relacion': 'relación',
+    'situacion': 'situación',
+    'posicion': 'posición',
+    'bloqueo': 'bloqueo',
+    'dinamico': 'dinámico',
+    'logico': 'lógico',
+    'teorico': 'teórico',
+    'friccion': 'fricción',
+    'aqui': 'aquí',
+    'util': 'útil',
+    'tambien': 'también',
+    'ayudara': 'ayudará',
+    'limites': 'límites',
+    'intuicion': 'intuición',
+    'expansion': 'expansión',
+    'union': 'unión',
+    'corazon': 'corazón',
+    'reflexion': 'reflexión',
+    'solucion': 'solución',
+    'ilusion': 'ilusión',
+    'proteccion': 'protección',
+    'transicion': 'transición',
+    'realizacion': 'realización',
+    'exito': 'éxito',
+    'rapido': 'rápido',
+    'rapida': 'rápida',
+    'vacio': 'vacío',
+    'armonia': 'armonía',
+    'obstaculo': 'obstáculo',
+    'proposito': 'propósito',
+    'comun': 'común',
+    'sintesis': 'síntesis',
+    'concentracion': 'concentración',
+    'limitacion': 'limitación',
+    'dificil': 'difícil',
+    'facil': 'fácil',
+    'autentico': 'auténtico',
+    'autentica': 'auténtica',
+    'mistico': 'místico',
+    'ayudarÃ¡': 'ayudará',
+    'lÃmites': 'límites',
+    'intuiciÃ³n': 'intuición',
+    'corazÃ³n': 'corazón',
+    'obstÃ¡culo': 'obstáculo'
+  };
+
+  let result = text;
+
+  for (const key in corrections) {
+    const regex = new RegExp(`\\b${key}\\b`, 'gi');
+    result = result.replace(regex, corrections[key]);
+  }
+
+  result = result
+    .replace(/ayudarÃ¡/gi, 'ayudará')
+    .replace(/lÃmites/gi, 'límites')
+    .replace(/intuiciÃ³n/gi, 'intuición')
+    .replace(/corazÃ³n/gi, 'corazón')
+    .replace(/obstÃ¡culo/gi, 'obstáculo')
+    .replace(/\besta\b/gi, 'está')
+    .replace(/\bmas\b/gi, 'más');
+
+  return result;
+}
+
+function renderText(text: string): string {
+  return normalizeSpanish(fixEncoding(text));
 }
 
 export function SpreadReader() {
@@ -153,7 +240,7 @@ export function SpreadReader() {
   }
 
   function handleDepthInterpretation() {
-    if (aiDepthState === "loading") {
+    if (aiDepthState === "loading" || !quickInterpretation) {
       return;
     }
 
@@ -161,6 +248,30 @@ export function SpreadReader() {
     if (aiDepthTimerRef.current !== null) {
       window.clearTimeout(aiDepthTimerRef.current);
     }
+
+    const payload = {
+      spreadName: selectedSpread.name,
+      question: "Pregunta general",
+      tone: interpretationTone,
+      cards: drawnCards.map((entry, index) => ({
+        positionNumber: index + 1,
+        positionName: typeof entry.position === 'string' ? entry.position : entry.position.label,
+        positionSubtitle: typeof entry.position === 'string' ? '' : entry.position.subtitle,
+        cardName: entry.card.nameEs,
+        arcana: entry.card.arcana,
+        suit: entry.card.suit,
+        isReversed: entry.reversed,
+        orientation: entry.reversed ? 'Invertida' : 'Derecha',
+      })),
+      baseInterpretation: {
+        summary: quickInterpretation.summary,
+        positionReadings: quickInterpretation.positionReadings,
+        relationships: quickInterpretation.relationships,
+        finalAdvice: quickInterpretation.finalAdvice,
+      },
+    };
+
+    console.log("Payload IA:", payload);
 
     aiDepthTimerRef.current = window.setTimeout(() => {
       setAiDepthState("ready");
@@ -251,8 +362,8 @@ export function SpreadReader() {
           <p className="reading-guidance">
             {status === "inicial" && "Elige una tirada y respira antes de comenzar."}
             {status === "barajando" && "Preparando la lectura..."}
-            {status === "revelando" && "La lectura se esta revelando carta por carta..."}
-            {status === "completada" && "Las cartas han hablado. Observa como dialogan entre si."}
+            {status === "revelando" && "La lectura se está revelando carta por carta..."}
+            {status === "completada" && "Las cartas han hablado. Observa cómo dialogan entre sí."}
           </p>
 
           <div className="reading-main-panel">
@@ -269,10 +380,10 @@ export function SpreadReader() {
             </div>
 
             {quickInterpretation && (
-              <section className="interpretation-panel" aria-label="Interpretacion de la lectura">
+              <section className="interpretation-panel" aria-label="Interpretación de la lectura">
                 <header className="interpretation-header">
-                  <h3>Interpretacion de tu lectura</h3>
-                  <p>Lectura rapida conectada de toda la tirada.</p>
+                  <h3>Interpretación de tu lectura</h3>
+                  <p>Lectura rápida conectada de toda la tirada.</p>
                 </header>
 
                 <div className="interpretation-tone-selector" role="radiogroup" aria-label="Tono de respuesta">
@@ -293,25 +404,43 @@ export function SpreadReader() {
                 </div>
 
                 <div className="interpretation-copy">
-                  {quickInterpretation.sections?.map((section, index) => (
-                    <div key={index} className="interpretation-section">
-                      <h4>
-                        {section.icon && <span className="interpretation-icon">{section.icon}</span>}
-                        {section.title}
-                      </h4>
-                      <p>{section.content}</p>
-                    </div>
-                  ))}
+                  <section className="reading-section">
+                    <h3>1. Síntesis general</h3>
+                    <p>{renderText(quickInterpretation.summary)}</p>
+                  </section>
 
-                  {quickInterpretation.finalMessage && (
-                    <div className="interpretation-highlight-block">
-                      <p>{quickInterpretation.finalMessage}</p>
-                    </div>
-                  )}
+                  <section className="reading-section">
+                    <h3>2. Lectura por posición</h3>
+                    <div className="position-reading-list">
+                      {quickInterpretation.positionReadings.map((item) => (
+                        <article className="position-reading-card" key={item.positionNumber}>
+                          <header className="position-reading-card__header">
+                            <span>{item.positionNumber}</span>
+                            <div>
+                              <strong>{renderText(item.positionName)}</strong>
+                              {item.positionSubtitle && <small>{renderText(item.positionSubtitle)}</small>}
+                            </div>
+                          </header>
 
-                  {!quickInterpretation.sections && quickInterpretation.paragraphs?.map((paragraph, index) => (
-                    <p key={`${index}-${paragraph.slice(0, 20)}`}>{paragraph}</p>
-                  ))}
+                          <p className="position-reading-card__card">
+                            {renderText(item.cardName)} · {renderText(item.orientation)}
+                          </p>
+
+                          <p>{renderText(item.interpretation)}</p>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="reading-section">
+                    <h3>3. Relaciones entre cartas</h3>
+                    <p>{renderText(quickInterpretation.relationships)}</p>
+                  </section>
+
+                  <section className="reading-section">
+                    <h3>4. Consejo final integrado</h3>
+                    <p>{renderText(quickInterpretation.finalAdvice)}</p>
+                  </section>
                 </div>
 
                 <div className="interpretation-ai">
@@ -322,15 +451,15 @@ export function SpreadReader() {
                     disabled={aiDepthState === "loading"}
                   >
                     {aiDepthState === "loading"
-                      ? "Preparando interpretacion profunda..."
+                      ? "Preparando interpretación profunda..."
                       : "Usar IA para mayor profundidad"}
                   </button>
                   {aiDepthState === "loading" && (
-                    <p className="interpretation-ai-message">Preparando una interpretacion mas profunda...</p>
+                    <p className="interpretation-ai-message">Preparando una interpretación más profunda...</p>
                   )}
                   {aiDepthState === "ready" && (
                     <p className="interpretation-ai-message">
-                      La interpretacion profunda con IA estara disponible en una siguiente fase.
+                      La interpretación profunda con IA estará disponible en una siguiente fase.
                     </p>
                   )}
                 </div>

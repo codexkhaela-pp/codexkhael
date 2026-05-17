@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { LogoutButton } from "@/app/components/logout-button";
 
 export function InternalNav() {
@@ -12,7 +12,7 @@ export function InternalNav() {
         <Link href="/dashboard">Panel</Link>
         <Link href="/cartas">Cartas</Link>
         <Link href="/tiradas">Tiradas</Link>
-        <Link href="/diario">Diario</Link>
+        <Link href="/diario">Diario / Bitácora</Link>
       </nav>
       <LogoutButton />
     </header>
