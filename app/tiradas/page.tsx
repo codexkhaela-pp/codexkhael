@@ -1,23 +1,21 @@
-import { readingsMock } from "@/lib/mock-data";
+import { BackButton } from "@/app/components/back-button";
+import { InternalNav } from "@/app/components/internal-nav";
+import { SpreadReader } from "@/app/tiradas/spread-reader";
 
 export default function TiradasPage() {
   return (
     <main className="app-shell">
+      <InternalNav />
       <section className="app-header">
-        <p className="app-kicker">Registro</p>
+        <div className="app-header-top">
+          <BackButton />
+          <p className="app-kicker">Tiradas</p>
+        </div>
         <h1>Tiradas</h1>
-        <p>Listado inicial con tiradas mock locales.</p>
+        <p>Selecciona el tipo de tirada, baraja el mazo y revela las cartas por posición.</p>
       </section>
 
-      <section className="stack" aria-label="Historial de tiradas">
-        {readingsMock.map((reading) => (
-          <article key={`${reading.date}-${reading.spread}`} className="stack-card">
-            <h2>{reading.spread}</h2>
-            <p>{reading.summary}</p>
-            <span>{reading.date}</span>
-          </article>
-        ))}
-      </section>
+      <SpreadReader />
     </main>
   );
 }

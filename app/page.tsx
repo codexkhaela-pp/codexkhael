@@ -9,7 +9,7 @@ export default function HomePage() {
           <span>CodexKhael</span>
         </a>
         <nav>
-          <a href="#metodo">Metodo</a>
+          <a href="#metodo">Método</a>
           <a href="#v1">Plataforma</a>
           <a href="#acceso">Acceso</a>
         </nav>
@@ -23,28 +23,27 @@ export default function HomePage() {
           <div>
             <div className="badge">
               <span />
-              Plataforma en construccion
+              Plataforma en construcción
             </div>
-            <h1>Tarot con estructura, intuicion y memoria.</h1>
+            <h1>Tarot con estructura, intuición y memoria.</h1>
             <p>
-              CodexKhael sera un espacio digital para estudiar tarot, registrar tiradas,
-              practicar interpretaciones y construir tu propio grimorio vivo con una metodologia
-              clara.
+              CodexKhael será un espacio digital para estudiar tarot, registrar tiradas, practicar
+              interpretaciones y construir tu propio grimorio vivo con una metodología clara.
             </p>
             <div className="actions">
               <Link className="btn btn-primary" href="/dashboard">
                 Acceder
               </Link>
               <a className="btn btn-secondary" href="#v1">
-                Ver que incluira
+                Ver qué incluirá
               </a>
             </div>
           </div>
 
           <aside className="hero-card" aria-label="Vista previa de una lectura">
             <div className="card-title">
-              <span>Tirada de practica</span>
-              <span>Preview</span>
+              <span>Tirada de práctica</span>
+              <span>Vista previa</span>
             </div>
             <div className="reading">
               <div className="tarot-card">
@@ -62,36 +61,36 @@ export default function HomePage() {
             </div>
             <div className="analysis">
               Guarda la pregunta, registra las cartas, define posiciones y desarrolla una lectura
-              concreta, ordenada y facil de revisar despues.
+              concreta, ordenada y fácil de revisar después.
             </div>
           </aside>
         </section>
 
         <section className="section" id="metodo">
-          <h2>No sera solo una web de tarot.</h2>
+          <h2>No será solo una web de tarot.</h2>
           <p className="section-intro">
-            La idea de CodexKhael es combinar estudio, practica y registro personal. Menos ruido,
-            mas metodo. Menos frases genericas, mas interpretacion concreta.
+            La idea de CodexKhael es combinar estudio, práctica y registro personal. Menos ruido,
+            más método. Menos frases genéricas, más interpretación concreta.
           </p>
           <div className="grid">
             <article className="feature">
               <strong>Grimorio digital</strong>
               <p>
-                Un espacio para ordenar significados, notas, simbolos, asociaciones y aprendizajes
+                Un espacio para ordenar significados, notas, símbolos, asociaciones y aprendizajes
                 por carta.
               </p>
             </article>
             <article className="feature">
               <strong>Registro de tiradas</strong>
               <p>
-                Guarda preguntas, cartas, posiciones, contexto e interpretacion final para consultar
-                tu evolucion.
+                Guarda preguntas, cartas, posiciones, contexto e interpretación final para consultar
+                tu evolución.
               </p>
             </article>
             <article className="feature">
-              <strong>Practica guiada</strong>
+              <strong>Práctica guiada</strong>
               <p>
-                Ejercicios para entrenar lectura concreta, conexion entre cartas y analisis por
+                Ejercicios para entrenar lectura concreta, conexión entre cartas y análisis por
                 posiciones.
               </p>
             </article>
@@ -99,10 +98,10 @@ export default function HomePage() {
         </section>
 
         <section className="section" id="v1">
-          <h2>Plataforma inicial.</h2>
+          <h2>Plataforma inicial</h2>
           <p className="section-intro">
-            La plataforma inicial se enfocara en lo esencial: estudiar, practicar y registrar. La
-            IA vendra despues, cuando el metodo base este firme.
+            La plataforma inicial se enfocará en lo esencial: estudiar, practicar y registrar. La
+            IA vendrá después, cuando el método base esté firme.
           </p>
           <div className="grid">
             <article className="feature">
@@ -112,21 +111,24 @@ export default function HomePage() {
             <article className="feature">
               <strong>Diferentes tiradas</strong>
               <p>
-                Carta del dia, cruz celta, cruz celta aspiracional, kabala, lectura mensual y otros
-                esquemas de practica.
+                Carta del día, cruz celta, cruz celta aspiracional, kábala, lectura mensual y otros
+                esquemas de práctica.
               </p>
             </article>
             <article className="feature">
               <strong>Diario de aprendizaje</strong>
-              <p>Historial de practicas para revisar patrones, errores y avances reales.</p>
+              <p>Historial de prácticas para revisar patrones, errores y avances reales.</p>
             </article>
           </div>
         </section>
 
         <section className="coming" id="acceso">
           <div>
-            <h2>Acceso anticipado proximamente.</h2>
-            <p>CodexKhael esta en construccion. Primero sera solido, luego bonito, luego inteligente.</p>
+            <h2>Acceso anticipado próximamente.</h2>
+            <p>
+              CodexKhael está en construcción. Primero será sólido, luego bonito, luego
+              inteligente.
+            </p>
           </div>
           <a className="btn btn-primary" href="mailto:hola@codexkhael.com">
             Contactar
@@ -141,4 +143,3 @@ export default function HomePage() {
     </div>
   );
 }
-

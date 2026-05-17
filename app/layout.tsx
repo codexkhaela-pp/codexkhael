@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CodexKhael | Tarot, estudio e intuicion",
+  title: "CodexKhael | Tarot, estudio e intuición",
   description:
-    "CodexKhael es una plataforma en construccion para estudiar tarot, registrar tiradas y entrenar la interpretacion intuitiva con estructura.",
+    "CodexKhael es una plataforma en construcción para estudiar tarot, registrar tiradas y entrenar la interpretación intuitiva con estructura.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

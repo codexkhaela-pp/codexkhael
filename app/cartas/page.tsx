@@ -1,23 +1,22 @@
-import { tarotLibraryMock } from "@/lib/mock-data";
+import { BackButton } from "@/app/components/back-button";
+import { InternalNav } from "@/app/components/internal-nav";
+import { CardsBrowser } from "@/app/cartas/cards-browser";
+import { tarotCards } from "@/src/data/tarotCards";
 
 export default function CartasPage() {
   return (
     <main className="app-shell">
+      <InternalNav />
       <section className="app-header">
-        <p className="app-kicker">Biblioteca</p>
+        <div className="app-header-top">
+          <BackButton />
+          <p className="app-kicker">Biblioteca</p>
+        </div>
         <h1>Cartas</h1>
-        <p>Datos mock para estructura inicial de estudio de cartas.</p>
+        <p>Explora el mazo local y filtra por nombre, número, código o tipo de mazo.</p>
       </section>
 
-      <section className="list-grid" aria-label="Listado de cartas">
-        {tarotLibraryMock.map((card) => (
-          <article key={card.name} className="list-card">
-            <h2>{card.name}</h2>
-            <p>{card.arcana}</p>
-            <span>{card.keyword}</span>
-          </article>
-        ))}
-      </section>
+      <CardsBrowser cards={tarotCards} />
     </main>
   );
 }

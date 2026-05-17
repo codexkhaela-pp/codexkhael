@@ -30,51 +30,51 @@ export const dashboardCards: DashboardCard[] = [
   },
   {
     title: "Mis tiradas",
-    description: "Revisa tiradas de practica con enfoque claro y ordenado.",
+    description: "Revisa tiradas de práctica con enfoque claro y ordenado.",
     href: "/tiradas",
   },
   {
     title: "Diario",
-    description: "Registra avances, dudas y aprendizajes de cada sesion.",
+    description: "Registra avances, dudas y aprendizajes de cada sesión.",
     href: "/diario",
   },
   {
-    title: "Practicas",
-    description: "Espacio inicial para ejercicios guiados (proximamente).",
+    title: "Prácticas",
+    description: "Espacio inicial para ejercicios guiados (próximamente).",
     href: null,
   },
 ];
 
 export const tarotLibraryMock: TarotCard[] = [
   { name: "El Loco", arcana: "Mayor", keyword: "Inicio" },
-  { name: "La Sacerdotisa", arcana: "Mayor", keyword: "Intuicion" },
-  { name: "Tres de Copas", arcana: "Menor", keyword: "Vinculos" },
-  { name: "Nueve de Oros", arcana: "Menor", keyword: "Autonomia" },
+  { name: "La Sacerdotisa", arcana: "Mayor", keyword: "Intuición" },
+  { name: "Tres de Copas", arcana: "Menor", keyword: "Vínculos" },
+  { name: "Nueve de Oros", arcana: "Menor", keyword: "Autonomía" },
 ];
 
 export const readingsMock: ReadingEntry[] = [
   {
     date: "2026-05-10",
     spread: "Pasado / Presente / Futuro",
-    summary: "Lectura enfocada en una decision profesional.",
+    summary: "Lectura enfocada en una decisión profesional.",
   },
   {
     date: "2026-05-14",
-    spread: "Situacion / Bloqueo / Consejo",
-    summary: "Revision de patron repetido en relaciones.",
+    spread: "Situación / Bloqueo / Consejo",
+    summary: "Revisión de patrón repetido en relaciones.",
   },
 ];
 
 export const journalMock: JournalEntry[] = [
   {
     date: "2026-05-09",
-    title: "Simbolos recurrentes",
-    note: "Aparece la energia de inicio cuando hay miedo al cambio.",
+    title: "Símbolos recurrentes",
+    note: "Aparece la energía de inicio cuando hay miedo al cambio.",
   },
   {
     date: "2026-05-15",
-    title: "Lectura mas concreta",
-    note: "Mejoro al definir la pregunta antes de sacar cartas.",
+    title: "Lectura más concreta",
+    note: "Mejoró al definir la pregunta antes de sacar cartas.",
   },
 ];
 
