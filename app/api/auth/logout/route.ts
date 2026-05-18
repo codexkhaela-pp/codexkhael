@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { AUTH_COOKIE_NAME, parseSessionCookieValue } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logAccess } from "@/lib/access-log";
+import { isPrismaMissingColumnError } from "@/lib/prisma-errors";
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -10,18 +11,24 @@ export async function POST(request: Request) {
   const session = parseSessionCookieValue(raw);
 
   if (session) {
-    // Only clear sessionToken in DB if it still matches this session's token.
-    // If another login already replaced it, don't touch the DB — just clear the cookie.
-    const user = await prisma.user.findUnique({
-      where: { id: session.userId },
-      select: { sessionToken: true },
-    });
-
-    if (user && user.sessionToken === session.sessionToken) {
-      await prisma.user.update({
+    try {
+      // Only clear sessionToken in DB if it still matches this session.
+      // If another login already replaced it, keep DB state and just clear cookie.
+      const user = await prisma.user.findUnique({
         where: { id: session.userId },
-        data: { sessionToken: null },
+        select: { sessionToken: true },
       });
+
+      if (user && user.sessionToken === session.sessionToken) {
+        await prisma.user.update({
+          where: { id: session.userId },
+          data: { sessionToken: null },
+        });
+      }
+    } catch (error) {
+      if (!isPrismaMissingColumnError(error, "sessionToken")) {
+        throw error;
+      }
     }
 
     const userAgent = request.headers.get("user-agent") ?? null;

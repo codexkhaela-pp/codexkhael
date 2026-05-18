@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { AUTH_COOKIE_NAME, createSessionCookieValue } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logAccess } from "@/lib/access-log";
+import { isPrismaConnectionError, isPrismaMissingColumnError } from "@/lib/prisma-errors";
 
 export const runtime = "nodejs";
 
@@ -21,9 +22,23 @@ function logAuthEvent(stage: string, details: Record<string, unknown>) {
   console.info(`[auth/login] ${stage}`, details);
 }
 
+export async function GET() {
+  return NextResponse.json(
+    { ok: false, error: "Método no permitido. Usa POST para iniciar sesión." },
+    { status: 405 },
+  );
+}
+
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as LoginBody;
+    let body: LoginBody;
+    try {
+      body = (await request.json()) as LoginBody;
+    } catch {
+      logAuthEvent("validation_failed", { reason: "invalid_json_body" });
+      return NextResponse.json({ error: "Solicitud inválida." }, { status: 400 });
+    }
+
     const username = body.username?.trim().toLowerCase() ?? "";
     const password = body.password ?? "";
 
@@ -62,11 +77,22 @@ export async function POST(request: Request) {
     const sessionToken = randomUUID();
     logAuthEvent("session_token_generated", { generated: Boolean(sessionToken) });
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { sessionToken },
-    });
-    logAuthEvent("session_token_persisted", { persisted: true, userId: user.id });
+    try {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { sessionToken },
+      });
+      logAuthEvent("session_token_persisted", { persisted: true, userId: user.id });
+    } catch (error) {
+      if (isPrismaMissingColumnError(error, "sessionToken")) {
+        logAuthEvent("session_token_persist_skipped", {
+          reason: "missing_sessiontoken_column",
+          userId: user.id,
+        });
+      } else {
+        throw error;
+      }
+    }
 
     const userAgent = request.headers.get("user-agent") ?? null;
     await logAccess({ userId: user.id, email: user.email, action: "login", userAgent });
@@ -94,6 +120,16 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, user: { id: user.id, email: user.email } });
   } catch (error) {
+    if (isPrismaConnectionError(error)) {
+      logAuthEvent("database_unreachable", {
+        message: error instanceof Error ? error.message : "database_connection_error",
+      });
+      return NextResponse.json(
+        { error: "No se pudo conectar con la base de datos. Intenta nuevamente en unos minutos." },
+        { status: 503 },
+      );
+    }
+
     logAuthEvent("unexpected_error", {
       message: error instanceof Error ? error.message : "unknown_error",
     });

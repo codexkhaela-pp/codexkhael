@@ -304,3 +304,39 @@ DATABASE_URL="<PROD_DATABASE_URL>" DIRECT_URL="<PROD_DIRECT_URL>" npx prisma db 
 ### Build
 - `npm run build` ejecutado: **OK** (incluye auth + diario endpoints).
 
+## Hotfix auth producciÃ³n (Vercel) - 2026-05-17
+
+### Problema observado
+- `POST /api/auth/login` devolvÃ­a 500 en producciÃ³n.
+- Abrir `/api/auth/login` en navegador mostraba 405 (esperable por mÃ©todo), pero generaba confusiÃ³n de diagnÃ³stico.
+
+### Correcciones aplicadas
+1. **Prisma env resolution mÃ¡s robusta** (`lib/prisma.ts`)
+   - Fallback de conexiÃ³n en este orden:
+     - `DIRECT_URL`
+     - `DATABASE_URL`
+     - `POSTGRES_PRISMA_URL`
+     - `POSTGRES_URL_NON_POOLING`
+     - `POSTGRES_URL`
+   - Limpieza de comillas accidentales en valores de env.
+2. **Compatibilidad con schema desfasado en producciÃ³n**:
+   - `app/api/auth/login/route.ts`:
+     - si falta columna `sessionToken` (error Prisma `P2022`), no rompe login.
+     - manejo explÃ­cito de error de conexiÃ³n Prisma (`P10xx`) con respuesta 503 controlada.
+   - `lib/auth-server.ts`:
+     - si falta `sessionToken`, fallback temporal a validaciÃ³n por `id+email+status` para no bloquear acceso.
+   - `app/api/auth/logout/route.ts`:
+     - tolera ausencia de `sessionToken` sin romper cierre de sesiÃ³n.
+3. **GET en `/api/auth/login`**
+   - se devuelve JSON 405 controlado: "Usa POST para iniciar sesiÃ³n."
+
+### Archivos modificados
+- `lib/prisma.ts`
+- `lib/prisma-errors.ts` (nuevo)
+- `app/api/auth/login/route.ts`
+- `lib/auth-server.ts`
+- `app/api/auth/logout/route.ts`
+
+### ValidaciÃ³n
+- `npm run build` => **OK**.
+

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { AUTH_COOKIE_NAME, parseSessionCookieValue, type AppSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isPrismaMissingColumnError } from "@/lib/prisma-errors";
 
 export type AuthenticatedUser = {
   id: string;
@@ -19,22 +20,46 @@ export async function getCurrentUser(): Promise<AuthenticatedUser | null> {
     return null;
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.userId },
-    select: { id: true, email: true, status: true, sessionToken: true },
-  });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true, email: true, status: true, sessionToken: true },
+    });
 
-  if (
-    !user ||
-    user.email.toLowerCase() !== session.email.toLowerCase() ||
-    user.status !== "ACTIVE" ||
-    user.sessionToken !== session.sessionToken
-  ) {
-    return null;
+    if (
+      !user ||
+      user.email.toLowerCase() !== session.email.toLowerCase() ||
+      user.status !== "ACTIVE" ||
+      user.sessionToken !== session.sessionToken
+    ) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+    };
+  } catch (error) {
+    if (!isPrismaMissingColumnError(error, "sessionToken")) {
+      throw error;
+    }
+
+    const userWithoutToken = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true, email: true, status: true },
+    });
+
+    if (
+      !userWithoutToken ||
+      userWithoutToken.email.toLowerCase() !== session.email.toLowerCase() ||
+      userWithoutToken.status !== "ACTIVE"
+    ) {
+      return null;
+    }
+
+    return {
+      id: userWithoutToken.id,
+      email: userWithoutToken.email,
+    };
   }
-
-  return {
-    id: user.id,
-    email: user.email,
-  };
 }

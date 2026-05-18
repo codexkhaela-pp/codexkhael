@@ -1,10 +1,51 @@
-﻿import { PrismaClient } from "@/src/generated/prisma/client";
+import { PrismaClient } from "@/src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
+const CONNECTION_ENV_NAMES = [
+  "DIRECT_URL",
+  "DATABASE_URL",
+  "POSTGRES_PRISMA_URL",
+  "POSTGRES_URL_NON_POOLING",
+  "POSTGRES_URL",
+] as const;
+
+function readConnectionVariable(name: (typeof CONNECTION_ENV_NAMES)[number]): string | null {
+  const rawValue = process.env[name];
+  if (!rawValue) {
+    return null;
+  }
+
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  // Handles accidental quoted values in environment settings.
+  const unquoted =
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+      ? trimmed.slice(1, -1).trim()
+      : trimmed;
+
+  return unquoted || null;
+}
+
+function resolveConnectionString(): string | null {
+  for (const envName of CONNECTION_ENV_NAMES) {
+    const value = readConnectionVariable(envName);
+    if (value) {
+      return value;
+    }
+  }
+  return null;
+}
+
+const connectionString = resolveConnectionString();
 
 if (!connectionString) {
-  throw new Error("DATABASE_URL or DIRECT_URL must be configured.");
+  throw new Error(
+    `Database connection string is missing. Configure one of: ${CONNECTION_ENV_NAMES.join(", ")}`,
+  );
 }
 
 const globalForPrisma = globalThis as unknown as {
