@@ -1,4 +1,5 @@
 import { LoginForm } from "@/app/login/login-form";
+import Link from "next/link";
 
 type LoginPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -18,6 +19,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <h1>Iniciar sesión</h1>
         <p>Introduce tus credenciales para entrar al panel.</p>
         <LoginForm nextPath={nextPath} />
+        <div style={{ marginTop: "1rem", textAlign: "center" }}>
+          <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+            ¿No tienes cuenta? <Link href="/register" style={{ color: "var(--gold)", textDecoration: "underline" }}>Regístrate</Link>
+          </p>
+        </div>
       </section>
     </main>
   );

@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { AUTH_COOKIE_NAME, isSessionAuthenticated } from "@/lib/auth";
 
-const PUBLIC_PATHS = new Set(["/", "/login"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/register"]);
 const PUBLIC_PREFIXES = ["/tarot/"];
-const AUTH_API_PATHS = new Set(["/api/auth/login", "/api/auth/logout"]);
+const AUTH_API_PATHS = new Set(["/api/auth/login", "/api/auth/logout", "/api/auth/register"]);
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) {
@@ -41,4 +41,3 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"],
 };
-

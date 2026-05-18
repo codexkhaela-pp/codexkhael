@@ -1,8 +1,8 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BitacoraWorkbench } from "@/app/diario/bitacora-workbench";
-import { addJournalRereading, getJournalEntries, getJournalEntryById } from "@/app/diario/storage";
+import { createRereadingInApi, fetchJournalEntriesFromApi, fetchJournalEntryByIdFromApi } from "@/app/diario/api-client";
 import type { JournalEntry, JournalRereading } from "@/app/diario/types";
 
 type ViewMode =
@@ -36,25 +36,6 @@ function formatDateTime(date: string, time: string): string {
   });
 }
 
-function createRereadingId() {
-  return `reread-${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
-}
-
-function buildInitialRereadingForm() {
-  const now = new Date();
-  const date = now.toISOString().slice(0, 10);
-  const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-
-  return {
-    rereadingDate: date,
-    rereadingTime: time,
-    didComeTrue: "pendiente" as NonNullable<JournalRereading["didComeTrue"]>,
-    reflection: "",
-    newPersonalInterpretation: "",
-    lessonLearned: "",
-  };
-}
-
 function getStatusLabel(value?: JournalRereading["didComeTrue"]) {
   if (!value) {
     return "Aún pendiente";
@@ -63,76 +44,49 @@ function getStatusLabel(value?: JournalRereading["didComeTrue"]) {
   return STATUS_OPTIONS.find((option) => option.value === value)?.label ?? "Aún pendiente";
 }
 
-interface StatusDropdownProps {
-  value: NonNullable<JournalRereading["didComeTrue"]>;
-  onChange: (value: NonNullable<JournalRereading["didComeTrue"]>) => void;
-}
-
-function StatusDropdown({ value, onChange }: StatusDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const selectedOption = STATUS_OPTIONS.find((option) => option.value === value) ?? STATUS_OPTIONS[0];
-
-  useEffect(() => {
-    function handleOutsideClick(event: MouseEvent) {
-      if (!dropdownRef.current) {
-        return;
-      }
-
-      if (!dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
-
-  return (
-    <div ref={dropdownRef} className="deck-dropdown journal-spread-dropdown">
-      <button
-        type="button"
-        className="deck-trigger"
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((current) => !current)}
-      >
-        <span>{selectedOption.label}</span>
-        <span className={`deck-chevron${isOpen ? " deck-chevron-open" : ""}`}>v</span>
-      </button>
-      {isOpen ? (
-        <ul className="deck-menu" role="listbox" aria-label="Seleccionar estado de cumplimiento">
-          {STATUS_OPTIONS.map((option) => (
-            <li key={option.value}>
-              <button
-                type="button"
-                className={`deck-option${value === option.value ? " deck-option-active" : ""}`}
-                onClick={() => {
-                  onChange(option.value);
-                  setIsOpen(false);
-                }}
-              >
-                {option.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  );
+function buildInitialRereadingForm() {
+  return {
+    didComeTrue: "pendiente" as NonNullable<JournalRereading["didComeTrue"]>,
+    comment: "",
+    reflection: "",
+    newPersonalInterpretation: "",
+    lessonLearned: "",
+  };
 }
 
 export function DiarioHub() {
   const [view, setView] = useState<ViewMode>({ type: "list" });
   const [refreshToken, setRefreshToken] = useState(0);
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const entries = useMemo(() => getJournalEntries(), [refreshToken]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEntries() {
+      setIsLoading(true);
+      const nextEntries = await fetchJournalEntriesFromApi();
+      if (!cancelled) {
+        setEntries(nextEntries);
+        setIsLoading(false);
+      }
+    }
+
+    void loadEntries();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshToken]);
+
+  const hasEntries = useMemo(() => entries.length > 0, [entries]);
 
   if (view.type === "new") {
     return (
       <BitacoraWorkbench
         onBack={() => setView({ type: "list" })}
         onSaved={(entry) => {
+          setEntries((previous) => [entry, ...previous.filter((item) => item.id !== entry.id)]);
           setRefreshToken((value) => value + 1);
           setView({ type: "detail", entryId: entry.id });
         }}
@@ -149,7 +103,6 @@ export function DiarioHub() {
           setRefreshToken((value) => value + 1);
           setView({ type: "list" });
         }}
-        onRereadingSaved={() => setRefreshToken((value) => value + 1)}
       />
     );
   }
@@ -164,13 +117,27 @@ export function DiarioHub() {
       </div>
 
       <div className="journal-history-list">
-        {entries.length === 0 ? (
+        {isLoading ? (
+          <article className="journal-history-card">
+            <p>Cargando entradas...</p>
+          </article>
+        ) : !hasEntries ? (
           <article className="journal-history-card">
             <p>Aún no hay entradas guardadas. Crea tu primera lectura desde "Nueva entrada".</p>
           </article>
         ) : (
           entries.map((entry) => (
             <article key={entry.id} className="journal-history-card">
+              {(() => {
+                const hasRereadings = entry.rereadings.length > 0;
+                const hasFulfilled = entry.rereadings.some((item) => item.didComeTrue === "si");
+                return (
+                  <>
+                    {hasRereadings ? <p><strong>Seguimiento:</strong> Con relecturas</p> : null}
+                    {hasFulfilled ? <p><strong>Cumplimiento:</strong> Marcada como cumplida</p> : null}
+                  </>
+                );
+              })()}
               <h3>{entry.metadata.consultantName || "Sin consultante"}</h3>
               <p>
                 <strong>Fecha:</strong> {formatDateTime(entry.metadata.date, entry.metadata.time)}
@@ -205,14 +172,72 @@ export function DiarioHub() {
 type JournalEntryDetailProps = {
   entryId: string;
   onBack: () => void;
-  onRereadingSaved: () => void;
 };
 
-function JournalEntryDetail({ entryId, onBack, onRereadingSaved }: JournalEntryDetailProps) {
+function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
+  const [entry, setEntry] = useState<JournalEntry | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [form, setForm] = useState(buildInitialRereadingForm);
-  const [message, setMessage] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  const entry = getJournalEntryById(entryId);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEntry() {
+      setIsLoading(true);
+      const nextEntry = await fetchJournalEntryByIdFromApi(entryId);
+      if (!cancelled) {
+        setEntry(nextEntry);
+        setIsLoading(false);
+      }
+    }
+
+    void loadEntry();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [entryId]);
+
+  async function saveRereading() {
+    if (!entry || isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveMessage("");
+
+    try {
+      const updatedEntry = await createRereadingInApi(entry.id, {
+        didComeTrue: form.didComeTrue,
+        comment: form.comment,
+        reflection: form.reflection,
+        newInterpretation: form.newPersonalInterpretation,
+        lessonLearned: form.lessonLearned,
+      });
+      setEntry(updatedEntry);
+      setForm(buildInitialRereadingForm());
+      setSaveMessage("Relectura guardada.");
+    } catch (error) {
+      setSaveMessage(error instanceof Error ? error.message : "No se pudo guardar la relectura.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <section className="journal-history">
+        <div className="journal-history-header">
+          <h2>Cargando entrada...</h2>
+          <button type="button" className="btn btn-secondary" onClick={onBack}>
+            Volver al historial
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   if (!entry) {
     return (
@@ -225,28 +250,6 @@ function JournalEntryDetail({ entryId, onBack, onRereadingSaved }: JournalEntryD
         </div>
       </section>
     );
-  }
-
-  function saveRereading() {
-    if (!entry) {
-      return;
-    }
-
-    const payload: JournalRereading = {
-      id: createRereadingId(),
-      createdAt: new Date().toISOString(),
-      rereadingDate: form.rereadingDate,
-      rereadingTime: form.rereadingTime,
-      didComeTrue: form.didComeTrue,
-      reflection: form.reflection,
-      newPersonalInterpretation: form.newPersonalInterpretation,
-      lessonLearned: form.lessonLearned,
-    };
-
-    addJournalRereading(entry.id, payload);
-    onRereadingSaved();
-    setMessage("Relectura guardada.");
-    setForm(buildInitialRereadingForm());
   }
 
   return (
@@ -343,56 +346,58 @@ function JournalEntryDetail({ entryId, onBack, onRereadingSaved }: JournalEntryD
       <article className="journal-detail-card">
         <h3>Agregar relectura futura</h3>
         <div className="journal-form-grid">
-          <label>
-            Fecha
-            <input
-              type="date"
-              value={form.rereadingDate}
-              onChange={(event) => setForm((prev) => ({ ...prev, rereadingDate: event.target.value }))}
-            />
-          </label>
-          <label>
-            Hora
-            <input
-              type="time"
-              value={form.rereadingTime}
-              onChange={(event) => setForm((prev) => ({ ...prev, rereadingTime: event.target.value }))}
-            />
-          </label>
           <label className="journal-field-wide">
             ¿Se cumplió la lectura?
-            <StatusDropdown
+            <select
               value={form.didComeTrue}
-              onChange={(nextValue) => setForm((prev) => ({ ...prev, didComeTrue: nextValue }))}
+              onChange={(event) =>
+                setForm((previous) => ({
+                  ...previous,
+                  didComeTrue: event.target.value as NonNullable<JournalRereading["didComeTrue"]>,
+                }))
+              }
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="journal-field-wide">
+            Comentario
+            <textarea
+              value={form.comment}
+              onChange={(event) => setForm((previous) => ({ ...previous, comment: event.target.value }))}
             />
           </label>
           <label className="journal-field-wide">
             Reflexión actual
             <textarea
               value={form.reflection}
-              onChange={(event) => setForm((prev) => ({ ...prev, reflection: event.target.value }))}
+              onChange={(event) => setForm((previous) => ({ ...previous, reflection: event.target.value }))}
             />
           </label>
           <label className="journal-field-wide">
             Nueva interpretación personal
             <textarea
               value={form.newPersonalInterpretation}
-              onChange={(event) => setForm((prev) => ({ ...prev, newPersonalInterpretation: event.target.value }))}
+              onChange={(event) => setForm((previous) => ({ ...previous, newPersonalInterpretation: event.target.value }))}
             />
           </label>
           <label className="journal-field-wide">
             Qué aprendí de esta tirada
             <textarea
               value={form.lessonLearned}
-              onChange={(event) => setForm((prev) => ({ ...prev, lessonLearned: event.target.value }))}
+              onChange={(event) => setForm((previous) => ({ ...previous, lessonLearned: event.target.value }))}
             />
           </label>
         </div>
         <div className="journal-save-actions journal-rereading-actions">
-          <button type="button" className="btn btn-primary" onClick={saveRereading}>
-            Guardar relectura
+          <button type="button" className="btn btn-primary" onClick={saveRereading} disabled={isSaving}>
+            {isSaving ? "Guardando..." : "Guardar relectura"}
           </button>
-          {message ? <p>{message}</p> : null}
+          {saveMessage ? <p>{saveMessage}</p> : null}
         </div>
       </article>
     </section>

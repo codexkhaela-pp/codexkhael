@@ -17,7 +17,7 @@ import {
 } from "@dnd-kit/core";
 import { tarotCards, type TarotCard } from "@/src/data/tarotCards";
 import { JOURNAL_SPREADS } from "@/app/diario/spreads";
-import { saveJournalEntry } from "@/app/diario/storage";
+import { createJournalEntryInApi } from "@/app/diario/api-client";
 import type {
   JournalCardPlacement,
   JournalCanvasSnapshot,
@@ -868,7 +868,7 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
     };
   }
 
-  function persistEntry() {
+  async function persistEntry() {
     const payload = buildEntryPayload({
       entryId,
       metadata,
@@ -880,9 +880,36 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
       createdAt,
     });
 
-    saveJournalEntry(payload);
-    setSaveMessage("Entrada guardada en localStorage.");
-    onSaved?.(payload);
+    try {
+      const placementsWithMeaning = payload.canvas.placements.map((placement) => {
+        const card = tarotCards.find((item) => item.id === placement.cardId);
+        const meaningUsed = placement.isReversed ? card?.keywordsReversed ?? "" : card?.keywordsUpright ?? "";
+        return {
+          ...placement,
+          orientation: placement.isReversed ? ("invertida" as const) : ("derecha" as const),
+          rotation: placement.isReversed ? 180 : 0,
+          meaningUsed,
+        };
+      });
+
+      const savedEntry = await createJournalEntryInApi({
+        metadata: payload.metadata,
+        reflection: payload.reflection,
+        canvas: {
+          ...payload.canvas,
+          placements: placementsWithMeaning,
+        },
+        flipStats: payload.flipStats,
+        flipEvents: payload.flipEvents,
+        notes: payload.reflection.personalInterpretation,
+        createdAt: payload.createdAt,
+      });
+
+      setSaveMessage("Entrada guardada en base de datos.");
+      onSaved?.(savedEntry);
+    } catch (error) {
+      setSaveMessage(error instanceof Error ? error.message : "No se pudo guardar la entrada.");
+    }
   }
 
   return (

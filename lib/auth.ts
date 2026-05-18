@@ -1,26 +1,40 @@
-export const AUTH_COOKIE_NAME = "codexkhael_session";
+﻿export const AUTH_COOKIE_NAME = "codexkhael_session";
 
-const DEFAULT_AUTH_USER = "admin";
-const DEFAULT_AUTH_PASSWORD = "cambia-esta-clave";
-const DEFAULT_SESSION_TOKEN =
-  "codexkhael_dev_session_token_change_this_in_env_local";
+export type AppSession = {
+  userId: string;
+  email: string;
+};
 
-export function getAuthUser(): string {
-  return process.env.TEMP_AUTH_USER ?? DEFAULT_AUTH_USER;
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
 }
 
-export function getAuthPassword(): string {
-  return process.env.TEMP_AUTH_PASSWORD ?? DEFAULT_AUTH_PASSWORD;
+export function createSessionCookieValue(session: AppSession): string {
+  const params = new URLSearchParams();
+  params.set("u", session.userId);
+  params.set("e", normalizeEmail(session.email));
+  return params.toString();
 }
 
-export function getSessionToken(): string {
-  return process.env.TEMP_AUTH_SESSION_TOKEN ?? DEFAULT_SESSION_TOKEN;
+export function parseSessionCookieValue(cookieValue: string | undefined): AppSession | null {
+  if (!cookieValue) {
+    return null;
+  }
+
+  const params = new URLSearchParams(cookieValue);
+  const userId = params.get("u")?.trim() ?? "";
+  const email = normalizeEmail(params.get("e") ?? "");
+
+  if (!UUID_REGEX.test(userId) || !email.includes("@")) {
+    return null;
+  }
+
+  return { userId, email };
 }
 
 export function isSessionAuthenticated(cookieValue: string | undefined): boolean {
-  if (!cookieValue) {
-    return false;
-  }
-  return cookieValue === getSessionToken();
+  return parseSessionCookieValue(cookieValue) !== null;
 }
-
