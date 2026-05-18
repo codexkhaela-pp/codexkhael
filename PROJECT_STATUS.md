@@ -223,3 +223,84 @@ UI detalle:
 6. Validar sesión única: login en segundo navegador invalida el primero.
 7. Validar recuperación completa: token expirado, token reutilizado, cambio efectivo de contraseña.
 
+
+---
+
+## Incidente Vercel - Login falla en producción (diagnóstico y corrección)
+
+### Síntoma reportado
+- Local: login funciona.
+- Vercel producción: login no permite iniciar sesión.
+
+### Causa más probable detectada
+1. **Diferencia de datos entre local y producción**:
+   - Usuario existente en local no necesariamente existe en DB de producción.
+   - Se recomienda registrar usuario directamente en producción vía `/register` y luego login.
+2. **Posible desalineación de schema en producción**:
+   - Login actual requiere columnas/modelos ya incorporados:
+     - `User.sessionToken`
+     - `AccessLog`
+     - `PasswordResetToken`
+   - Si producción no tiene ese schema, el login puede fallar en runtime.
+
+### Corrección aplicada en código
+1. **Logs controlados temporales en `POST /api/auth/login`** (sin exponer password/hash):
+   - `request_received`
+   - `validation_failed`
+   - `user_lookup` (found/active/passwordValid)
+   - `session_token_generated`
+   - `session_token_persisted`
+   - `cookie_set`
+   - `unexpected_error`
+2. **Hardening de logout cookie en producción**:
+   - Se fuerza expiración explícita (`maxAge: 0`) con los mismos atributos de cookie (`httpOnly`, `secure`, `sameSite`, `path="/"`) antes de delete.
+3. **Variables legacy temporales removidas de `.env.example`**:
+   - Ya no se documentan `TEMP_AUTH_*` porque auth real usa DB.
+
+### Variables de entorno (lista exacta)
+#### Requeridas (Vercel)
+- `DATABASE_URL`
+- `DIRECT_URL`
+
+#### Opcionales
+- `AUTH_DEBUG` (`1` para logs detallados fuera de prod; en prod el login ya emite logs controlados)
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### Verificación cookie/auth
+- Login escribe cookie: `codexkhael_session`
+- Opciones de cookie en login:
+  - `httpOnly: true`
+  - `secure: true` en producción
+  - `sameSite: "lax"`
+  - `path: "/"`
+  - `maxAge: 7 días`
+- Middleware y `auth-server` leen la misma cookie y validan:
+  - `userId`
+  - `email`
+  - `sessionToken` contra DB
+
+### Comando seguro de sincronización schema (producción)
+Ejecutar desde local apuntando a la DB de producción (NO en cliente web):
+
+```bash
+npx prisma db push
+```
+
+Si quieres forzar explícitamente variables de prod en shell:
+
+```bash
+DATABASE_URL="<PROD_DATABASE_URL>" DIRECT_URL="<PROD_DIRECT_URL>" npx prisma db push
+```
+
+### Validación funcional sugerida en Vercel
+1. Crear usuario en `/register`.
+2. Login con ese usuario en `/login`.
+3. Confirmar sesión persistente tras refresh.
+4. Abrir `/diario` (ruta protegida).
+5. Probar `GET /api/diario/entries` autenticado.
+6. Logout y confirmar cierre de sesión.
+
+### Build
+- `npm run build` ejecutado: **OK** (incluye auth + diario endpoints).
+

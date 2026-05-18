@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+﻿import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { AUTH_COOKIE_NAME, createSessionCookieValue } from "@/lib/auth";
@@ -12,43 +12,91 @@ type LoginBody = {
   password?: string;
 };
 
+function logAuthEvent(stage: string, details: Record<string, unknown>) {
+  if (process.env.NODE_ENV !== "production" && process.env.AUTH_DEBUG !== "1") {
+    return;
+  }
+
+  // Controlled temporary logs for production debugging (no password/hash output).
+  console.info(`[auth/login] ${stage}`, details);
+}
+
 export async function POST(request: Request) {
-  const body = (await request.json()) as LoginBody;
-  const username = body.username?.trim().toLowerCase() ?? "";
-  const password = body.password ?? "";
+  try {
+    const body = (await request.json()) as LoginBody;
+    const username = body.username?.trim().toLowerCase() ?? "";
+    const password = body.password ?? "";
 
-  if (!username || !password) {
-    return NextResponse.json({ error: "Usuario o contraseña inválidos." }, { status: 401 });
+    logAuthEvent("request_received", {
+      hasUsername: Boolean(username),
+      passwordLength: password.length,
+      hasAtSymbol: username.includes("@"),
+    });
+
+    if (!username || !password) {
+      logAuthEvent("validation_failed", { reason: "missing_credentials" });
+      return NextResponse.json({ error: "Usuario o contraseña inválidos." }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: username },
+      select: { id: true, email: true, passwordHash: true, status: true },
+    });
+
+    const userFound = Boolean(user);
+    const isActive = user?.status === "ACTIVE";
+    const hasPasswordHash = Boolean(user?.passwordHash);
+    const passwordValid = Boolean(user && user.passwordHash && user.passwordHash === password);
+
+    logAuthEvent("user_lookup", {
+      userFound,
+      isActive,
+      hasPasswordHash,
+      passwordValid,
+    });
+
+    if (!userFound || !isActive || !hasPasswordHash || !passwordValid || !user) {
+      return NextResponse.json({ error: "Usuario o contraseña inválidos." }, { status: 401 });
+    }
+
+    const sessionToken = randomUUID();
+    logAuthEvent("session_token_generated", { generated: Boolean(sessionToken) });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { sessionToken },
+    });
+    logAuthEvent("session_token_persisted", { persisted: true, userId: user.id });
+
+    const userAgent = request.headers.get("user-agent") ?? null;
+    await logAccess({ userId: user.id, email: user.email, action: "login", userAgent });
+
+    const cookieStore = await cookies();
+    cookieStore.set(
+      AUTH_COOKIE_NAME,
+      createSessionCookieValue({ userId: user.id, email: user.email, sessionToken }),
+      {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      },
+    );
+
+    logAuthEvent("cookie_set", {
+      cookieName: AUTH_COOKIE_NAME,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAgeSeconds: 60 * 60 * 24 * 7,
+    });
+
+    return NextResponse.json({ ok: true, user: { id: user.id, email: user.email } });
+  } catch (error) {
+    logAuthEvent("unexpected_error", {
+      message: error instanceof Error ? error.message : "unknown_error",
+    });
+    return NextResponse.json({ error: "No se pudo iniciar sesión." }, { status: 500 });
   }
-
-  const user = await prisma.user.findUnique({
-    where: { email: username },
-    select: { id: true, email: true, passwordHash: true, status: true },
-  });
-
-  if (!user || user.status !== "ACTIVE" || !user.passwordHash || user.passwordHash !== password) {
-    return NextResponse.json({ error: "Usuario o contraseña inválidos." }, { status: 401 });
-  }
-
-  const sessionToken = randomUUID();
-
-  // Save new sessionToken in DB — invalidates any previous session
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { sessionToken },
-  });
-
-  const userAgent = request.headers.get("user-agent") ?? null;
-  await logAccess({ userId: user.id, email: user.email, action: "login", userAgent });
-
-  const cookieStore = await cookies();
-  cookieStore.set(AUTH_COOKIE_NAME, createSessionCookieValue({ userId: user.id, email: user.email, sessionToken }), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-
-  return NextResponse.json({ ok: true, user: { id: user.id, email: user.email } });
 }

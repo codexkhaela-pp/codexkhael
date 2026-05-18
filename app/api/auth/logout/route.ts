@@ -28,6 +28,13 @@ export async function POST(request: Request) {
     await logAccess({ userId: session.userId, email: session.email, action: "logout", userAgent });
   }
 
+  cookieStore.set(AUTH_COOKIE_NAME, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
   cookieStore.delete(AUTH_COOKIE_NAME);
   return NextResponse.json({ ok: true });
 }
