@@ -1,7 +1,9 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 import { AUTH_COOKIE_NAME, createSessionCookieValue } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logAccess } from "@/lib/access-log";
 
 export const runtime = "nodejs";
 
@@ -28,8 +30,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Usuario o contraseña inválidos." }, { status: 401 });
   }
 
+  const sessionToken = randomUUID();
+
+  // Save new sessionToken in DB — invalidates any previous session
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { sessionToken },
+  });
+
+  const userAgent = request.headers.get("user-agent") ?? null;
+  await logAccess({ userId: user.id, email: user.email, action: "login", userAgent });
+
   const cookieStore = await cookies();
-  cookieStore.set(AUTH_COOKIE_NAME, createSessionCookieValue({ userId: user.id, email: user.email }), {
+  cookieStore.set(AUTH_COOKIE_NAME, createSessionCookieValue({ userId: user.id, email: user.email, sessionToken }), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

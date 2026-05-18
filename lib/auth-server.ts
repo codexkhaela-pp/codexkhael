@@ -1,4 +1,4 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { AUTH_COOKIE_NAME, parseSessionCookieValue, type AppSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -21,10 +21,15 @@ export async function getCurrentUser(): Promise<AuthenticatedUser | null> {
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { id: true, email: true, status: true },
+    select: { id: true, email: true, status: true, sessionToken: true },
   });
 
-  if (!user || user.email.toLowerCase() !== session.email.toLowerCase() || user.status !== "ACTIVE") {
+  if (
+    !user ||
+    user.email.toLowerCase() !== session.email.toLowerCase() ||
+    user.status !== "ACTIVE" ||
+    user.sessionToken !== session.sessionToken
+  ) {
     return null;
   }
 

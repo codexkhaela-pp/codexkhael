@@ -1,5 +1,6 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logAccess } from "@/lib/access-log";
 
 export const runtime = "nodejs";
 
@@ -75,6 +76,9 @@ export async function POST(request: Request) {
       },
     });
   }
+
+  const userAgent = request.headers.get("user-agent") ?? null;
+  await logAccess({ userId: createdUser.id, email: createdUser.email, action: "register", userAgent });
 
   return NextResponse.json({ ok: true, user: createdUser }, { status: 201 });
 }

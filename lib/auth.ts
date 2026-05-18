@@ -1,8 +1,9 @@
-﻿export const AUTH_COOKIE_NAME = "codexkhael_session";
+export const AUTH_COOKIE_NAME = "codexkhael_session";
 
 export type AppSession = {
   userId: string;
   email: string;
+  sessionToken: string;
 };
 
 const UUID_REGEX =
@@ -16,6 +17,7 @@ export function createSessionCookieValue(session: AppSession): string {
   const params = new URLSearchParams();
   params.set("u", session.userId);
   params.set("e", normalizeEmail(session.email));
+  params.set("t", session.sessionToken);
   return params.toString();
 }
 
@@ -27,12 +29,13 @@ export function parseSessionCookieValue(cookieValue: string | undefined): AppSes
   const params = new URLSearchParams(cookieValue);
   const userId = params.get("u")?.trim() ?? "";
   const email = normalizeEmail(params.get("e") ?? "");
+  const sessionToken = params.get("t")?.trim() ?? "";
 
-  if (!UUID_REGEX.test(userId) || !email.includes("@")) {
+  if (!UUID_REGEX.test(userId) || !email.includes("@") || !sessionToken) {
     return null;
   }
 
-  return { userId, email };
+  return { userId, email, sessionToken };
 }
 
 export function isSessionAuthenticated(cookieValue: string | undefined): boolean {

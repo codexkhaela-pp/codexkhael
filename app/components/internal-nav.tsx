@@ -1,9 +1,14 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { LogoutButton } from "@/app/components/logout-button";
+import { SessionGuard } from "@/app/components/session-guard";
+import { getCurrentUser } from "@/lib/auth-server";
 
-export function InternalNav() {
+export async function InternalNav() {
+  const user = await getCurrentUser();
+
   return (
     <header className="internal-nav">
+      <SessionGuard />
       <Link href="/dashboard" className="brand">
         <span className="brand-mark">✦</span>
         <span>CodexKhael</span>
@@ -14,7 +19,14 @@ export function InternalNav() {
         <Link href="/tiradas">Tiradas</Link>
         <Link href="/diario">Diario / Bitácora</Link>
       </nav>
-      <LogoutButton />
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        {user ? (
+          <span style={{ fontSize: "0.72rem", color: "var(--muted)", opacity: 0.7 }}>
+            Demo privada para {user.email}
+          </span>
+        ) : null}
+        <LogoutButton />
+      </div>
     </header>
   );
 }
