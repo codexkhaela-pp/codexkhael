@@ -19,6 +19,7 @@ const STATUS_OPTIONS: Array<{ value: NonNullable<JournalRereading["didComeTrue"]
 ];
 
 type SortKey = "recent" | "oldest";
+export type DiarioViewType = "list" | "new" | "detail";
 
 function formatDateTime(date: string, time: string): string {
   if (!date) {
@@ -95,7 +96,11 @@ function isSameMonth(date: Date, now: Date): boolean {
   return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
 }
 
-export function DiarioHub() {
+type DiarioHubProps = {
+  onViewTypeChange?: (viewType: DiarioViewType) => void;
+};
+
+export function DiarioHub({ onViewTypeChange }: DiarioHubProps) {
   const [view, setView] = useState<ViewMode>({ type: "list" });
   const [refreshToken, setRefreshToken] = useState(0);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -176,6 +181,10 @@ export function DiarioHub() {
     setPage(1);
   }, [sortBy, entries.length]);
 
+  useEffect(() => {
+    onViewTypeChange?.(view.type);
+  }, [onViewTypeChange, view.type]);
+
   if (view.type === "new") {
     return (
       <BitacoraWorkbench
@@ -206,7 +215,7 @@ export function DiarioHub() {
     <section className={styles.journalMain} aria-label="Historial de Diario / Bitácora">
       <div className={styles.topActions}>
         <button type="button" className={styles.newEntryButton} onClick={() => setView({ type: "new" })}>
-          + Nueva registro
+          + Nuevo registro
         </button>
       </div>
 

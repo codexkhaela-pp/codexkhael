@@ -2558,6 +2558,22 @@ footer {
   gap: 10px;
 }
 
+.journal-metadata-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.journal-metadata-emotion {
+  grid-column: span 1;
+}
+
+.journal-metadata-spread {
+  grid-column: span 1;
+}
+
+.journal-metadata-question {
+  grid-column: span 2;
+}
+
 .journal-form-grid label,
 .journal-reflection-grid label,
 .journal-dropdown-field {
@@ -2591,7 +2607,21 @@ footer {
   align-items: stretch;
 }
 
+.journal-compose-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.journal-compose-left {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
 .journal-side-panel {
+  display: flex;
   height: 100%;
   min-height: 0;
 }
@@ -2632,10 +2662,19 @@ footer {
 
 .journal-canvas-shell,
 .journal-tray-shell {
-  height: clamp(700px, 76vh, 860px);
+  height: clamp(620px, 72vh, 820px);
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+.journal-compose-left .journal-canvas-shell {
+  height: auto;
+}
+
+.journal-compose-left .journal-canvas {
+  min-height: 420px;
+  flex: 1 1 auto;
 }
 
 .journal-canvas {
@@ -2818,6 +2857,7 @@ footer {
 .journal-tray-shell {
   position: sticky;
   top: 12px;
+  width: 100%;
 }
 
 .journal-tray-shell.is-over {
@@ -2898,6 +2938,10 @@ footer {
   gap: 10px;
 }
 
+.journal-reflection-grid-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .journal-reflection-wide {
   grid-column: 1 / -1;
 }
@@ -2915,7 +2959,7 @@ footer {
 
 .journal-textarea-main {
   width: 100%;
-  min-height: 150px;
+  min-height: 84px;
 }
 
 .journal-textarea-compact {
@@ -3020,6 +3064,15 @@ footer {
 }
 
 @media (max-width: 1100px) {
+  .journal-metadata-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .journal-metadata-question {
+    grid-column: 1 / -1;
+  }
+
+  .journal-compose-grid,
   .journal-workspace {
     grid-template-columns: 1fr;
   }
@@ -3039,6 +3092,7 @@ footer {
 }
 
 @media (max-width: 720px) {
+  .journal-metadata-grid,
   .journal-form-grid,
   .journal-reflection-grid {
     grid-template-columns: 1fr;

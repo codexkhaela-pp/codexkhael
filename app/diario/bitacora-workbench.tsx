@@ -916,8 +916,8 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
     <section className="journal-tool" aria-label="Diario / Bitácora">
       <div className="journal-topbar">
         <article className="journal-metadata-panel">
-          <h2>Datos basicos</h2>
-          <div className="journal-form-grid">
+          <h2>Datos básicos</h2>
+          <div className="journal-form-grid journal-metadata-grid">
             <label>
               Consultante
               <input
@@ -945,19 +945,18 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
               Lugar
               <input value={metadata.place} onChange={(event) => setMetadata((prev) => ({ ...prev, place: event.target.value }))} />
             </label>
-            <label>
+            <label className="journal-metadata-emotion">
               Estado emocional
               <input
                 value={metadata.emotionalState}
                 onChange={(event) => setMetadata((prev) => ({ ...prev, emotionalState: event.target.value }))}
               />
             </label>
-            <div className="journal-field-wide journal-dropdown-field">
+            <div className="journal-dropdown-field journal-metadata-spread">
               <span>Tipo de tirada</span>
               <SpreadDropdown spreadId={selectedSpreadId} onSelect={updateSpread} />
-              <p className="journal-spread-description">{spread.description}</p>
             </div>
-            <label className="journal-field-wide">
+            <label className="journal-metadata-question">
               Pregunta / tema
               <input
                 value={metadata.question ?? ""}
@@ -976,97 +975,129 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
         onDragEnd={onDragEnd}
         onDragCancel={onDragCancel}
       >
-        <div className="journal-workspace">
-          <section className="journal-canvas-shell" aria-label="Mapa de tirada">
-            <header>
-              <h2>Mapa de tirada</h2>
-              <p>
-                {spread.mode === "free"
-                  ? "Modo libre: arrastra cartas y sueltalas en cualquier zona del mapa."
-                  : "Arrastra cartas desde la bandeja y sueltalas en las posiciones de la tirada."}
-              </p>
-              {spread.mode === "free" ? (
-                <div className="journal-selection-controls">
-                  <button
-                    type="button"
-                    className={`btn btn-secondary${selectionMode ? " journal-btn-active" : ""}`}
-                    onClick={() => {
-                      if (selectionMode) {
-                        setSelectedPlacementIds([]);
-                      }
-                      setSelectionMode(!selectionMode);
+        <div className="journal-compose-grid">
+          <div className="journal-compose-left">
+            <section className="journal-canvas-shell" aria-label="Mapa de tirada">
+              <header>
+                <h2>Mapa de tirada</h2>
+                <p>
+                  {spread.mode === "free"
+                    ? "Modo libre: arrastra cartas y sueltalas en cualquier zona del mapa."
+                    : "Arrastra cartas desde la bandeja y sueltalas en las posiciones de la tirada."}
+                </p>
+                {spread.mode === "free" ? (
+                  <div className="journal-selection-controls">
+                    <button
+                      type="button"
+                      className={`btn btn-secondary${selectionMode ? " journal-btn-active" : ""}`}
+                      onClick={() => {
+                        if (selectionMode) {
+                          setSelectedPlacementIds([]);
+                        }
+                        setSelectionMode(!selectionMode);
+                      }}
+                    >
+                      {selectionMode ? "Seleccion multiple activa" : "Activar seleccion multiple"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setSelectedPlacementIds([])}
+                      disabled={selectedPlacementIds.length === 0}
+                    >
+                      Limpiar seleccion
+                    </button>
+                  </div>
+                ) : null}
+              </header>
+
+              <div className="journal-canvas">
+                {spread.mode === "fixed" ? (
+                  <div
+                    className="journal-fixed-grid"
+                    style={{
+                      gridTemplateColumns: `repeat(${gridTemplate.cols}, minmax(120px, 1fr))`,
+                      gridTemplateRows: `repeat(${gridTemplate.rows}, auto)`,
                     }}
                   >
-                    {selectionMode ? "Seleccion multiple activa" : "Activar seleccion multiple"}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setSelectedPlacementIds([])}
-                    disabled={selectedPlacementIds.length === 0}
-                  >
-                    Limpiar seleccion
-                  </button>
-                </div>
-              ) : null}
-            </header>
+                    {spread.positions.map((position) => {
+                      const placement = placementsByPosition.get(position.id);
+                      const flipped = placement ? flippedPlacementIds.includes(placement.id) : false;
 
-            <div className="journal-canvas">
-              {spread.mode === "fixed" ? (
-                <div
-                  className="journal-fixed-grid"
-                  style={{
-                    gridTemplateColumns: `repeat(${gridTemplate.cols}, minmax(120px, 1fr))`,
-                    gridTemplateRows: `repeat(${gridTemplate.rows}, auto)`,
-                  }}
-                >
-                  {spread.positions.map((position) => {
-                    const placement = placementsByPosition.get(position.id);
-                    const flipped = placement ? flippedPlacementIds.includes(placement.id) : false;
+                      return (
+                        <DroppablePosition key={position.id} position={position}>
+                          {placement ? (
+                            <PlacedCard
+                              placement={placement}
+                              spreadType={spread.name}
+                              isFlipped={flipped}
+                              isSelected={selectedPlacementIds.includes(placement.id)}
+                              selectionMode={selectionMode && spread.mode === "free"}
+                              keywords={pickKeywords(
+                                tarotCards.find((card) => card.id === placement.cardId) ?? tarotCards[0],
+                                placement.isReversed,
+                              )}
+                              onFlipToBack={registerFlipToBack}
+                              onFlipToFront={registerFlipToFront}
+                              onRotate={togglePlacementRotation}
+                              onToggleSelected={togglePlacementSelection}
+                            />
+                          ) : (
+                            <div className="journal-slot-placeholder">Suelta aqui</div>
+                          )}
+                        </DroppablePosition>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <FreeCanvas
+                    canvasRef={canvasRef}
+                    placements={placements}
+                    spreadName={spread.name}
+                    flippedPlacementIds={flippedPlacementIds}
+                    selectedPlacementIds={selectedPlacementIds}
+                    selectionMode={selectionMode}
+                    dragGroup={dragGroup}
+                    dragDelta={dragDelta}
+                    onFlipToBack={registerFlipToBack}
+                    onFlipToFront={registerFlipToFront}
+                    onRotate={togglePlacementRotation}
+                    onToggleSelected={togglePlacementSelection}
+                  />
+                )}
+              </div>
+            </section>
 
-                    return (
-                      <DroppablePosition key={position.id} position={position}>
-                        {placement ? (
-                          <PlacedCard
-                            placement={placement}
-                            spreadType={spread.name}
-                            isFlipped={flipped}
-                            isSelected={selectedPlacementIds.includes(placement.id)}
-                            selectionMode={selectionMode && spread.mode === "free"}
-                            keywords={pickKeywords(
-                              tarotCards.find((card) => card.id === placement.cardId) ?? tarotCards[0],
-                              placement.isReversed,
-                            )}
-                            onFlipToBack={registerFlipToBack}
-                            onFlipToFront={registerFlipToFront}
-                            onRotate={togglePlacementRotation}
-                            onToggleSelected={togglePlacementSelection}
-                          />
-                        ) : (
-                          <div className="journal-slot-placeholder">Suelta aqui</div>
-                        )}
-                      </DroppablePosition>
-                    );
-                  })}
-                </div>
-              ) : (
-                <FreeCanvas
-                  canvasRef={canvasRef}
-                  placements={placements}
-                  spreadName={spread.name}
-                  flippedPlacementIds={flippedPlacementIds}
-                  selectedPlacementIds={selectedPlacementIds}
-                  selectionMode={selectionMode}
-                  dragGroup={dragGroup}
-                  dragDelta={dragDelta}
-                  onFlipToBack={registerFlipToBack}
-                  onFlipToFront={registerFlipToFront}
-                  onRotate={togglePlacementRotation}
-                  onToggleSelected={togglePlacementSelection}
-                />
-              )}
-            </div>
-          </section>
+            <section className="journal-reflection-panel" aria-label="Registro interpretativo">
+              <h2>Reflexión personal</h2>
+              <div className="journal-reflection-grid journal-reflection-grid-compact">
+                <label className="journal-reflection-wide">
+                  Interpretación personal
+                  <textarea
+                    className="journal-textarea-main"
+                    value={reflection.personalInterpretation}
+                    onChange={(event) => setReflection((prev) => ({ ...prev, personalInterpretation: event.target.value }))}
+                  />
+                </label>
+                <label>
+                  Mensaje final / conclusión
+                  <textarea
+                    className="journal-textarea-compact"
+                    value={reflection.finalMessage}
+                    onChange={(event) => setReflection((prev) => ({ ...prev, finalMessage: event.target.value }))}
+                  />
+                </label>
+                <label>
+                  Acción o consejo
+                  <textarea
+                    className="journal-textarea-compact"
+                    value={reflection.suggestedAction}
+                    onChange={(event) => setReflection((prev) => ({ ...prev, suggestedAction: event.target.value }))}
+                  />
+                </label>
+              </div>
+            </section>
+          </div>
 
           <aside className="journal-side-panel">
             <TrayDroppable>
@@ -1098,36 +1129,6 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
           ) : null}
         </DragOverlay>
       </DndContext>
-
-      <section className="journal-reflection-panel" aria-label="Registro interpretativo">
-        <h2>Reflexion personal</h2>
-        <div className="journal-reflection-grid">
-          <label className="journal-reflection-wide">
-            Interpretacion personal
-            <textarea
-              className="journal-textarea-main"
-              value={reflection.personalInterpretation}
-              onChange={(event) => setReflection((prev) => ({ ...prev, personalInterpretation: event.target.value }))}
-            />
-          </label>
-          <label>
-            Mensaje final / conclusion
-            <textarea
-              className="journal-textarea-compact"
-              value={reflection.finalMessage}
-              onChange={(event) => setReflection((prev) => ({ ...prev, finalMessage: event.target.value }))}
-            />
-          </label>
-          <label>
-            Accion o consejo
-            <textarea
-              className="journal-textarea-compact"
-              value={reflection.suggestedAction}
-              onChange={(event) => setReflection((prev) => ({ ...prev, suggestedAction: event.target.value }))}
-            />
-          </label>
-        </div>
-      </section>
 
       <section className="journal-footer-actions">
         <div className="journal-save-actions">

@@ -18,7 +18,7 @@ const sidebarItems: SidebarItem[] = [
   { id: "cartas", label: "Cartas", icon: "\u2736", href: "/cartas" },
   { id: "tiradas", label: "Tiradas", icon: "\u2609", href: "/tiradas" },
   { id: "bitacora", label: "Bitacora", icon: "\u270d", href: "/diario" },
-  { id: "repaso", label: "Repaso", icon: "\u263e" },
+  { id: "repaso", label: "Repaso", icon: "\u263e", href: "/aprendizaje" },
   { id: "desafios", label: "Desafios", icon: "\u2691" },
   { id: "comunidad", label: "Comunidad", icon: "\u2637" },
   { id: "recursos", label: "Recursos", icon: "\u2726" },

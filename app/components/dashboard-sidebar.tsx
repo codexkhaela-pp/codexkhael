@@ -13,7 +13,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { key: "cartas", label: "Cartas", href: "/cartas", icon: "🃏" },
   { key: "tiradas", label: "Tiradas", href: "/tiradas", icon: "🗺" },
   { key: "bitacora", label: "Bitácora", href: "/diario", icon: "✍" },
-  { key: "repaso", label: "Repaso", href: "#", icon: "🔄" },
+  { key: "repaso", label: "Repaso", href: "/aprendizaje", icon: "🔄" },
   { key: "desafios", label: "Desafíos", href: "#", icon: "🏆" },
   { key: "comunidad", label: "Comunidad", href: "#", icon: "👥" },
   { key: "recursos", label: "Recursos", href: "#", icon: "📂" },
@@ -23,11 +23,13 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
 type DashboardSidebarProps = {
   logoSrc?: string;
   activeKey?: string;
+  footerMessage?: string;
 };
 
 export function DashboardSidebar({
   logoSrc = "/assets/logo/logo-codex.png",
   activeKey = "inicio",
+  footerMessage,
 }: DashboardSidebarProps) {
   return (
     <aside className={styles.sidebar}>
@@ -48,7 +50,10 @@ export function DashboardSidebar({
       </div>
 
       <div className={styles.sidebarFooterCard}>
-        <p>"El tarot no predice el futuro, ilumina el camino para que tomes mejores decisiones hoy."</p>
+        <p>
+          {footerMessage ??
+            "\"El tarot no predice el futuro, ilumina el camino para que tomes mejores decisiones hoy.\""}
+        </p>
       </div>
     </aside>
   );

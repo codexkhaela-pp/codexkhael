@@ -1,18 +1,28 @@
-﻿import { DashboardShell } from "@/app/components/dashboard-shell";
+﻿"use client";
+
+import { useState } from "react";
+import { DashboardShell } from "@/app/components/dashboard-shell";
 import { DashboardPageHeader } from "@/app/components/dashboard-page-header";
-import { DiarioHub } from "@/app/diario/diario-hub";
+import { DiarioHub, type DiarioViewType } from "@/app/diario/diario-hub";
 
 export default function DiarioPage() {
+  const [viewType, setViewType] = useState<DiarioViewType>("list");
+  const isNewEntryView = viewType === "new";
+
   return (
     <DashboardShell activeKey="bitacora">
       <main className="app-shell dashboard-preview-bg">
         <DashboardPageHeader
           kicker="Bitácora"
-          title="Bitácora"
-          description="Historial de lecturas y registro personal con mapa de tirada, interpretacion y relecturas futuras."
+          title={isNewEntryView ? "Registro de nueva entrada" : "Bitácora"}
+          description={
+            isNewEntryView
+              ? undefined
+              : "Desde aquí puedes registrar tus lecturas, revisar tu historial y hacer relecturas futuras."
+          }
         />
 
-        <DiarioHub />
+        <DiarioHub onViewTypeChange={setViewType} />
       </main>
     </DashboardShell>
   );

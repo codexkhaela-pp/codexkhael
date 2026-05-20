@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 type DashboardPageHeaderProps = {
   kicker: string;
   title: string;
-  description: ReactNode;
+  description?: ReactNode;
 };
 
 export function DashboardPageHeader({
@@ -16,7 +16,7 @@ export function DashboardPageHeader({
       <div className="app-header-top">
       </div>
       <h1>{title}</h1>
-      <p>{description}</p>
+      {description ? <p>{description}</p> : null}
     </section>
   );
 }
