@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BitacoraWorkbench } from "@/app/diario/bitacora-workbench";
 import { createRereadingInApi, fetchJournalEntriesFromApi, fetchJournalEntryByIdFromApi } from "@/app/diario/api-client";
 import type { JournalEntry, JournalRereading } from "@/app/diario/types";
+import styles from "./diario-hub.module.css";
 
 type ViewMode =
   | { type: "list" }
@@ -17,6 +18,8 @@ const STATUS_OPTIONS: Array<{ value: NonNullable<JournalRereading["didComeTrue"]
   { value: "pendiente", label: "Aún pendiente" },
 ];
 
+type SortKey = "recent" | "oldest";
+
 function formatDateTime(date: string, time: string): string {
   if (!date) {
     return "Sin fecha";
@@ -24,7 +27,7 @@ function formatDateTime(date: string, time: string): string {
 
   const parsed = new Date(`${date}T${time || "00:00"}`);
   if (Number.isNaN(parsed.getTime())) {
-    return `${date} ${time}`.trim();
+    return `${date}`.trim();
   }
 
   return parsed.toLocaleString("es-PE", {
@@ -54,11 +57,51 @@ function buildInitialRereadingForm() {
   };
 }
 
+function parseEntryDate(entry: JournalEntry): Date {
+  const date = entry.metadata.date || "";
+  const time = entry.metadata.time || "00:00";
+  const parsed = new Date(`${date}T${time}`);
+  return Number.isNaN(parsed.getTime()) ? new Date(0) : parsed;
+}
+
+function formatDateLabel(entry: JournalEntry): string {
+  const parsed = parseEntryDate(entry);
+  if (parsed.getTime() === 0) {
+    return "Sin fecha";
+  }
+
+  return parsed.toLocaleString("es-PE", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function formatDateOnly(date: string): string {
+  if (!date) return "Sin fecha";
+  const parsed = new Date(`${date}T00:00`);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return parsed.toLocaleDateString("es-PE", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+function isSameMonth(date: Date, now: Date): boolean {
+  return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+}
+
 export function DiarioHub() {
   const [view, setView] = useState<ViewMode>({ type: "list" });
   const [refreshToken, setRefreshToken] = useState(0);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<SortKey>("recent");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,6 +123,58 @@ export function DiarioHub() {
   }, [refreshToken]);
 
   const hasEntries = useMemo(() => entries.length > 0, [entries]);
+  const now = useMemo(() => new Date(), []);
+  const totalReadings = entries.length;
+  const totalRereadings = useMemo(
+    () => entries.reduce((acc, entry) => acc + entry.rereadings.length, 0),
+    [entries],
+  );
+  const readingsThisMonth = useMemo(
+    () => entries.filter((entry) => isSameMonth(parseEntryDate(entry), now)).length,
+    [entries, now],
+  );
+  const rereadingsThisMonth = useMemo(
+    () =>
+      entries.reduce((acc, entry) => {
+        const monthly = entry.rereadings.filter((item) =>
+          isSameMonth(new Date(`${item.rereadingDate}T${item.rereadingTime || "00:00"}`), now),
+        ).length;
+        return acc + monthly;
+      }, 0),
+    [entries, now],
+  );
+  const latestEntry = useMemo(() => {
+    if (!entries.length) return null;
+    return [...entries].sort((a, b) => parseEntryDate(b).getTime() - parseEntryDate(a).getTime())[0];
+  }, [entries]);
+  const uniqueCardsRegistered = useMemo(() => {
+    const set = new Set<string>();
+    for (const entry of entries) {
+      for (const placement of entry.canvas.placements) {
+        if (placement.cardId) set.add(placement.cardId);
+      }
+    }
+    return set.size;
+  }, [entries]);
+  const sortedEntries = useMemo(() => {
+    const cloned = [...entries];
+    cloned.sort((a, b) => {
+      const delta = parseEntryDate(b).getTime() - parseEntryDate(a).getTime();
+      return sortBy === "recent" ? delta : -delta;
+    });
+    return cloned;
+  }, [entries, sortBy]);
+
+  const pageSize = 6;
+  const pageCount = Math.max(1, Math.ceil(sortedEntries.length / pageSize));
+  const paginatedEntries = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return sortedEntries.slice(start, start + pageSize);
+  }, [sortedEntries, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [sortBy, entries.length]);
 
   if (view.type === "new") {
     return (
@@ -108,63 +203,127 @@ export function DiarioHub() {
   }
 
   return (
-    <section className="journal-history" aria-label="Historial de Diario / Bitácora">
-      <div className="journal-history-header">
-        <h2>Diario / Bitácora</h2>
-        <button type="button" className="btn btn-primary" onClick={() => setView({ type: "new" })}>
-          Nueva entrada
+    <section className={styles.journalMain} aria-label="Historial de Diario / Bitácora">
+      <div className={styles.topActions}>
+        <button type="button" className={styles.newEntryButton} onClick={() => setView({ type: "new" })}>
+          + Nueva registro
         </button>
       </div>
 
-      <div className="journal-history-list">
-        {isLoading ? (
-          <article className="journal-history-card">
-            <p>Cargando entradas...</p>
-          </article>
-        ) : !hasEntries ? (
-          <article className="journal-history-card">
-            <p>Aún no hay entradas guardadas. Crea tu primera lectura desde "Nueva entrada".</p>
-          </article>
-        ) : (
-          entries.map((entry) => (
-            <article key={entry.id} className="journal-history-card">
-              {(() => {
-                const hasRereadings = entry.rereadings.length > 0;
-                const hasFulfilled = entry.rereadings.some((item) => item.didComeTrue === "si");
-                return (
-                  <>
-                    {hasRereadings ? <p><strong>Seguimiento:</strong> Con relecturas</p> : null}
-                    {hasFulfilled ? <p><strong>Cumplimiento:</strong> Marcada como cumplida</p> : null}
-                  </>
-                );
-              })()}
-              <h3>{entry.metadata.consultantName || "Sin consultante"}</h3>
-              <p>
-                <strong>Fecha:</strong> {formatDateTime(entry.metadata.date, entry.metadata.time)}
-              </p>
-              <p>
-                <strong>Tirada:</strong> {entry.metadata.spreadType}
-              </p>
-              <p>
-                <strong>Tema:</strong> {entry.metadata.question || "Sin tema"}
-              </p>
-              <p>
-                <strong>Cartas:</strong> {entry.canvas.placements.length}
-              </p>
-              <p>
-                <strong>Relecturas:</strong> {entry.rereadings.length}
-              </p>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setView({ type: "detail", entryId: entry.id })}
-              >
-                Ver
-              </button>
-            </article>
-          ))
-        )}
+      <div className={styles.statsGrid}>
+        <article className={styles.statCard}>
+          <div className={styles.statIcon}>📖</div>
+          <div>
+            <p className={styles.statLabel}>Total de lecturas</p>
+            <p className={styles.statValue}>{totalReadings}</p>
+            <p className={styles.statHint}>↗ +{readingsThisMonth} este mes</p>
+          </div>
+        </article>
+        <article className={styles.statCard}>
+          <div className={styles.statIcon}>🔄</div>
+          <div>
+            <p className={styles.statLabel}>Total de relecturas</p>
+            <p className={styles.statValue}>{totalRereadings}</p>
+            <p className={styles.statHint}>↗ +{rereadingsThisMonth} este mes</p>
+          </div>
+        </article>
+        <article className={styles.statCard}>
+          <div className={styles.statIcon}>🗓</div>
+          <div>
+            <p className={styles.statLabel}>Última entrada</p>
+            <p className={styles.statValueSmall}>{latestEntry ? formatDateOnly(latestEntry.metadata.date) : "--"}</p>
+            <p className={styles.statMuted}>
+              {latestEntry?.metadata.consultantName || "Sin consultante"} · {latestEntry ? latestEntry.canvas.placements.length : 0} cartas
+            </p>
+          </div>
+        </article>
+        <article className={styles.statCard}>
+          <div className={styles.statIcon}>✦</div>
+          <div>
+            <p className={styles.statLabel}>Cartas registradas</p>
+            <p className={styles.statValue}>{uniqueCardsRegistered} / 78</p>
+            <p className={styles.statMuted}>Mazo completado</p>
+          </div>
+        </article>
       </div>
+
+      <div className={styles.entriesToolbar}>
+        <h3 className={styles.entriesTitle}>✦ Entradas recientes</h3>
+        <label className={styles.sortWrap}>
+          <span>Ordenar por:</span>
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortKey)} className={styles.sortSelect}>
+            <option value="recent">Más recientes</option>
+            <option value="oldest">Más antiguas</option>
+          </select>
+        </label>
+      </div>
+
+      {isLoading ? (
+        <article className={styles.emptyState}>Cargando entradas...</article>
+      ) : !hasEntries ? (
+        <article className={styles.emptyState}>Aún no hay entradas guardadas. Crea tu primera lectura desde "Nueva entrada".</article>
+      ) : (
+        <>
+          <div className={styles.entriesGrid}>
+            {paginatedEntries.map((entry) => (
+              <article key={entry.id} className={styles.entryCard}>
+                <div className={styles.entryTop}>
+                  <div className={styles.entryIconWrap}>
+                    {entry.canvas.placements[0]?.image ? (
+                      <img
+                        src={entry.canvas.placements[0].image}
+                        alt={entry.canvas.placements[0].cardName || "Carta"}
+                        className={styles.entryCardThumb}
+                      />
+                    ) : (
+                      <span className={styles.entryFallback}>✦</span>
+                    )}
+                  </div>
+                  <div className={styles.entryHeadText}>
+                    <h4>{entry.metadata.consultantName || "Sin consultante"}</h4>
+                    <p>{formatDateLabel(entry)}</p>
+                  </div>
+                  <button type="button" className={styles.entryMenu} aria-label="Más opciones">
+                    •••
+                  </button>
+                </div>
+
+                <div className={styles.entryBody}>
+                  <p>
+                    <strong>Tirada:</strong> {entry.metadata.spreadType}
+                  </p>
+                  <p>
+                    <strong>Tema:</strong> {entry.metadata.question || "Sin tema"}
+                  </p>
+                </div>
+
+                <div className={styles.entryFooter}>
+                  <p>🂠 {entry.canvas.placements.length} cartas</p>
+                  <p>◔ {entry.rereadings.length} relecturas</p>
+                  <button
+                    type="button"
+                    className={styles.readButton}
+                    onClick={() => setView({ type: "detail", entryId: entry.id })}
+                  >
+                    Ver lectura →
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className={styles.pagination}>
+            <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={page <= 1}>
+              ‹
+            </button>
+            <span>{page}</span>
+            <span className={styles.pageTotal}>/ {pageCount}</span>
+            <button type="button" onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={page >= pageCount}>
+              ›
+            </button>
+          </div>
+        </>
+      )}
     </section>
   );
 }

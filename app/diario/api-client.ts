@@ -1,4 +1,5 @@
 ﻿import type { JournalEntry } from "@/app/diario/types";
+import { getJournalEntries, getJournalEntryById } from "@/app/diario/storage";
 
 type ListResponse = {
   entries?: JournalEntry[];
@@ -42,31 +43,49 @@ async function parseJson<T>(response: Response): Promise<T> {
 }
 
 export async function fetchJournalEntriesFromApi(): Promise<JournalEntry[]> {
-  const response = await fetch("/api/diario/entries", {
-    method: "GET",
-    credentials: "same-origin",
-  });
+  try {
+    const response = await fetch("/api/diario/entries", {
+      method: "GET",
+      credentials: "same-origin",
+    });
 
-  if (!response.ok) {
-    return [];
+    if (response.status === 401) {
+      return getJournalEntries();
+    }
+
+    if (!response.ok) {
+      return getJournalEntries();
+    }
+
+    const data = await parseJson<ListResponse>(response);
+    const apiEntries = Array.isArray(data.entries) ? data.entries : [];
+
+    if (apiEntries.length > 0) {
+      return apiEntries;
+    }
+
+    return getJournalEntries();
+  } catch {
+    return getJournalEntries();
   }
-
-  const data = await parseJson<ListResponse>(response);
-  return Array.isArray(data.entries) ? data.entries : [];
 }
 
 export async function fetchJournalEntryByIdFromApi(id: string): Promise<JournalEntry | null> {
-  const response = await fetch(`/api/diario/entries/${id}`, {
-    method: "GET",
-    credentials: "same-origin",
-  });
+  try {
+    const response = await fetch(`/api/diario/entries/${id}`, {
+      method: "GET",
+      credentials: "same-origin",
+    });
 
-  if (!response.ok) {
-    return null;
+    if (!response.ok) {
+      return getJournalEntryById(id);
+    }
+
+    const data = await parseJson<DetailResponse>(response);
+    return data.entry ?? getJournalEntryById(id);
+  } catch {
+    return getJournalEntryById(id);
   }
-
-  const data = await parseJson<DetailResponse>(response);
-  return data.entry ?? null;
 }
 
 export async function createJournalEntryInApi(payload: CreatePayload): Promise<JournalEntry> {

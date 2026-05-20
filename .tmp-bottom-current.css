@@ -1,0 +1,444 @@
+.bottomLayoutGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.card {
+  background: linear-gradient(145deg, #0e0d19, #131124);
+  border: 1px solid rgba(201, 166, 107, 0.25);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  min-height: 360px;
+}
+
+.cardTitle {
+  font-family: Cinzel, "Times New Roman", serif;
+  font-size: 13px;
+  color: var(--gold-bright);
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.9;
+}
+
+.progressContentWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 15px;
+}
+
+.progressTextBlock h3 {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+
+.progressTextBlock h2 {
+  font-family: Cinzel, "Times New Roman", serif;
+  font-size: 24px;
+  color: var(--text-light);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.circleProgressBox {
+  width: 85px;
+  height: 85px;
+  position: relative;
+}
+
+.circleVisualRender {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(var(--gold) 0% 65%, #18142c 65% 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.circleInnerMask {
+  width: 69px;
+  height: 69px;
+  background-color: #110f1f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Cinzel, "Times New Roman", serif;
+  font-size: 17px;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.horizontalBarDecor {
+  width: 100%;
+  height: 3px;
+  background: #18142c;
+  margin-bottom: 15px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.horizontalBarFill {
+  height: 100%;
+  background: var(--gold);
+  width: 65%;
+}
+
+.statsStrip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+  background-color: var(--purple-inner);
+  padding: 14px 8px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.statNode span {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.statNode strong {
+  font-family: Cinzel, "Times New Roman", serif;
+  font-size: 15px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.statSub {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.practiceItemsStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  max-height: 290px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.practiceItemsStack::-webkit-scrollbar,
+.bitacoraList::-webkit-scrollbar {
+  width: 7px;
+}
+
+.practiceItemsStack::-webkit-scrollbar-track,
+.bitacoraList::-webkit-scrollbar-track {
+  background: #0f0d1a;
+  border-radius: 999px;
+}
+
+.practiceItemsStack::-webkit-scrollbar-thumb,
+.bitacoraList::-webkit-scrollbar-thumb {
+  background: rgba(197, 168, 128, 0.38);
+  border-radius: 999px;
+}
+
+.practiceNode {
+  background-color: var(--purple-inner);
+  padding: 12px 14px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.01);
+}
+
+.practiceLeftGroup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.miniTarotCardRender {
+  width: 32px;
+  height: 48px;
+  background: linear-gradient(185deg, #1f1b3a, #0b0914);
+  border: 1px solid rgba(197, 168, 128, 0.3);
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.miniTarotCardRender::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 0.5px solid rgba(197, 168, 128, 0.18);
+  border-radius: 2px;
+}
+
+.nodeDetails h4 {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.nodeDetails p {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.nodeDate {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.bitacoraList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 290px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding-right: 6px;
+}
+
+.bitacoraItem {
+  background: radial-gradient(circle at 50% 50%, #fffbf2 0%, #f7f1df 100%);
+  color: #332a21;
+  border-radius: 10px;
+  border: 1px solid #eadebe;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.bitacoraMeta {
+  min-width: 0;
+}
+
+.bitacoraMeta span {
+  font-size: 9.5px;
+  color: #7d6f5e;
+  font-weight: 600;
+  display: block;
+}
+
+.bitacoraMeta strong {
+  font-family: Cinzel, "Times New Roman", serif;
+  color: #211912;
+  font-size: 12px;
+  display: block;
+  margin: 2px 0 3px;
+}
+
+.bitacoraMeta p {
+  font-size: 11px;
+  color: #4a4035;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.bitacoraCarta {
+  width: 72px;
+  height: 44px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: linear-gradient(145deg, #f0e2c4, #e7d5af);
+  color: #5c4a2d;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px;
+}
+
+.miniCardsRowFlex {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: space-between;
+}
+
+.repasoNodeCard {
+  width: 23%;
+  aspect-ratio: 2 / 3.3;
+  background-color: var(--purple-inner);
+  border: 1px solid rgba(197, 168, 128, 0.15);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px;
+  position: relative;
+}
+
+.repasoCardSymbol {
+  font-size: 14px;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+.repasoNodeCard span.statusIndicator {
+  font-size: 9.5px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.dotRed {
+  background: #e05353;
+  box-shadow: 0 0 6px #e05353;
+}
+
+.dotOrange {
+  background: #e09343;
+  box-shadow: 0 0 6px #e09343;
+}
+
+.dotGreen {
+  background: #43c773;
+  box-shadow: 0 0 6px #43c773;
+}
+
+.quickActionsQuad {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.actionNode {
+  background-color: var(--purple-inner);
+  border: 1px solid rgba(255, 255, 255, 0.01);
+  padding: 14px 12px;
+  border-radius: 10px;
+  text-align: left;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.actionNode:hover {
+  border-color: rgba(197, 168, 128, 0.2);
+}
+
+.actionNode h4 {
+  font-size: 13px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.actionNode p {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.challengeContainerBox {
+  text-align: center;
+  padding: 16px;
+  background-color: var(--purple-inner);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.01);
+}
+
+.challengeSub {
+  color: var(--gold);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.challengeContainerBox h3 {
+  font-family: Cinzel, "Times New Roman", serif;
+  font-size: 15px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.challengeDesc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin: 4px 0 12px;
+  line-height: 1.4;
+}
+
+.challengeProgressMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 5px;
+  color: var(--text-light);
+}
+
+.challengeBarBg {
+  background: #0b0a14;
+  height: 5px;
+  border-radius: 3px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.challengeBarFill {
+  background: linear-gradient(90deg, rgba(197, 168, 128, 0.4), var(--gold));
+  height: 100%;
+  width: 60%;
+}
+
+.btnActionTrigger {
+  background-color: var(--purple-inner);
+  border: 1px solid var(--gold-border);
+  color: var(--text-light);
+  padding: 11px;
+  border-radius: 8px;
+  font-family: Cinzel, "Times New Roman", serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.25s;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btnActionTrigger:hover {
+  background: var(--gold);
+  color: var(--bg-base);
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(197, 168, 128, 0.2);
+}
+

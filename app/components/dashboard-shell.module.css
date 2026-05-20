@@ -1,0 +1,16 @@
+.shell {
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.content {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  height: 100vh;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

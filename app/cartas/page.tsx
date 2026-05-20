@@ -1,23 +1,20 @@
-import { BackButton } from "@/app/components/back-button";
-import { InternalNav } from "@/app/components/internal-nav";
+﻿import { DashboardShell } from "@/app/components/dashboard-shell";
+import { DashboardPageHeader } from "@/app/components/dashboard-page-header";
 import { CardsBrowser } from "@/app/cartas/cards-browser";
 import { tarotCards } from "@/src/data/tarotCards";
+import styles from "./cartas.module.css";
 
 export default function CartasPage() {
   return (
-    <main className="app-shell">
-      <InternalNav />
-      <section className="app-header">
-        <div className="app-header-top">
-          <BackButton />
-          <p className="app-kicker">Biblioteca</p>
-        </div>
-        <h1>Cartas</h1>
-        <p>Explora el mazo local y filtra por nombre, número, código o tipo de mazo.</p>
-      </section>
-
-      <CardsBrowser cards={tarotCards} />
-    </main>
+    <DashboardShell activeKey="cartas">
+      <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
+        <DashboardPageHeader
+          kicker=""
+          title="Cartas"
+          description="Explora el mazo local y filtra por nombre, número, código o tipo de mazo."
+        />
+        <CardsBrowser cards={tarotCards} />
+      </main>
+    </DashboardShell>
   );
 }
-

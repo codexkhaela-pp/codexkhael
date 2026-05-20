@@ -1,0 +1,160 @@
+.bottom-layout-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .mini-cards-row-flex {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+        }
+
+        .repaso-node-card {
+            width: 23%;
+            aspect-ratio: 2/3.3;
+            background-color: var(--purple-inner);
+            border: 1px solid rgba(197, 168, 128, 0.15);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 4px;
+            position: relative;
+        }
+
+        .repaso-card-symbol {
+            font-size: 14px;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        .repaso-node-card span.status-indicator {
+            font-size: 9.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .dot-red { background: #e05353; box-shadow: 0 0 6px #e05353; }
+        .dot-orange { background: #e09343; box-shadow: 0 0 6px #e09343; }
+        .dot-green { background: #43c773; box-shadow: 0 0 6px #43c773; }
+
+        .quick-actions-quad {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .action-node {
+            background-color: var(--purple-inner);
+            border: 1px solid rgba(255,255,255,0.01);
+            padding: 14px 12px;
+            border-radius: 10px;
+            text-align: left;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+        .action-node:hover {
+            border-color: rgba(197, 168, 128, 0.2);
+        }
+
+        .action-node h4 {
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .action-node p {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .challenge-container-box {
+            text-align: center;
+            padding: 16px;
+            background-color: var(--purple-inner);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.01);
+        }
+
+        .challenge-container-box span.sub {
+            color: var(--gold);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .challenge-container-box h3 {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .challenge-container-box p.desc {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin: 4px 0 12px 0;
+            line-height: 1.4;
+        }
+
+        .challenge-progress-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 5px;
+            color: var(--text-light);
+        }
+
+        .challenge-bar-bg {
+            background: #0b0a14;
+            height: 5px;
+            border-radius: 3px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .challenge-bar-fill {
+            background: linear-gradient(90deg, rgba(197,168,128,0.4), var(--gold));
+            height: 100%;
+            width: 60%;
+        }
+
+        .btn-action-trigger {
+            background-color: var(--purple-inner);
+            border: 1px solid var(--gold-border);
+            color: var(--text-light);
+            padding: 11px;
+            border-radius: 8px;
+            font-family: var(--font-serif);
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.25s;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .btn-action-trigger:hover {
+            background: var(--gold);
+            color: var(--bg-base);
+            border-color: var(--gold);
+            box-shadow: 0 0 12px rgba(197, 168, 128, 0.2);
+        }
+
+        

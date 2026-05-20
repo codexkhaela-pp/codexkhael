@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codex Khael - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #06050b;
+            --bg-surface: #0e0d18;
+            --purple-dark: #121021;
+            --purple-card: #151226;
+            --purple-inner: #1d1831;
+            --purple-accent: #2e2454;
+            --gold: #c5a880;
+            --gold-bright: #e5c9a3;
+            --gold-border: rgba(197, 168, 128, 0.22);
+            --gold-border-heavy: rgba(197, 168, 128, 0.4);
+            --gold-glow: rgba(197, 168, 128, 0.05);
+            --text-light: #e2e1e9;
+            --text-muted: #787596;
+            --font-serif: 'Cinzel', serif;
+            --font-sans: 'Inter', sans-serif;
+            --font-italic: 'Playfair Display', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(46, 36, 84, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 75% 70%, rgba(21, 18, 38, 0.4) 0%, transparent 45%),
+                radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 120px 120px, 200px 200px;
+            background-position: 0 0, 0 0, 40px 40px, 110px 70px;
+            color: var(--text-light);
+            font-family: var(--font-sans);
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* --- 1. SIDEBAR --- */
+        aside {
+            width: 260px;
+            height: 100%;
+            background-color: #0b0a13;
+            border-right: 1px solid var(--gold-border);
+            padding: 35px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .logo-area {
+            text-align: left;
+            padding-left: 10px;
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-symbol {
+            font-family: var(--font-serif);
+            font-size: 34px;
+            font-weight: 700;
+            color: var(--gold-bright);
+            line-height: 1;
+            text-shadow: 0 0 10px rgba(197, 168, 128, 0.3);
+            background: linear-gradient(135deg, var(--gold-bright), #967d59);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text h1 {
+            font-family: var(--font-serif);
+            color: var(--gold-bright);
+            font-size: 17px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        .logo-text span {
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-links li a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 11px 14px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-weight: 400;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links li.active a {
+            background-color: var(--purple-accent);
+            color: var(--text-light);
+            font-weight: 500;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .nav-links li a:hover:not(.active) {
+            color: var(--text-light);
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .sidebar-footer-card {
+            background: #0d0c16;
+            border: 1px solid var(--gold-border);
+            padding: 22px 18px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .sidebar-footer-card p {
+            font-family: var(--font-italic);
+            font-size: 12.5px;
+            color: var(--gold);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* --- 2. HEADER SUPERIOR --- */
+        .content-container {
+            flex-grow: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            height: 75px;
+            width: 100%;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(197, 168, 128, 0.06);
+            background-color: #080710;
+        }
+
+        .menu-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--gold-border);
+            color: var(--gold);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-icon {
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            background: none;
+            border: none;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-icon:hover { color: var(--gold-bright); }
+
+        .notif-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background-color: #552d6e;
+            color: white;
+            font-size: 8.5px;
+            font-weight: 600;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-mini-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1.5px solid var(--gold-border-heavy);
+            background: linear-gradient(135deg, #443773, #221a3c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.4);
+        }
+
+        /* --- 3 & 4. HERO / WELCOME BANNER --- */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(90deg, #0f0e1a 0%, #17142b 40%, #1a1733 60%, #0f0e1a 100%);
+            border: 1px solid rgba(201, 166, 107, 0.32); /* Ajustado con el nuevo borde dorado */
+            border-radius: 20px;
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.02);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 115px;
+            height: 115px;
+            flex-shrink: 0;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            background: linear-gradient(135deg, #3d2b63, #150f24);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .level-badge {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #121021;
+            border: 1px solid var(--gold);
+            color: var(--gold-bright);
+            font-family: var(--font-serif);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .welcome-text {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .welcome-text h2 {
+            font-size: 15px;
+            color: var(--text-muted);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .welcome-text h1 {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            color: var(--text-light);
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.1;
+        }
+
+        .welcome-text p {
+            color: var(--gold);
+            font-size: 14.5px;
+            letter-spacing: 0.2px;
+            margin-top: 2px;
+        }
+
+        .mystic-moon-svg {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            opacity: 0.45;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .streak-card {
+            background: rgba(10, 9, 18, 0.75);
+            border: 1px solid rgba(201, 166, 107, 0.32); /* Ajustado con el nuevo borde dorado */
+            padding: 20px 25px;
+            border-radius: 14px;
+            text-align: center;
+            min-width: 200px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 15px rgba(197, 168, 128, 0.05);
+            backdrop-filter: blur(4px);
+        }
+
+        .streak-card span {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: block;
+        }
+
+        .streak-number {
+            font-family: var(--font-serif);
+            font-size: 34px;
+            color: var(--gold-bright);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 6px 0;
+            font-weight: 600;
+        }
+
+        .streak-fire {
+            color: #ff7a00;
+            font-size: 28px;
+            text-shadow: 0 0 12px rgba(255,122,0,0.4);
+            font-style: normal;
+        }
+
+        .streak-progress-container {
+            width: 100%;
+            background: #1a172a;
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .streak-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(197,168,128,0.4), var(--gold-bright));
+            width: 80%;
+            box-shadow: 0 0 8px rgba(197, 168, 128, 0.6);
+        }
+
+        /* --- 5. CARDS COMPONENTES (OPTIMIZACIÓN DE BORDE SOLICITADA) --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #0e0d19, #131124);
+            border: 1px solid rgba(201, 166, 107, 0.32); /* Definición precisa del borde dorado solicitada */
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        }
+
+        .card-title {
+            font-family: var(--font-serif);
+            font-size: 13px;
+            color: var(--gold-bright);
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.9;
+        }
+
+        /* --- 6. MI PROGRESO --- */
+        .progress-content-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .progress-text-block h3 {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-bottom: 2px;
+        }
+
+        .progress-text-block h2 {
+            font-family: var(--font-serif);
+            font-size: 24px;
+            color: var(--text-light);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .circle-progress-box {
+            width: 85px;
+            height: 85px;
+            position: relative;
+        }
+
+        .circle-visual-render {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--gold) 0% 65%, #18142c 65% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+        }
+
+        .circle-inner-mask {
+            width: 69px;
+            height: 69px;
+            background-color: #110f1f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-serif);
+            font-size: 17px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .horizontal-bar-decor {
+            width: 100%;
+            height: 3px;
+            background: #18142c;
+            margin-bottom: 15px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .horizontal-bar-fill {
+            height: 100%;
+            background: var(--gold);
+            width: 65%;
+        }
+
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+            background-color: var(--purple-inner);
+            padding: 14px 8px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .stat-node span {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .stat-node strong {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* --- 7. MIS PRÁCTICAS RECIENTES --- */
+        .practice-items-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .practice-node {
+            background-color: var(--purple-inner);
+            padding: 12px 14px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.01);
+        }
+
+        .practice-left-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .mini-tarot-card-render {
+            width: 32px;
+            height: 48px;
+            background: linear-gradient(185deg, #1f1b3a, #0b0914);
+            border: 1px solid rgba(197, 168, 128, 0.3);
+            border-radius: 4px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .mini-tarot-card-render::before {
+            content: "";
+            position: absolute;
+            inset: 2px;
+            border: 0.5px solid rgba(197, 168, 128, 0.15);
+            border-radius: 2px;
+        }
+
+        .mini-tarot-art {
+            font-size: 13px;
+            color: var(--gold);
+            opacity: 0.8;
+            z-index: 1;
+        }
+
+        .node-details h4 {
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .node-details p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .node-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* --- 8. MI BITÁCORA (ORNAMENTO SUTIL INTEGRADO SIN AFECTAR LAYOUT) --- */
+        .parchment-container {
+            background: radial-gradient(circle at 50% 50%, #fffbf2 0%, #f7f1df 100%);
+            color: #332a21;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+            border: 1px solid #eadebe;
+            overflow: hidden;
+        }
+
+        /* Doble marco ornamental interno estilizado sin alterar la caja base */
+        .parchment-container::before {
+            content: "";
+            position: absolute;
+            inset: 6px;
+            border: 1px solid rgba(140, 115, 80, 0.22);
+            border-radius: 8px;
+            pointer-events: none;
+        }
+        
+        .parchment-container::after {
+            content: "";
+            position: absolute;
+            inset: 9px;
+            border: 0.5px dashed rgba(140, 115, 80, 0.15);
+            border-radius: 6px;
+            pointer-events: none;
+        }
+
+        .parchment-content {
+            flex-grow: 1;
+            z-index: 1;
+        }
+
+        .parchment-content span {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #7d6f5e;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .parchment-content h3 {
+            font-family: var(--font-serif);
+            font-size: 17px;
+            margin: 5px 0 8px 0;
+            color: #211912;
+            font-weight: 700;
+        }
+
+        .parchment-content p {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #4a4035;
+            font-weight: 400;
+        }
+
+        .tarot-card-right-mock {
+            width: 66px;
+            height: 105px;
+            background: linear-gradient(145deg, #0f0d19, #1b172e);
+            border-radius: 6px;
+            flex-shrink: 0;
+            border: 1.5px solid var(--gold);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 4px;
+            z-index: 1;
+        }
+
+        .tarot-card-right-mock::before {
+            content: "";
+            position: absolute;
+            inset: 3px;
+            border: 0.5px solid rgba(197, 168, 128, 0.2);
+            border-radius: 4px;
+        }
+
+        .card-mock-title {
+            font-family: var(--font-serif);
+            font-size: 6px;
+            color: var(--gold-bright);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .card-mock-art {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        /* --- 9. FILA INFERIOR EQUILIBRADA --- */
+        .bottom-layout-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .mini-cards-row-flex {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+        }
+
+        .repaso-node-card {
+            width: 23%;
+            aspect-ratio: 2/3.3;
+            background-color: var(--purple-inner);
+            border: 1px solid rgba(197, 168, 128, 0.15);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 4px;
+            position: relative;
+        }
+
+        .repaso-card-symbol {
+            font-size: 14px;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        .repaso-node-card span.status-indicator {
+            font-size: 9.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .dot-red { background: #e05353; box-shadow: 0 0 6px #e05353; }
+        .dot-orange { background: #e09343; box-shadow: 0 0 6px #e09343; }
+        .dot-green { background: #43c773; box-shadow: 0 0 6px #43c773; }
+
+        .quick-actions-quad {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .action-node {
+            background-color: var(--purple-inner);
+            border: 1px solid rgba(255,255,255,0.01);
+            padding: 14px 12px;
+            border-radius: 10px;
+            text-align: left;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+        .action-node:hover {
+            border-color: rgba(197, 168, 128, 0.2);
+        }
+
+        .action-node h4 {
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .action-node p {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .challenge-container-box {
+            text-align: center;
+            padding: 16px;
+            background-color: var(--purple-inner);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.01);
+        }
+
+        .challenge-container-box span.sub {
+            color: var(--gold);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .challenge-container-box h3 {
+            font-family: var(--font-serif);
+            font-size: 15px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .challenge-container-box p.desc {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin: 4px 0 12px 0;
+            line-height: 1.4;
+        }
+
+        .challenge-progress-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 5px;
+            color: var(--text-light);
+        }
+
+        .challenge-bar-bg {
+            background: #0b0a14;
+            height: 5px;
+            border-radius: 3px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .challenge-bar-fill {
+            background: linear-gradient(90deg, rgba(197,168,128,0.4), var(--gold));
+            height: 100%;
+            width: 60%;
+        }
+
+        .btn-action-trigger {
+            background-color: var(--purple-inner);
+            border: 1px solid var(--gold-border);
+            color: var(--text-light);
+            padding: 11px;
+            border-radius: 8px;
+            font-family: var(--font-serif);
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.25s;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .btn-action-trigger:hover {
+            background: var(--gold);
+            color: var(--bg-base);
+            border-color: var(--gold);
+            box-shadow: 0 0 12px rgba(197, 168, 128, 0.2);
+        }
+
+        /* --- 3. FOOTER (REDISEÑADO COMO BANDA DECORATIVA PREMIUM CENTRAL) --- */
+        footer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: auto;
+            padding: 10px 0 5px 0; /* Control estricto de altura */
+        }
+
+        .footer-banner-strip {
+            background: linear-gradient(90deg, transparent 0%, rgba(29, 24, 49, 0.6) 20%, rgba(29, 24, 49, 0.6) 80%, transparent 100%);
+            border-top: 1px solid rgba(191, 160, 116, 0.18);
+            border-bottom: 1px solid rgba(191, 160, 116, 0.18);
+            padding: 14px 60px;
+            min-width: 65%;
+            max-width: 90%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .footer-banner-strip p {
+            font-family: var(--font-italic);
+            color: var(--gold-bright);
+            font-size: 14px;
+            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        footer span.decorative-star {
+            font-size: 9px;
+            color: var(--gold);
+            opacity: 0.7;
+            text-shadow: 0 0 4px rgba(197, 168, 128, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="top-sidebar">
+            <div class="logo-area">
+                <div class="logo-symbol">K</div>
+                <div class="logo-text">
+                    <h1>CODEX KHAEL</h1>
+                    <span>Tarotista</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li class="active"><a href="#">🔮 Inicio</a></li>
+                <li><a href="#">📖 Cursos</a></li>
+                <li><a href="#">🃏 Cartas</a></li>
+                <li><a href="#">🗺 Tiradas</a></li>
+                <li><a href="#">✍ Bitácora</a></li>
+                <li><a href="#">🔄 Repaso</a></li>
+                <li><a href="#">🏆 Desafíos</a></li>
+                <li><a href="#">👥 Comunidad</a></li>
+                <li><a href="#">📂 Recursos</a></li>
+                <li><a href="#">⚙ Ajustes</a></li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-footer-card">
+            <p>"El tarot no predice el futuro, ilumina el camino para que tomes mejores decisiones hoy."</p>
+        </div>
+    </aside>
+
+    <div class="content-container">
+        
+        <header>
+            <div class="header-left">
+                <button class="menu-toggle-btn">☰</button>
+            </div>
+            <div class="header-right">
+                <button class="header-icon">🔍</button>
+                <button class="header-icon">
+                    🔔
+                    <span class="notif-badge">3</span>
+                </button>
+                <div class="user-mini-avatar">🌙</div>
+            </div>
+        </header>
+
+        <main>
+            
+            <section class="welcome-banner">
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <div class="avatar-img">🔮</div>
+                        <div class="level-badge">NIVEL 12</div>
+                    </div>
+                    <div class="welcome-text">
+                        <h2>Bienvenida de nuevo,</h2>
+                        <h1>Elara Vance</h1>
+                        <p>Sigue tu camino. Cada carta es una enseñanza.</p>
+                    </div>
+                </div>
+                
+                <div class="mystic-moon-svg">
+                    <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#c5a880" stroke-width="1" stroke-dasharray="2 3" opacity="0.3"/>
+                        <path d="M40,20 A30,30 0 1,0 80,60 A26,26 0 1,1 40,20 Z" fill="#c5a880" opacity="0.8"/>
+                        <circle cx="50" cy="15" r="1.5" fill="#e5c9a3"/>
+                        <circle cx="85" cy="50" r="1.5" fill="#e5c9a3"/>
+                        <circle cx="15" cy="50" r="1.5" fill="#e5c9a3"/>
+                    </svg>
+                </div>
+                
+                <div class="streak-card">
+                    <span>Racha de Aprendizaje</span>
+                    <div class="streak-number">
+                        <i class="streak-fire">🔥</i> 19 <span style="font-size: 13px; color: var(--text-muted); font-family: var(--font-sans); font-weight:400;">días</span>
+                    </div>
+                    <div class="streak-progress-container">
+                        <div class="streak-progress-bar"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-grid">
+                
+                <article class="card">
+                    <div class="card-title">📊 Mi Progreso</div>
+                    <div>
+                        <div class="progress-content-wrapper">
+                            <div class="progress-text-block">
+                                <h3>Nivel actual</h3>
+                                <h2>Arcana Mayor</h2>
+                            </div>
+                            <div class="circle-progress-box">
+                                <div class="circle-visual-render">
+                                    <div class="circle-inner-mask">65%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="horizontal-bar-decor">
+                            <div class="horizontal-bar-fill"></div>
+                        </div>
+                        <div class="stats-strip">
+                            <div class="stat-node"><span>Módulos</span><strong>18<span style="color:var(--text-muted); font-size:11px;">/28</span></strong></div>
+                            <div class="stat-node"><span>Lecciones</span><strong>142<span style="color:var(--text-muted); font-size:11px;">/250</span></strong></div>
+                            <div class="stat-node"><span>Cartas</span><strong>46<span style="color:var(--text-muted); font-size:11px;">/78</span></strong></div>
+                        </div>
+                    </div>
+                    <button class="btn-action-trigger">Ver mi progreso</button>
+                </article>
+
+                <article class="card">
+                    <div class="card-title">🃏 Mis Prácticas Recientes</div>
+                    <div class="practice-items-stack">
+                        <div class="practice-node">
+                            <div class="practice-left-group">
+                                <div class="mini-tarot-card-render"><span class="mini-tarot-art">⚔️</span></div>
+                                <div class="node-details">
+                                    <h4>Tirada de la Cruz Celta</h4>
+                                    <p>Práctica libre</p>
+                                </div>
+                            </div>
+                            <div class="node-date">12 Nov</div>
+                        </div>
+                        <div class="practice-node">
+                            <div class="practice-left-group">
+                                <div class="mini-tarot-card-render"><span class="mini-tarot-art">❤️</span></div>
+                                <div class="node-details">
+                                    <h4>Tirada de 3 Cartas</h4>
+                                    <p>Amor y Relaciones</p>
+                                </div>
+                            </div>
+                            <div class="node-date">10 Nov</div>
+                        </div>
+                        <div class="practice-node">
+                            <div class="practice-left-group">
+                                <div class="mini-tarot-card-render"><span class="mini-tarot-art">✨</span></div>
+                                <div class="node-details">
+                                    <h4>Tirada Sí o No</h4>
+                                    <p>Pregunta concreta</p>
+                                </div>
+                            </div>
+                            <div class="node-date">8 Nov</div>
+                        </div>
+                    </div>
+                    <button class="btn-action-trigger">Ver todas mis prácticas</button>
+                </article>
+
+                <article class="card">
+                    <div class="card-title">✍ Mi Bitácora</div>
+                    <div class="parchment-container">
+                        <div class="parchment-content">
+                            <span>Última entrada • 12 Nov</span>
+                            <h3>Reflexión Diaria</h3>
+                            <p>Hoy conecté profundamente con La Estrella. Me recuerda que después de tiempos difíciles, siempre hay esperanza y guía...</p>
+                        </div>
+                        <div class="tarot-card-right-mock">
+                            <div class="card-mock-title">XVII</div>
+                            <div class="card-mock-art">⭐</div>
+                            <div class="card-mock-title">Estrella</div>
+                        </div>
+                    </div>
+                    <button class="btn-action-trigger">Ir a mi bitácora</button>
+                </article>
+
+            </section>
+
+            <section class="bottom-layout-grid">
+                
+                <article class="card">
+                    <div class="card-title">🔄 Cartas para Repasar</div>
+                    <div class="mini-cards-row-flex">
+                        <div class="repaso-node-card">
+                            <div class="repaso-card-symbol">🗼</div>
+                            <span class="status-indicator"><i class="dot dot-red"></i> Mal</span>
+                        </div>
+                        <div class="repaso-node-card">
+                            <div class="repaso-card-symbol">👑</div>
+                            <span class="status-indicator"><i class="dot dot-orange"></i> Ver</span>
+                        </div>
+                        <div class="repaso-node-card">
+                            <div class="repaso-card-symbol">🌙</div>
+                            <span class="status-indicator"><i class="dot dot-orange"></i> Ver</span>
+                        </div>
+                        <div class="repaso-node-card">
+                            <div class="repaso-card-symbol">⚖️</div>
+                            <span class="status-indicator"><i class="dot dot-green"></i> OK</span>
+                        </div>
+                    </div>
+                    <button class="btn-action-trigger">Ver todas las cartas</button>
+                </article>
+
+                <article class="card">
+                    <div class="card-title">⚡ Accesos Rápidos</div>
+                    <div class="quick-actions-quad">
+                        <div class="action-node">
+                            <h4>Nueva Tirada</h4>
+                            <p>Aleatoria</p>
+                        </div>
+                        <div class="action-node">
+                            <h4>Bitácora</h4>
+                            <p>Registrar día</p>
+                        </div>
+                        <div class="action-node">
+                            <h4>Mis Cursos</h4>
+                            <p>Continuar</p>
+                        </div>
+                        <div class="action-node">
+                            <h4>Repaso</h4>
+                            <p>Memoria</p>
+                        </div>
+                    </div>
+                    <button class="btn-action-trigger">Explorar Atajos</button>
+                </article>
+
+                <article class="card">
+                    <div class="card-title">✨ Mi Próximo Desafío</div>
+                    <div class="challenge-container-box">
+                        <span class="sub">Desafío Semanal</span>
+                        <h3>Interpretación Intuitiva</h3>
+                        <p class="desc">Realiza 5 tiradas intuitivas completas y registra tus impresiones.</p>
+                        <div class="challenge-progress-meta">
+                            <span>Progreso</span>
+                            <span>3 / 5</span>
+                        </div>
+                        <div class="challenge-bar-bg">
+                            <div class="challenge-bar-fill"></div>
+                        </div>
+                    </div>
+                    <button class="btn-action-trigger">Ver desafíos</button>
+                </article>
+
+            </section>
+
+            <footer>
+                <div class="footer-banner-strip">
+                    <p>
+                        <span class="decorative-star">✦</span>
+                        “No necesitas memorizar el tarot, necesitas comprender el lenguaje del alma.”
+                        <span class="decorative-star">✦</span>
+                    </p>
+                </div>
+            </footer>
+
+        </main>
+    </div>
+
+</body>
+</html>

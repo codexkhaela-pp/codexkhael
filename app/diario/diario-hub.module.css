@@ -1,0 +1,312 @@
+﻿.journalMain {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.topActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.newEntryButton {
+  border: 1px solid rgba(201, 166, 107, 0.7);
+  background: linear-gradient(145deg, #d8b36f, #c5a163);
+  color: #1d1408;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  margin-bottom: 15px;
+}
+
+.statsGrid {
+  border: 1px solid rgba(201, 166, 107, 0.3);
+  border-radius: 18px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  background: linear-gradient(160deg, rgba(15, 14, 27, 0.94), rgba(11, 9, 22, 0.94));
+}
+
+.statCard {
+  border: 1px solid rgba(201, 166, 107, 0.14);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: radial-gradient(circle at 20% 25%, rgba(42, 30, 76, 0.35), rgba(17, 14, 32, 0.95));
+}
+
+.statIcon {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 166, 107, 0.5);
+  display: grid;
+  place-items: center;
+  color: #c9a66b;
+  font-size: 28px;
+  background: rgba(16, 13, 30, 0.74);
+  flex-shrink: 0;
+}
+
+.statLabel {
+  margin: 0;
+  color: #d8d3e5;
+  font-size: 15px;
+}
+
+.statValue {
+  margin: 3px 0 2px;
+  font-family: "Cinzel", "Times New Roman", serif;
+  color: #f3ede2;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.statValueSmall {
+  margin: 3px 0 2px;
+  font-family: "Cinzel", "Times New Roman", serif;
+  color: #f3ede2;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.statHint {
+  margin: 0;
+  color: #66d38b;
+  font-size: 14px;
+}
+
+.statMuted {
+  margin: 0;
+  color: #adabc1;
+  font-size: 14px;
+}
+
+.entriesToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 1px solid rgba(201, 166, 107, 0.18);
+  padding-top: 8px;
+  margin-bottom: 10px;
+}
+
+.entriesTitle {
+  margin: 0;
+  font-family: "Cinzel", "Times New Roman", serif;
+  font-size: 17px;
+  color: #f4eddf;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+
+.sortWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(201, 166, 107, 0.26);
+  border-radius: 10px;
+  background: rgba(12, 10, 24, 0.8);
+  padding: 8px 12px;
+  color: #a9a7c0;
+  font-size: 14px;
+}
+
+.sortSelect {
+  border: 0;
+  background: transparent;
+  color: #dad5e4;
+  font-size: 14px;
+  outline: none;
+}
+
+.entriesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.entryCard {
+  border: 1px solid rgba(201, 166, 107, 0.38);
+  border-radius: 16px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(44, 33, 78, 0.42), transparent 46%),
+    linear-gradient(160deg, rgba(14, 12, 27, 0.96), rgba(11, 10, 20, 0.96));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.33);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entryTop {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.entryIconWrap {
+  width: 56px;
+  height: 56px;
+  border: 1px solid rgba(201, 166, 107, 0.45);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #141125;
+  display: grid;
+  place-items: center;
+}
+
+.entryCardThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.entryFallback {
+  color: #c9a66b;
+  font-size: 20px;
+}
+
+.entryHeadText h4 {
+  margin: 0;
+  font-family: "Cinzel", "Times New Roman", serif;
+  color: #f3ecdf;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.entryHeadText p {
+  margin: 3px 0 0;
+  color: #a7a4bf;
+  font-size: 15px;
+}
+
+.entryMenu {
+  border: 0;
+  background: transparent;
+  color: #c9a66b;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.entryBody p {
+  margin: 0 0 6px;
+  color: #d7d3e6;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.entryBody p strong {
+  color: #f1ede4;
+  font-weight: 600;
+}
+
+.entryFooter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: auto;
+}
+
+.entryFooter p {
+  margin: 0;
+  color: #b6b2c8;
+  font-size: 14px;
+}
+
+.readButton {
+  margin-left: auto;
+  border: 1px solid rgba(201, 166, 107, 0.4);
+  background: rgba(22, 18, 39, 0.88);
+  border-radius: 10px;
+  color: #e8dfcd;
+  padding: 8px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.readButton:hover {
+  border-color: rgba(229, 201, 163, 0.75);
+}
+
+.emptyState {
+  border: 1px solid rgba(201, 166, 107, 0.3);
+  border-radius: 14px;
+  padding: 18px;
+  color: #c9c4d7;
+  background: rgba(12, 10, 24, 0.8);
+}
+
+.pagination {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(201, 166, 107, 0.26);
+  background: rgba(12, 10, 24, 0.74);
+  border-radius: 12px;
+  padding: 8px 10px;
+  align-self: center;
+}
+
+.pagination button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 166, 107, 0.26);
+  background: transparent;
+  color: #ddd7e8;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  min-width: 24px;
+  text-align: center;
+  color: #eee8dd;
+  font-family: "Cinzel", "Times New Roman", serif;
+}
+
+.pageTotal {
+  color: #a9a4bc !important;
+}
+
+@media (max-width: 1500px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .entriesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .entriesToolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .entriesGrid {
+    grid-template-columns: 1fr;
+  }
+}
