@@ -10,7 +10,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const nextRaw = params.next;
   const nextCandidate = Array.isArray(nextRaw) ? nextRaw[0] : nextRaw;
   const nextPath =
-    nextCandidate && nextCandidate.startsWith("/") ? nextCandidate : "/dashboard";
+    nextCandidate && nextCandidate.startsWith("/") ? nextCandidate : "/dashboard-preview";
 
   return (
     <main className="auth-shell">
@@ -33,4 +33,3 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     </main>
   );
 }
-

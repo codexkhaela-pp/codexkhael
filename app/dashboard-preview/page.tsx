@@ -1,8 +1,10 @@
-﻿import fs from "node:fs";
+import fs from "node:fs";
 import path from "node:path";
-import { DashboardSidebar } from "@/app/components/dashboard-sidebar";
+import { PreviewShadowContent } from "@/app/dashboard-preview/preview-shadow-content";
 import { getCurrentUser } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
+import { resolveLevelByXp } from "@/lib/xp/service";
+import { tarotCards } from "@/src/data/tarotCards";
 
 function readSourceHtml(): string {
   const preferred = path.join(process.cwd(), "docs", "design", "dashboard-final", "dashboard-final.html");
@@ -30,15 +32,18 @@ function extractStyleAndBody(html: string): { css: string; body: string } {
   return { css: styleMatch[1].trim(), body: bodyMatch[1].trim() };
 }
 
-function extractSections(bodyHtml: string): { contentInner: string } {
+function extractSections(bodyHtml: string): { mainInner: string } {
   const contentMatch = bodyHtml.match(/<div class="content-container">([\s\S]*)<\/div>\s*$/i);
 
   if (!contentMatch) {
     throw new Error("No se pudo extraer content-container del body fuente.");
   }
 
+  const contentInner = contentMatch[1].trim();
+  const mainInner = contentInner.replace(/<header>[\s\S]*?<\/header>/i, "").trim();
+
   return {
-    contentInner: contentMatch[1].trim(),
+    mainInner,
   };
 }
 
@@ -74,10 +79,8 @@ function getRankByLevel(nivelRaw: number, sexo: string | null | undefined): stri
   return feminine ? "Ipsissima del Cosmos" : "Ipsissimus del Cosmos";
 }
 
-function getProgressByLevel(nivelRaw: number) {
-  const level = Math.max(1, Math.floor(nivelRaw || 1));
-  const percent = Math.min(100, Math.max(1, level));
-
+function getProgressByPercent(percentRaw: number) {
+  const percent = Math.min(100, Math.max(1, Math.round(percentRaw)));
   const modulesTotal = 28;
   const lessonsTotal = 250;
   const cardsTotal = 78;
@@ -97,6 +100,183 @@ function getProgressByLevel(nivelRaw: number) {
   };
 }
 
+type ReviewCardStatus = "MAL" | "DUDA" | "OK" | "PRACTICAR" | "SUGERIDA";
+
+type ReviewCardItem = {
+  cardId: string;
+  nameEs: string;
+  image: string;
+  status: ReviewCardStatus;
+  isRealData: boolean;
+};
+
+function pickRandomCards<T>(items: T[], count: number): T[] {
+  const pool = [...items];
+  for (let i = pool.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count);
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildFallbackReviewCards(): ReviewCardItem[] {
+  const randomCards = pickRandomCards(tarotCards, 4);
+  return randomCards.map((card, index) => ({
+    cardId: card.id,
+    nameEs: card.nameEs,
+    image: card.image,
+    status: index < 2 ? "PRACTICAR" : "SUGERIDA",
+    isRealData: false,
+  }));
+}
+
+async function resolveReviewCards(userId: string | null): Promise<ReviewCardItem[]> {
+  if (!userId) {
+    return buildFallbackReviewCards();
+  }
+
+  const rows = await prisma.cardLearningProgress.findMany({
+    where: { userId },
+    select: {
+      cardId: true,
+      correctCount: true,
+      incorrectCount: true,
+      currentIncorrectStreak: true,
+      weight: true,
+    },
+  });
+
+  if (rows.length === 0) {
+    return buildFallbackReviewCards();
+  }
+
+  type Aggregate = {
+    cardId: string;
+    totalCorrect: number;
+    totalIncorrect: number;
+    totalSeen: number;
+    maxIncorrectStreak: number;
+    maxWeight: number;
+  };
+
+  const aggregateByCard = new Map<string, Aggregate>();
+  for (const row of rows) {
+    const current = aggregateByCard.get(row.cardId) ?? {
+      cardId: row.cardId,
+      totalCorrect: 0,
+      totalIncorrect: 0,
+      totalSeen: 0,
+      maxIncorrectStreak: 0,
+      maxWeight: 1,
+    };
+    current.totalCorrect += row.correctCount;
+    current.totalIncorrect += row.incorrectCount;
+    current.totalSeen += row.correctCount + row.incorrectCount;
+    current.maxIncorrectStreak = Math.max(current.maxIncorrectStreak, row.currentIncorrectStreak);
+    current.maxWeight = Math.max(current.maxWeight, row.weight);
+    aggregateByCard.set(row.cardId, current);
+  }
+
+  const tarotById = new Map(tarotCards.map((card) => [card.id, card]));
+
+  const problematic = Array.from(aggregateByCard.values())
+    .map((entry) => {
+      const accuracy = entry.totalSeen > 0 ? entry.totalCorrect / entry.totalSeen : 1;
+      const score =
+        entry.totalIncorrect * 5 +
+        (1 - accuracy) * 3 +
+        entry.maxIncorrectStreak * 2 +
+        Math.max(0, entry.maxWeight - 1) * 1.5;
+      return { ...entry, accuracy, score };
+    })
+    .filter((entry) => {
+      return (
+        entry.totalSeen > 0 &&
+        (entry.totalIncorrect > 0 || entry.accuracy < 0.8 || entry.maxIncorrectStreak > 0 || entry.maxWeight > 1.2)
+      );
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4);
+
+  if (problematic.length === 0) {
+    return buildFallbackReviewCards();
+  }
+
+  const cards = problematic
+    .map((entry): ReviewCardItem | null => {
+      const card = tarotById.get(entry.cardId);
+      if (!card) return null;
+
+      let status: ReviewCardStatus = "OK";
+      if (
+        entry.totalIncorrect >= Math.max(2, entry.totalCorrect) ||
+        entry.accuracy < 0.45 ||
+        entry.maxIncorrectStreak >= 2
+      ) {
+        status = "MAL";
+      } else if (
+        entry.totalIncorrect > 0 ||
+        entry.accuracy < 0.75 ||
+        entry.maxIncorrectStreak > 0 ||
+        entry.maxWeight >= 1.35
+      ) {
+        status = "DUDA";
+      }
+
+      return {
+        cardId: card.id,
+        nameEs: card.nameEs,
+        image: card.image,
+        status,
+        isRealData: true,
+      };
+    })
+    .filter((item): item is ReviewCardItem => item !== null);
+
+  if (cards.length === 0) {
+    return buildFallbackReviewCards();
+  }
+
+  return cards;
+}
+
+function statusVisual(status: ReviewCardStatus): { dotClass: string; label: string } {
+  if (status === "MAL") return { dotClass: "dot-red", label: "Mal" };
+  if (status === "DUDA") return { dotClass: "dot-orange", label: "Duda" };
+  if (status === "OK") return { dotClass: "dot-green", label: "Ok" };
+  if (status === "PRACTICAR") return { dotClass: "dot-orange", label: "Practicar" };
+  return { dotClass: "dot-green", label: "Sugerida" };
+}
+
+function buildReviewCardsHtml(cards: ReviewCardItem[]): string {
+  return cards
+    .map((card) => {
+      const visual = statusVisual(card.status);
+      const safeName = escapeHtml(card.nameEs);
+      const safeImage = escapeHtml(card.image);
+
+      return `
+        <div class="repaso-node-card" data-card-id="${escapeHtml(card.cardId)}" data-origin="${card.isRealData ? "real" : "fallback"}">
+          <div class="repaso-card-symbol">
+            <img src="${safeImage}" alt="${safeName}" class="repaso-card-image" loading="lazy" />
+          </div>
+          <p class="repaso-card-name">${safeName}</p>
+          <span class="status-indicator"><i class="dot ${visual.dotClass}"></i> ${visual.label}</span>
+        </div>
+      `;
+    })
+    .join("");
+}
+
 function applyAssetReplacements(
   html: string,
   logoSrc: string,
@@ -104,8 +284,12 @@ function applyAssetReplacements(
   displayName: string,
   level: number,
   rankTitle: string,
-  progress: ReturnType<typeof getProgressByLevel>,
+  streakDays: number,
+  progress: ReturnType<typeof getProgressByPercent>,
+  reviewCards: ReviewCardItem[],
 ): string {
+  const reviewCardsHtml = buildReviewCardsHtml(reviewCards);
+
   return html
     .replace(
       /<div class="logo-symbol">[\s\S]*?<\/div>/i,
@@ -125,6 +309,7 @@ function applyAssetReplacements(
       `$1${displayName}$3`,
     )
     .replace(/NIVEL\s*\d+/i, `NIVEL ${level}`)
+    .replace(/(<div class="streak-number">\s*<i class="streak-fire">[^<]*<\/i>\s*)\d+/i, `$1${streakDays}`)
     .replace(
       /(<div class="progress-text-block">[\s\S]*?<h3>[\s\S]*?<\/h3>\s*<h2>)([\s\S]*?)(<\/h2>)/i,
       `$1${rankTitle}$3`,
@@ -132,7 +317,11 @@ function applyAssetReplacements(
     .replace(/(<div class="circle-inner-mask">)\d+%?(<\/div>)/i, `$1${progress.percent}%$2`)
     .replace(/(<strong>)\d+(<span[^>]*>\/28<\/span><\/strong>)/i, `$1${progress.modulesDone}$2`)
     .replace(/(<strong>)\d+(<span[^>]*>\/250<\/span><\/strong>)/i, `$1${progress.lessonsDone}$2`)
-    .replace(/(<strong>)\d+(<span[^>]*>\/78<\/span><\/strong>)/i, `$1${progress.cardsDone}$2`);
+    .replace(/(<strong>)\d+(<span[^>]*>\/78<\/span><\/strong>)/i, `$1${progress.cardsDone}$2`)
+    .replace(
+      /<div class="mini-cards-row-flex">[\s\S]*?<\/div>(\s*<button class="btn-action-trigger">Ver todas las cartas<\/button>)/i,
+      `<div class="mini-cards-row-flex">${reviewCardsHtml}</div>$1`,
+    );
 }
 
 async function resolvePreviewUser() {
@@ -140,16 +329,21 @@ async function resolvePreviewUser() {
 
   if (!currentUser) {
     return {
+      userId: null as string | null,
       displayName: "CodexKhael.app",
       sexo: null as string | null,
-      nivel: 12,
+      nivel: 1,
+      totalXp: 0,
+      currentStreak: 0,
+      rankTitle: "Iniciado",
+      progressPercent: 1,
     };
   }
 
   const [profile, userRow] = await Promise.all([
     prisma.userProfile.findUnique({
       where: { userId: currentUser.id },
-      select: { displayName: true, sexo: true, level: true },
+      select: { displayName: true, sexo: true, level: true, currentLevel: true, totalXp: true, currentStreak: true },
     }),
     prisma.user.findUnique({
       where: { id: currentUser.id },
@@ -159,10 +353,25 @@ async function resolvePreviewUser() {
 
   const fallbackName = userRow?.name?.trim() || userRow?.email?.split("@")[0] || "CodexKhael.app";
 
+  const totalXp = profile?.totalXp ?? 0;
+  const levelResolved = await resolveLevelByXp(totalXp);
+  const currentLevel = profile?.currentLevel ?? profile?.level ?? levelResolved.level;
+  const xpCurrentLevel = levelResolved.requiredTotalXp;
+  const xpNextLevel = levelResolved.nextLevelRequiredXp;
+  const progressPercent =
+    xpNextLevel > xpCurrentLevel
+      ? Math.round((Math.max(0, totalXp - xpCurrentLevel) / Math.max(1, xpNextLevel - xpCurrentLevel)) * 100)
+      : 100;
+
   return {
+    userId: currentUser.id,
     displayName: profile?.displayName?.trim() || fallbackName,
     sexo: profile?.sexo ?? null,
-    nivel: profile?.level ?? 12,
+    nivel: currentLevel,
+    totalXp,
+    currentStreak: profile?.currentStreak ?? 0,
+    rankTitle: levelResolved.title,
+    progressPercent,
   };
 }
 
@@ -174,8 +383,9 @@ export default async function DashboardPreviewPage() {
   const avatarName = getAvatarByLevel(previewUser.sexo, previewUser.nivel);
   const avatarSrc = `/assets/avatar/${avatarName}.png`;
   const logoSrc = "/assets/logo/logo-codex.png";
-  const rankTitle = getRankByLevel(previewUser.nivel, previewUser.sexo);
-  const progress = getProgressByLevel(previewUser.nivel);
+  const rankTitle = previewUser.rankTitle || getRankByLevel(previewUser.nivel, previewUser.sexo);
+  const progress = getProgressByPercent(previewUser.progressPercent);
+  const reviewCards = await resolveReviewCards(previewUser.userId);
 
   const replacedBody = applyAssetReplacements(
     body,
@@ -184,70 +394,87 @@ export default async function DashboardPreviewPage() {
     previewUser.displayName,
     previewUser.nivel,
     rankTitle,
+    previewUser.currentStreak,
     progress,
+    reviewCards,
   );
-  const { contentInner } = extractSections(replacedBody);
+  const { mainInner } = extractSections(replacedBody);
 
-  const adjustedCss =
-    css
-      .replace(/body\s*\{/g, ".dashboardShell {")
-      .replace(
-        /background:\s*conic-gradient\(var\(--gold\)\s*0%\s*\d+%,\s*#18142c\s*\d+%\s*100%\);/i,
-        `background: conic-gradient(var(--gold) 0% ${progress.percent}%, #18142c ${progress.percent}% 100%);`,
-      )
-      .replace(
-        /(\.horizontal-bar-fill\s*\{[\s\S]*?width:\s*)\d+%/i,
-        `$1${progress.percent}%`,
-      ) +
+  const adjustedCss = css
+    .replace(
+      /background:\s*conic-gradient\(var\(--gold\)\s*0%\s*\d+%,\s*#18142c\s*\d+%\s*100%\);/i,
+      `background: conic-gradient(var(--gold) 0% ${progress.percent}%, #18142c ${progress.percent}% 100%);`,
+    )
+    .replace(/(\.horizontal-bar-fill\s*\{[\s\S]*?width:\s*)\d+%/i, `$1${progress.percent}%`) +
     `
-    .dashboardShell {
-      padding-left: 260px !important;
-      width: 100vw !important;
-    }
+      main {
+        padding: 10px 15px;
+      }
 
-    .dashboardShell > .content-container {
-      width: calc(100vw - 260px) !important;
-      min-width: 0 !important;
-      margin-left: 0 !important;
-    }
+      .logo-symbol-img {
+        width: 180px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+        object-fit: contain;
+      }
 
-    main {
-      padding: 10px 15px;
-    }
+      .user-mini-avatar-img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center 22%;
+        border-radius: 50%;
+      }
 
-    .logo-symbol-img {
-      width: 180px;
-      max-width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
-    }
+      .avatar-img {
+        overflow: hidden;
+        position: relative;
+      }
 
-    .user-mini-avatar-img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      object-position: center 22%;
-      border-radius: 50%;
-    }
+      .avatar-photo {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center 22%;
+        transform: scale(1.55);
+        transform-origin: center 22%;
+        border-radius: 50%;
+      }
 
-    .avatar-img {
-      overflow: hidden;
-      position: relative;
-    }
+      .repaso-card-symbol {
+        width: 100%;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 2px;
+      }
 
-    .avatar-photo {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      object-position: center 22%;
-      transform: scale(1.55);
-      transform-origin: center 22%;
-      border-radius: 50%;
-    }
-  `;
+      .repaso-card-image {
+        width: 88%;
+        aspect-ratio: 0.68;
+        border-radius: 7px;
+        object-fit: cover;
+        border: 1px solid rgba(197, 168, 128, 0.3);
+      }
+
+      .repaso-card-name {
+        margin: 6px 0 4px;
+        padding: 0 4px;
+        color: #d8d2e4;
+        font-size: 10px;
+        line-height: 1.2;
+        text-align: center;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 24px;
+      }
+    `;
 
   return (
     <>
@@ -258,16 +485,10 @@ export default async function DashboardPreviewPage() {
         rel="stylesheet"
       />
 
-      <style dangerouslySetInnerHTML={{ __html: adjustedCss }} />
-
-      <div className="dashboardShell">
-        <DashboardSidebar logoSrc={logoSrc} activeKey="inicio" footerMessage={`Nivel ${previewUser.nivel}: ${rankTitle}`} />
-        <main
-          className="content-container mainContent"
-          style={{ width: "calc(100vw - 260px)", minWidth: 0, marginLeft: 0 }}
-          dangerouslySetInnerHTML={{ __html: contentInner }}
-        />
+      <div style={{ flex: 1, minHeight: 0, display: "flex", overflow: "hidden" }}>
+        <PreviewShadowContent css={adjustedCss} html={mainInner} />
       </div>
     </>
   );
 }
+

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PanelShellGate } from "@/app/components/panel-shell-gate";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,8 +18,9 @@ export default function RootLayout({
       <head>
         <meta charSet="UTF-8" />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <PanelShellGate>{children}</PanelShellGate>
+      </body>
     </html>
   );
 }
-

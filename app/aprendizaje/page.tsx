@@ -1,6 +1,5 @@
 ﻿import Link from "next/link";
 import { redirect } from "next/navigation";
-import { DashboardShell } from "@/app/components/dashboard-shell";
 import { getCurrentUser } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
 import { orientationLabel } from "@/lib/aprendizaje/quiz-engine";
@@ -43,7 +42,7 @@ function orientationToEs(value: string): string {
 export default async function AprendizajePage() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/login");
+    redirect("/login?next=/aprendizaje");
   }
 
   const cardMap = new Map(tarotCards.map((card) => [card.id, card]));
@@ -119,8 +118,7 @@ export default async function AprendizajePage() {
       : 0;
 
   return (
-    <DashboardShell activeKey="repaso">
-      <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
+    <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
         <section className={styles.learningLayout}>
           <section className={styles.leftArea}>
             <section className={styles.topStrip}>
@@ -250,6 +248,6 @@ export default async function AprendizajePage() {
           </aside>
         </section>
       </main>
-    </DashboardShell>
   );
 }
+

@@ -1,0 +1,18 @@
+
+> codexkhael@0.1.0 dev
+> next dev -p 4019
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:4019
+- Network:       http://192.168.18.194:4019
+- Environments: .env.local, .env
+✓ Ready in 421ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          65024
+- Dir:          D:\FUENTES - CODIGO\3. PROPIOS\codexkhael\codexkhael
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 65024 /F to stop it.
+[?25h

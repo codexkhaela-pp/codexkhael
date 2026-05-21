@@ -18,8 +18,9 @@ export function middleware(request: NextRequest) {
   const authenticated = isSessionAuthenticated(cookieValue);
 
   if (AUTH_API_PATHS.has(pathname) || isPublicPath(pathname)) {
-    if (authenticated && pathname === "/login") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    const hasNextParam = request.nextUrl.searchParams.has("next");
+    if (authenticated && pathname === "/login" && !hasNextParam) {
+      return NextResponse.redirect(new URL("/dashboard-preview", request.url));
     }
     return NextResponse.next();
   }

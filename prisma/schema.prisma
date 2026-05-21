@@ -82,6 +82,30 @@ enum LearningOrientationScope {
   BOTH
 }
 
+enum XpSourceType {
+  CHALLENGE_COMPLETED
+  QUIZ_COMPLETED
+  COURSE_LESSON_COMPLETED
+  JOURNAL_ENTRY_CREATED
+  STREAK_BONUS
+  MANUAL_ADJUSTMENT
+}
+
+enum ChallengeType {
+  DAILY
+  GUIDED
+  COMPLETE_CARD
+  ERROR_DETECTION
+  VEIL_READING
+  HARD_DECISION
+}
+
+enum ChallengeAttemptStatus {
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
 model User {
   id              String              @id @default(uuid()) @db.Uuid
   name            String?
@@ -100,6 +124,8 @@ model User {
   profile         UserProfile?
   learningSessions LearningQuizSession[]
   learningProgress CardLearningProgress[]
+  xpTransactions   UserXpTransaction[]
+  challengeAttempts UserChallengeAttempt[]
 
   @@index([email])
 }
@@ -112,12 +138,125 @@ model UserProfile {
   avatarType     String?
   level          Int      @default(1)
   learningStreak Int      @default(0)
+  totalXp        Int      @default(0)
+  currentLevel   Int      @default(1)
+  currentStreak  Int      @default(0)
+  bestStreak     Int      @default(0)
+  lastStreakDate DateTime?
+  timezone       String   @default("America/Lima")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model LevelConfig {
+  id              String   @id @default(uuid()) @db.Uuid
+  level           Int      @unique
+  requiredTotalXp Int
+  title           String
+  description     String   @db.Text
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([isActive, level])
+}
+
+model UserXpTransaction {
+  id         String       @id @default(uuid()) @db.Uuid
+  userId     String       @db.Uuid
+  sourceType XpSourceType
+  sourceId   String?
+  xpAmount   Int
+  reason     String?      @db.Text
+  createdAt  DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([sourceType, sourceId])
+}
+
+model Challenge {
+  id           String        @id @default(uuid()) @db.Uuid
+  type         ChallengeType
+  title        String
+  description  String        @db.Text
+  difficulty   String
+  baseXp       Int
+  isDaily      Boolean       @default(false)
+  isRepeatable Boolean       @default(true)
+  maxDailyXp   Int?
+  activeFrom   DateTime?
+  activeTo     DateTime?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  questions ChallengeQuestion[]
+  attempts  UserChallengeAttempt[]
+
+  @@index([isActive, type])
+  @@index([isDaily, isActive])
+}
+
+model ChallengeQuestion {
+  id            String   @id @default(uuid()) @db.Uuid
+  challengeId   String   @db.Uuid
+  cardsJson     Json
+  questionText  String   @db.Text
+  optionsJson   Json
+  correctAnswer String   @db.Text
+  explanation   String   @db.Text
+  order         Int      @map("order_index")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  answers   UserChallengeAnswer[]
+
+  @@index([challengeId, order])
+}
+
+model UserChallengeAttempt {
+  id           String                @id @default(uuid()) @db.Uuid
+  userId       String                @db.Uuid
+  challengeId  String                @db.Uuid
+  startedAt    DateTime              @default(now())
+  completedAt  DateTime?
+  status       ChallengeAttemptStatus @default(IN_PROGRESS)
+  score        Float                 @default(0)
+  correctCount Int                   @default(0)
+  incorrectCount Int                 @default(0)
+  earnedXp     Int                   @default(0)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge             @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  answers   UserChallengeAnswer[]
+
+  @@index([userId, startedAt])
+  @@index([challengeId, status])
+}
+
+model UserChallengeAnswer {
+  id            String   @id @default(uuid()) @db.Uuid
+  attemptId     String   @db.Uuid
+  questionId    String   @db.Uuid
+  selectedAnswer String  @db.Text
+  isCorrect     Boolean
+  answeredAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  attempt  UserChallengeAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question ChallengeQuestion    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId, answeredAt])
 }
 
 model LearningQuizSession {

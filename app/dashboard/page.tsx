@@ -1,4 +1,8 @@
 ﻿import { Cinzel, Inter, Playfair_Display } from "next/font/google";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth-server";
+import { prisma } from "@/lib/prisma";
+import { resolveLevelByXp } from "@/lib/xp/service";
 import styles from "./dashboard.module.css";
 
 const cinzel = Cinzel({
@@ -21,22 +25,22 @@ const playfair = Playfair_Display({
 });
 
 const navItems = [
-  { label: "Inicio", icon: "🔮", active: true },
-  { label: "Cursos", icon: "📖" },
-  { label: "Cartas", icon: "🃏" },
-  { label: "Tiradas", icon: "🗺" },
-  { label: "Bitácora", icon: "✍" },
-  { label: "Repaso", icon: "🔄" },
-  { label: "Desafíos", icon: "🏆" },
-  { label: "Comunidad", icon: "👥" },
-  { label: "Recursos", icon: "📂" },
-  { label: "Ajustes", icon: "⚙" },
+  { label: "Inicio", icon: "??", active: true },
+  { label: "Cursos", icon: "??" },
+  { label: "Cartas", icon: "??" },
+  { label: "Tiradas", icon: "??" },
+  { label: "Bitácora", icon: "?" },
+  { label: "Repaso", icon: "??" },
+  { label: "Desafíos", icon: "??" },
+  { label: "Comunidad", icon: "??" },
+  { label: "Recursos", icon: "??" },
+  { label: "Ajustes", icon: "?" },
 ];
 
 const practices = [
-  { icon: "⚔️", title: "Tirada de la Cruz Celta", sub: "Práctica libre", date: "12 Nov" },
-  { icon: "❤️", title: "Tirada de 3 Cartas", sub: "Amor y Relaciones", date: "10 Nov" },
-  { icon: "✨", title: "Tirada Si o No", sub: "Pregunta concreta", date: "8 Nov" },
+  { icon: "??", title: "Tirada de la Cruz Celta", sub: "Práctica libre", date: "12 Nov" },
+  { icon: "??", title: "Tirada de 3 Cartas", sub: "Amor y Relaciones", date: "10 Nov" },
+  { icon: "?", title: "Tirada Si o No", sub: "Pregunta concreta", date: "8 Nov" },
 ];
 
 const quickActions = [
@@ -51,7 +55,42 @@ export const metadata = {
   description: "Dashboard Codex Khael",
 };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    redirect("/login");
+  }
+
+  const [profile, userRow] = await Promise.all([
+    prisma.userProfile.findUnique({
+      where: { userId: currentUser.id },
+      select: {
+        displayName: true,
+        totalXp: true,
+        currentLevel: true,
+        level: true,
+        currentStreak: true,
+      },
+    }),
+    prisma.user.findUnique({
+      where: { id: currentUser.id },
+      select: { name: true, email: true },
+    }),
+  ]);
+
+  const totalXp = profile?.totalXp ?? 0;
+  const levelConfig = await resolveLevelByXp(totalXp);
+  const currentLevel = profile?.currentLevel ?? profile?.level ?? levelConfig.level;
+  const currentStreak = profile?.currentStreak ?? 0;
+  const displayName = profile?.displayName?.trim() || userRow?.name?.trim() || userRow?.email?.split("@")[0] || "CodexKhael.app";
+
+  const currentRangeXp = levelConfig.requiredTotalXp;
+  const nextRangeXp = levelConfig.nextLevelRequiredXp;
+  const progressPercent =
+    nextRangeXp > currentRangeXp
+      ? Math.round((Math.max(0, totalXp - currentRangeXp) / Math.max(1, nextRangeXp - currentRangeXp)) * 100)
+      : 100;
+
   return (
     <div className={`${styles.dashboardViewport} ${cinzel.variable} ${inter.variable} ${playfair.variable}`}>
       <aside className={styles.sidebar}>
@@ -83,14 +122,14 @@ export default function DashboardPage() {
 
       <div className={styles.contentContainer}>
         <header className={styles.topHeader}>
-          <button className={styles.menuToggleBtn} type="button">☰</button>
+          <button className={styles.menuToggleBtn} type="button">?</button>
           <div className={styles.headerRight}>
-            <button className={styles.headerIcon} type="button">🔍</button>
+            <button className={styles.headerIcon} type="button">??</button>
             <button className={styles.headerIcon} type="button">
-              🔔
+              ??
               <span className={styles.notifBadge}>3</span>
             </button>
-            <div className={styles.userMiniAvatar}>🌙</div>
+            <div className={styles.userMiniAvatar}>??</div>
           </div>
         </header>
 
@@ -98,13 +137,13 @@ export default function DashboardPage() {
           <section className={styles.welcomeBanner}>
             <div className={styles.userProfile}>
               <div className={styles.avatarContainer}>
-                <div className={styles.avatarImg}>🔮</div>
-                <div className={styles.levelBadge}>NIVEL 12</div>
+                <div className={styles.avatarImg}>??</div>
+                  <div className={styles.levelBadge}>NIVEL {currentLevel}</div>
               </div>
 
               <div className={styles.welcomeText}>
                 <h2>Bienvenida de nuevo,</h2>
-                <h1>Elara Vance</h1>
+                <h1>{displayName}</h1>
                 <p>Sigue tu camino. Cada carta es una enseñanza.</p>
               </div>
             </div>
@@ -122,8 +161,8 @@ export default function DashboardPage() {
             <div className={styles.streakCard}>
               <span>Racha de Aprendizaje</span>
               <div className={styles.streakNumber}>
-                <i className={styles.streakFire}>🔥</i>
-                19
+                <i className={styles.streakFire}>??</i>
+                {currentStreak}
                 <span className={styles.streakUnit}>días</span>
               </div>
               <div className={styles.streakProgressContainer}>
@@ -134,16 +173,16 @@ export default function DashboardPage() {
 
           <section className={styles.dashboardGrid}>
             <article className={styles.card}>
-              <div className={styles.cardTitle}>📊 Mi Progreso</div>
+              <div className={styles.cardTitle}>?? Mi Progreso</div>
               <div>
                 <div className={styles.progressContentWrapper}>
                   <div className={styles.progressTextBlock}>
                     <h3>Nivel actual</h3>
-                    <h2>Arcana Mayor</h2>
+                    <h2>{levelConfig.title}</h2>
                   </div>
                   <div className={styles.circleProgressBox}>
                     <div className={styles.circleVisualRender}>
-                      <div className={styles.circleInnerMask}>65%</div>
+                      <div className={styles.circleInnerMask}>{progressPercent}%</div>
                     </div>
                   </div>
                 </div>
@@ -162,7 +201,7 @@ export default function DashboardPage() {
             </article>
 
             <article className={styles.card}>
-              <div className={styles.cardTitle}>🃏 Mis Prácticas Recientes</div>
+              <div className={styles.cardTitle}>?? Mis Prácticas Recientes</div>
               <div className={styles.practiceItemsStack}>
                 {practices.map((practice) => (
                   <div key={practice.title} className={styles.practiceNode}>
@@ -181,7 +220,7 @@ export default function DashboardPage() {
             </article>
 
             <article className={styles.card}>
-              <div className={styles.cardTitle}>✍ Mi Bitácora</div>
+              <div className={styles.cardTitle}>? Mi Bitácora</div>
               <div className={styles.parchmentContainer}>
                 <div className={styles.parchmentContent}>
                   <span>Última entrada • 12 Nov</span>
@@ -190,7 +229,7 @@ export default function DashboardPage() {
                 </div>
                 <div className={styles.tarotCardRightMock}>
                   <div className={styles.cardMockTitle}>XVII</div>
-                  <div className={styles.cardMockArt}>⭐</div>
+                  <div className={styles.cardMockArt}>?</div>
                   <div className={styles.cardMockTitle}>Estrella</div>
                 </div>
               </div>
@@ -200,18 +239,18 @@ export default function DashboardPage() {
 
           <section className={styles.bottomLayoutGrid}>
             <article className={styles.card}>
-              <div className={styles.cardTitle}>🔄 Cartas para Repasar</div>
+              <div className={styles.cardTitle}>?? Cartas para Repasar</div>
               <div className={styles.miniCardsRowFlex}>
-                <div className={styles.repasoNodeCard}><div className={styles.repasoCardSymbol}>🗼</div><span className={styles.statusIndicator}><i className={`${styles.dot} ${styles.dotRed}`} />Mal</span></div>
-                <div className={styles.repasoNodeCard}><div className={styles.repasoCardSymbol}>👑</div><span className={styles.statusIndicator}><i className={`${styles.dot} ${styles.dotOrange}`} />Ver</span></div>
-                <div className={styles.repasoNodeCard}><div className={styles.repasoCardSymbol}>🌙</div><span className={styles.statusIndicator}><i className={`${styles.dot} ${styles.dotOrange}`} />Ver</span></div>
-                <div className={styles.repasoNodeCard}><div className={styles.repasoCardSymbol}>⚖️</div><span className={styles.statusIndicator}><i className={`${styles.dot} ${styles.dotGreen}`} />OK</span></div>
+                <div className={styles.repasoNodeCard}><div className={styles.repasoCardSymbol}>??</div><span className={styles.statusIndicator}><i className={`${styles.dot} ${styles.dotRed}`} />Mal</span></div>
+                <div className={styles.repasoNodeCard}><div className={styles.repasoCardSymbol}>??</div><span className={styles.statusIndicator}><i className={`${styles.dot} ${styles.dotOrange}`} />Ver</span></div>
+                <div className={styles.repasoNodeCard}><div className={styles.repasoCardSymbol}>??</div><span className={styles.statusIndicator}><i className={`${styles.dot} ${styles.dotOrange}`} />Ver</span></div>
+                <div className={styles.repasoNodeCard}><div className={styles.repasoCardSymbol}>??</div><span className={styles.statusIndicator}><i className={`${styles.dot} ${styles.dotGreen}`} />OK</span></div>
               </div>
               <button type="button" className={styles.btnActionTrigger}>Ver todas las cartas</button>
             </article>
 
             <article className={styles.card}>
-              <div className={styles.cardTitle}>⚡ Accesos Rapidos</div>
+              <div className={styles.cardTitle}>? Accesos Rapidos</div>
               <div className={styles.quickActionsQuad}>
                 {quickActions.map((action) => (
                   <div key={action.title} className={styles.actionNode}>
@@ -224,7 +263,7 @@ export default function DashboardPage() {
             </article>
 
             <article className={styles.card}>
-              <div className={styles.cardTitle}>✨ Mi Próximo Desafio</div>
+              <div className={styles.cardTitle}>? Mi Próximo Desafio</div>
               <div className={styles.challengeContainerBox}>
                 <span className={styles.challengeSub}>Desafio Semanal</span>
                 <h3>Interpretación Intuitiva</h3>
@@ -237,11 +276,15 @@ export default function DashboardPage() {
           </section>
 
           <footer className={styles.footerArea}>
-            <p><span className={styles.decorativeStar}>✦</span>"No necesitas memorizar el tarot, necesitas comprender el lenguaje del alma."<span className={styles.decorativeStar}>✦</span></p>
+            <p><span className={styles.decorativeStar}>?</span>"No necesitas memorizar el tarot, necesitas comprender el lenguaje del alma."<span className={styles.decorativeStar}>?</span></p>
           </footer>
         </main>
       </div>
     </div>
   );
 }
+
+
+
+
 

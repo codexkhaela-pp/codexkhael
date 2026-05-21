@@ -1,6 +1,5 @@
 ﻿import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { DashboardShell } from "@/app/components/dashboard-shell";
 import { DashboardPageHeader } from "@/app/components/dashboard-page-header";
 import { getCurrentUser } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
@@ -86,8 +85,7 @@ export default async function AprendizajeResultadosPage({ params }: ResultsPageP
     session.scorePercent >= 90 ? "Excelente precisión" : session.scorePercent >= 75 ? "Buen rendimiento" : "Necesita refuerzo";
 
   return (
-    <DashboardShell activeKey="repaso">
-      <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
+    <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
         <DashboardPageHeader
           kicker="Aprendizaje"
           title="Resultados de sesión"
@@ -259,6 +257,6 @@ export default async function AprendizajeResultadosPage({ params }: ResultsPageP
           </aside>
         </section>
       </main>
-    </DashboardShell>
   );
 }
+

@@ -35,20 +35,20 @@ const suitMeaningMap: Record<TarotCard["suit"], SuitMeaningProfile> = {
         direct: "estÃ¡s frente a una decisiÃ³n de fondo que no se resuelve con evasiÃ³n",
       },
       reversed: {
-        mystic: "la energÃ­a del ciclo aparece trabada y pide revisar dÃ³nde te resistes",
-        psychological: "aparece un patrÃ³n interno que aÃºn no termina de integrarse",
+        mystic: "la energía del ciclo aparece trabada y pide revisar dónde te resistes",
+        psychological: "aparece un patrón interno que aún no termina de integrarse",
         direct: "sigues repitiendo el mismo punto y necesitas cortar ese bucle",
       },
     },
     challenge: {
       upright: {
-        mystic: "el reto es sostener la lecciÃ³n sin perder centro",
+        mystic: "el reto es sostener la lección sin perder centro",
         psychological: "el bloqueo aparece cuando dudas de lo que ya sabes",
-        direct: "el problema es no comprometerte con la decisiÃ³n que ya viste",
+        direct: "el problema es no comprometerte con la decisión que ya viste",
       },
       reversed: {
-        mystic: "el bloqueo nace de resistir una transformaciÃ³n necesaria",
-        psychological: "el obstÃ¡culo estÃ¡ en evitar una verdad que ya es evidente",
+        mystic: "el bloqueo nace de resistir una transformación necesaria",
+        psychological: "el obstáculo está en evitar una verdad que ya es evidente",
         direct: "dejas pendiente lo importante y eso te detiene",
       },
     },
@@ -56,7 +56,7 @@ const suitMeaningMap: Record<TarotCard["suit"], SuitMeaningProfile> = {
       upright: {
         mystic: "el consejo es honrar el proceso y actuar con consciencia",
         psychological: "te conviene integrar lo aprendido y actuar desde claridad",
-        direct: "toma una decisiÃ³n firme y sostenla con disciplina",
+        direct: "toma una decisión firme y sostenla con disciplina",
       },
       reversed: {
         mystic: "el consejo es pausar, observar y reordenar antes de avanzar",
@@ -68,33 +68,33 @@ const suitMeaningMap: Record<TarotCard["suit"], SuitMeaningProfile> = {
   wands: {
     context: {
       upright: {
-        mystic: "hay una fuerza de expansiÃ³n que quiere abrir nuevos caminos",
+        mystic: "hay una fuerza de expansión que quiere abrir nuevos caminos",
         psychological: "surge impulso para avanzar y recuperar iniciativa",
-        direct: "tienes energÃ­a para moverte y crecer",
+        direct: "tienes energía para moverte y crecer",
       },
       reversed: {
-        mystic: "la energÃ­a de avance se encuentra contenida y todavÃ­a no fluye del todo",
-        psychological: "hay frustraciÃ³n por querer avanzar sin sentir direcciÃ³n firme",
-        direct: "estÃ¡s empujando, pero el movimiento no termina de responder",
+        mystic: "la energía de avance se encuentra contenida y todavía no fluye del todo",
+        psychological: "hay frustración por querer avanzar sin sentir dirección firme",
+        direct: "estás empujando, pero el movimiento no termina de responder",
       },
     },
     challenge: {
       upright: {
         mystic: "el bloqueo aparece al dispersar tu fuego en demasiados frentes",
-        psychological: "el obstÃ¡culo estÃ¡ en la impaciencia por resultados",
+        psychological: "el obstáculo está en la impaciencia por resultados",
         direct: "el problema es querer todo al mismo tiempo",
       },
       reversed: {
-        mystic: "el camino se frena por expectativas que aÃºn no tienen base",
+        mystic: "el camino se frena por expectativas que aún no tienen base",
         psychological: "el bloqueo surge al esperar avance sin una estructura clara",
         direct: "esperas resultados antes de ordenar lo esencial",
       },
     },
     advice: {
       upright: {
-        mystic: "el consejo es canalizar tu energÃ­a en una direcciÃ³n concreta",
-        psychological: "elige una prioridad y sostÃ©nla con constancia",
-        direct: "enfÃ³cate en una sola lÃ­nea y ejecÃºtala",
+        mystic: "el consejo es canalizar tu energía en una dirección concreta",
+        psychological: "elige una prioridad y sosténla con constancia",
+        direct: "enfócate en una sola línea y ejecútala",
       },
       reversed: {
         mystic: "el consejo es contener el impulso y recuperar rumbo",
@@ -107,37 +107,37 @@ const suitMeaningMap: Record<TarotCard["suit"], SuitMeaningProfile> = {
     context: {
       upright: {
         mystic: "la lectura muestra sensibilidad abierta y necesidad de conexiÃ³n autÃ©ntica",
-        psychological: "hay una emociÃ³n disponible que quiere expresarse con honestidad",
+        psychological: "hay una emoción disponible que quiere expresarse con honestidad",
         direct: "lo emocional es central y no conviene ignorarlo",
       },
       reversed: {
-        mystic: "la energÃ­a afectiva aparece desajustada y pide contenciÃ³n",
-        psychological: "hay saturaciÃ³n emocional o dificultad para nombrar lo que sientes",
-        direct: "estÃ¡s cargando demasiado por dentro y eso nubla tu decisiÃ³n",
+        mystic: "la energía afectiva aparece desajustada y pide contención",
+        psychological: "hay saturación emocional o dificultad para nombrar lo que sientes",
+        direct: "estás cargando demasiado por dentro y eso nubla tu decisión",
       },
     },
     challenge: {
       upright: {
-        mystic: "el bloqueo estÃ¡ en confundir sensibilidad con dependencia",
-        psychological: "el obstÃ¡culo aparece cuando priorizas agradar antes que cuidarte",
+        mystic: "el bloqueo está en confundir sensibilidad con dependencia",
+        psychological: "el obstáculo aparece cuando priorizas agradar antes que cuidarte",
         direct: "te frenas por complacer y postergarte",
       },
       reversed: {
-        mystic: "el bloqueo nace de un desborde emocional que pide lÃ­mite",
-        psychological: "el reto es regular la emociÃ³n antes de actuar",
-        direct: "si decides desde el desborde, te desordenas mÃ¡s",
+        mystic: "el bloqueo nace de un desborde emocional que pide límite",
+        psychological: "el reto es regular la emoción antes de actuar",
+        direct: "si decides desde el desborde, te desordenas más",
       },
     },
     advice: {
       upright: {
         mystic: "el consejo es escuchar tu mundo interno sin dramatizarlo",
-        psychological: "nombra lo que sientes y define lÃ­mites sanos",
-        direct: "sÃ© claro con lo que sientes y cuida tu energÃ­a",
+        psychological: "nombra lo que sientes y define límites sanos",
+        direct: "sé claro con lo que sientes y cuida tu energía",
       },
       reversed: {
         mystic: "el consejo es cerrar fugas emocionales y volver al centro",
         psychological: "primero regula, luego conversa o decide",
-        direct: "pon lÃ­mite, estabiliza y despuÃ©s actÃºa",
+        direct: "pon límite, estabiliza y después actúa",
       },
     },
   },
@@ -145,32 +145,32 @@ const suitMeaningMap: Record<TarotCard["suit"], SuitMeaningProfile> = {
     context: {
       upright: {
         mystic: "la lectura trae claridad mental y verdad que quiere salir a la luz",
-        psychological: "hay lucidez para observar el patrÃ³n con objetividad",
-        direct: "ya tienes informaciÃ³n suficiente para decidir",
+        psychological: "hay lucidez para observar el patrón con objetividad",
+        direct: "ya tienes información suficiente para decidir",
       },
       reversed: {
-        mystic: "la mente estÃ¡ cargada y la energÃ­a se fragmenta en exceso",
-        psychological: "aparece ruido mental que dificulta ver con precisiÃ³n",
-        direct: "estÃ¡s pensando demasiado y actuando poco",
+        mystic: "la mente está cargada y la energía se fragmenta en exceso",
+        psychological: "aparece ruido mental que dificulta ver con precisión",
+        direct: "estás pensando demasiado y actuando poco",
       },
     },
     challenge: {
       upright: {
-        mystic: "el bloqueo surge cuando la lÃ³gica se vuelve rigidez",
-        psychological: "el obstÃ¡culo estÃ¡ en controlar todo desde la mente",
+        mystic: "el bloqueo surge cuando la lógica se vuelve rigidez",
+        psychological: "el obstáculo está en controlar todo desde la mente",
         direct: "te trabas por sobreanalizar",
       },
       reversed: {
-        mystic: "el reto se intensifica por confusiÃ³n y diÃ¡logo interno agotador",
-        psychological: "el bloqueo estÃ¡ en la rumiaciÃ³n y el juicio interno",
+        mystic: "el reto se intensifica por confusión y diálogo interno agotador",
+        psychological: "el bloqueo está en la rumiación y el juicio interno",
         direct: "si sigues dando vueltas, no avanzas",
       },
     },
     advice: {
       upright: {
-        mystic: "el consejo es elegir verdad y actuar con precisiÃ³n",
+        mystic: "el consejo es elegir verdad y actuar con precisión",
         psychological: "ordena ideas, reduce ruido y define el siguiente paso real",
-        direct: "decide una acciÃ³n concreta y ejecÃºtala hoy",
+        direct: "decide una acción concreta y ejecútala hoy",
       },
       reversed: {
         mystic: "el consejo es silenciar el exceso mental antes de actuar",
@@ -182,36 +182,36 @@ const suitMeaningMap: Record<TarotCard["suit"], SuitMeaningProfile> = {
   pentacles: {
     context: {
       upright: {
-        mystic: "la energÃ­a busca arraigo, estructura y estabilidad sostenible",
-        psychological: "hay base prÃ¡ctica para construir con calma",
+        mystic: "la energía busca arraigo, estructura y estabilidad sostenible",
+        psychological: "hay base práctica para construir con calma",
         direct: "tienes recursos para ordenar y sostener",
       },
       reversed: {
-        mystic: "la estabilidad aparente aÃºn no termina de enraizarse",
-        psychological: "por fuera hay orden, pero internamente la base se siente frÃ¡gil",
-        direct: "te falta base firme y eso estÃ¡ frenando el avance",
+        mystic: "la estabilidad aparente aún no termina de enraizarse",
+        psychological: "por fuera hay orden, pero internamente la base se siente frágil",
+        direct: "te falta base firme y eso está frenando el avance",
       },
     },
     challenge: {
       upright: {
-        mystic: "el bloqueo estÃ¡ en aferrarte a lo seguro por temor al cambio",
-        psychological: "el obstÃ¡culo aparece cuando controlas de mÃ¡s por inseguridad",
+        mystic: "el bloqueo está en aferrarte a lo seguro por temor al cambio",
+        psychological: "el obstáculo aparece cuando controlas de más por inseguridad",
         direct: "te trabas por querer garantizar todo antes de moverte",
       },
       reversed: {
-        mystic: "el reto surge por desorden de recursos y pÃ©rdida de centro material",
-        psychological: "el bloqueo estÃ¡ en la falta de estructura sostenida",
-        direct: "sin orden prÃ¡ctico, el crecimiento se corta",
+        mystic: "el reto surge por desorden de recursos y pérdida de centro material",
+        psychological: "el bloqueo está en la falta de estructura sostenida",
+        direct: "sin orden práctica, el crecimiento se corta",
       },
     },
     advice: {
       upright: {
-        mystic: "el consejo es proteger recursos, consolidar base y avanzar desde ahÃ­",
-        psychological: "primero ordena, preserva energÃ­a y recupera estabilidad",
-        direct: "ordena lo bÃ¡sico, protege lo que tienes y luego crece",
+        mystic: "el consejo es proteger recursos, consolidar base y avanzar desde ahí",
+        psychological: "primero ordena, preserva energía y recupera estabilidad",
+        direct: "ordena lo básico, protege lo que tienes y luego crece",
       },
       reversed: {
-        mystic: "el consejo es soltar el miedo a perder y reequilibrar tu sostÃ©n",
+        mystic: "el consejo es soltar el miedo a perder y reequilibrar tu sostén",
         psychological: "necesitas flexibilizar control y reorganizar prioridades",
         direct: "deja el apego, corrige el orden y retoma control real",
       },
@@ -223,26 +223,26 @@ const cardMeaningMap: Record<string, CardMeaningOverride> = {
   "pentacles-09": {
     context: {
       upright: {
-        mystic: "hay una energÃ­a de autonomÃ­a bien ganada que pide disfrutarse con presencia",
+        mystic: "hay una energía de autonomía bien ganada que pide disfrutarse con presencia",
         psychological: "hay independencia y logros, junto con necesidad de sostenerlos con equilibrio interno",
         direct: "tienes logros, pero debes sostenerlos con orden y realismo",
       },
       reversed: {
-        mystic: "se muestra una estabilidad aparente que todavÃ­a necesita asentarse por dentro",
-        psychological: "aparece inseguridad detrÃ¡s de una imagen de control o autosuficiencia",
-        direct: "parece que todo estÃ¡ bajo control, pero la base sigue inestable",
+        mystic: "se muestra una estabilidad aparente que aún necesita asentarse por dentro",
+        psychological: "aparece inseguridad detrás de una imagen de control o autosuficiencia",
+        direct: "parece que todo está bajo control, pero la base sigue inestable",
       },
     },
   },
   "wands-03": {
     challenge: {
       upright: {
-        mystic: "el paso siguiente se abre cuando confÃ­as en tu expansiÃ³n sin dispersarte",
-        psychological: "el reto estÃ¡ en sostener la visiÃ³n a mediano plazo sin ansiedad",
-        direct: "debes mirar mÃ¡s allÃ¡ del corto plazo y sostener el plan",
+        mystic: "el paso siguiente se abre cuando confí­as en tu expansión sin dispersarte",
+        psychological: "el reto está en sostener la visión a mediano plazo sin ansiedad",
+        direct: "debes mirar más allá del corto plazo y sostener el plan",
       },
       reversed: {
-        mystic: "la expansiÃ³n se detiene porque la energÃ­a aÃºn no estÃ¡ lista para abrir camino",
+        mystic: "la expansión se detiene porque la energía aún no está lista para abrir camino",
         psychological: "el bloqueo aparece al querer resultados sin una base interna suficientemente firme",
         direct: "quieres avanzar, pero todavÃ­a no ordenaste el punto de partida",
       },
@@ -252,13 +252,13 @@ const cardMeaningMap: Record<string, CardMeaningOverride> = {
     advice: {
       upright: {
         mystic: "el consejo es contener antes de expandir: protege tu centro y fortalece tu base",
-        psychological: "te conviene recuperar estructura, lÃ­mites y seguridad antes de exigir avance",
+        psychological: "te conviene recuperar estructura, lí­mites y seguridad antes de exigir avance",
         direct: "no fuerces crecimiento ahora: ordena, protege y estabiliza",
       },
       reversed: {
-        mystic: "el consejo es aflojar la rigidez para que la energÃ­a vuelva a circular",
+        mystic: "el consejo es aflojar la rigidez para que la energía vuelva a circular",
         psychological: "soltar exceso de control te ayudarÃ¡ a recuperar equilibrio",
-        direct: "deja de apretar de mÃ¡s y reorganiza con flexibilidad",
+        direct: "deja de apretar de más y reorganiza con flexibilidad",
       },
     },
   },

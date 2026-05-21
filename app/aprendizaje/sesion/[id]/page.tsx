@@ -1,4 +1,3 @@
-﻿import { DashboardShell } from "@/app/components/dashboard-shell";
 import { DashboardPageHeader } from "@/app/components/dashboard-page-header";
 import { SessionPlayer } from "@/app/aprendizaje/components/session-player";
 import styles from "@/app/aprendizaje/aprendizaje.module.css";
@@ -16,16 +15,14 @@ export default async function AprendizajeSesionPage({ params }: SessionPageProps
   const { id } = await params;
 
   return (
-    <DashboardShell activeKey="repaso">
-      <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
-        <DashboardPageHeader
-          kicker="Aprendizaje"
-          title="Sesión activa"
-          description="Responde cada pregunta considerando orientación al derecho o invertida."
-        />
-        <SessionPlayer sessionId={id} />
-      </main>
-    </DashboardShell>
+    <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
+      <DashboardPageHeader
+        kicker="Aprendizaje"
+        title="Sesión activa"
+        description="Responde cada pregunta considerando orientación al derecho o invertida."
+      />
+      <SessionPlayer sessionId={id} />
+    </main>
   );
 }
 
