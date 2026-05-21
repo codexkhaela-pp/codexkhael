@@ -7,6 +7,7 @@ import { tarotCards, type TarotCard } from "@/src/data/tarotCards";
 import { tarotSpreads } from "@/src/data/tarotSpreads";
 import { SpreadLayout } from "@/app/tiradas/components/spread-layout";
 import type { DrawnCard, ReadingStatus } from "@/app/tiradas/types";
+import { requestAiTarotReading, type AiTarotReadingResponse, type AiTarotReadingRequest } from "@/lib/ai-client";
 
 type ReadingResult = {
   spreadId: string;
@@ -136,6 +137,8 @@ export function SpreadReader() {
   const [readingResult, setReadingResult] = useState<ReadingResult | null>(null);
   const [interpretationTone, setInterpretationTone] = useState<InterpretationTone>("psychological");
   const [aiDepthState, setAiDepthState] = useState<"idle" | "loading" | "ready">("idle");
+  const [aiResponse, setAiResponse] = useState<AiTarotReadingResponse | null>(null);
+  const [aiDepthError, setAiDepthError] = useState<string | null>(null);
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
   const timersRef = useRef<number[]>([]);
@@ -239,43 +242,53 @@ export function SpreadReader() {
     timersRef.current.push(shuffleTimer);
   }
 
-  function handleDepthInterpretation() {
+  async function handleDepthInterpretation() {
     if (aiDepthState === "loading" || !quickInterpretation) {
       return;
     }
 
     setAiDepthState("loading");
+    setAiDepthError(null);
     if (aiDepthTimerRef.current !== null) {
       window.clearTimeout(aiDepthTimerRef.current);
     }
 
-    const payload = {
-      spreadName: selectedSpread.name,
-      question: "Pregunta general",
-      tone: interpretationTone,
-      cards: drawnCards.map((entry, index) => ({
-        positionNumber: index + 1,
-        positionName: typeof entry.position === 'string' ? entry.position : entry.position.label,
-        positionSubtitle: typeof entry.position === 'string' ? '' : entry.position.subtitle,
-        cardName: entry.card.nameEs,
-        arcana: entry.card.arcana,
-        suit: entry.card.suit,
-        isReversed: entry.reversed,
-        orientation: entry.reversed ? 'Invertida' : 'Derecha',
-      })),
+    const payload: AiTarotReadingRequest = {
+      source: "SPREAD",
+      question: null, // Si hubiese input de pregunta, lo enviaríamos aquí
+      spreadType: selectedSpread.name,
       baseInterpretation: {
         summary: quickInterpretation.summary,
-        positionReadings: quickInterpretation.positionReadings,
-        relationships: quickInterpretation.relationships,
-        finalAdvice: quickInterpretation.finalAdvice,
+        cards: quickInterpretation.positionReadings.map((r) => ({
+          name: r.cardName,
+          orientation: r.orientation === "Invertida" ? "REVERSED" : "UPRIGHT",
+          positionName: typeof r.positionName === "string" ? r.positionName : null,
+          interpretation: r.interpretation,
+        })),
+        connections: quickInterpretation.relationships,
+        dominantTone: interpretationTone,
+        blockages: "", // No específico en quickInterpretation actual
+        advice: quickInterpretation.finalAdvice,
       },
+      cards: drawnCards.map((entry, index) => ({
+        cardId: entry.card.id,
+        name: entry.card.nameEs,
+        orientation: entry.reversed ? "REVERSED" : "UPRIGHT",
+        positionName: typeof entry.position === 'string' ? entry.position : entry.position.label,
+        order: index + 1,
+      })),
+      journalContext: null,
     };
 
-    console.log("Payload IA:", payload);
-
-    aiDepthTimerRef.current = window.setTimeout(() => {
+    try {
+      const response = await requestAiTarotReading(payload);
+      setAiResponse(response);
       setAiDepthState("ready");
-    }, INTERPRETATION_DEPTH_DELAY_MS);
+    } catch (err: any) {
+      console.error("Error AI:", err);
+      setAiDepthError(err.message || "Error conectando con la IA");
+      setAiDepthState("idle");
+    }
   }
 
   function toggleFlip(index: number) {
@@ -444,23 +457,154 @@ export function SpreadReader() {
                 </div>
 
                 <div className="interpretation-ai">
-                  <button
-                    type="button"
-                    className="btn btn-secondary interpretation-ai-btn"
-                    onClick={handleDepthInterpretation}
-                    disabled={aiDepthState === "loading"}
-                  >
-                    {aiDepthState === "loading"
-                      ? "Preparando interpretación profunda..."
-                      : "Usar IA para mayor profundidad"}
-                  </button>
-                  {aiDepthState === "loading" && (
-                    <p className="interpretation-ai-message">Preparando una interpretación más profunda...</p>
+                  {aiDepthError && (
+                    <div className="interpretation-ai-message" style={{ color: "#e05353" }}>
+                      {aiDepthError}
+                    </div>
                   )}
-                  {aiDepthState === "ready" && (
-                    <p className="interpretation-ai-message">
-                      La interpretación profunda con IA estará disponible en una siguiente fase.
-                    </p>
+
+                  {aiDepthState !== "ready" && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary interpretation-ai-btn"
+                      onClick={handleDepthInterpretation}
+                      disabled={aiDepthState === "loading"}
+                    >
+                      {aiDepthState === "loading"
+                        ? "Consultando a la IA profunda..."
+                        : "Usar IA para mayor profundidad"}
+                    </button>
+                  )}
+
+                  {aiDepthState === "loading" && (
+                    <p className="interpretation-ai-message">Preparando una interpretación más profunda, por favor espera...</p>
+                  )}
+
+                  {aiDepthState === "ready" && aiResponse && (
+                    <div className="interpretation-ai-panel">
+                      <header className="ai-panel-header">
+                        <span className="ai-panel-icon">✨</span>
+                        <h3>Profundización IA</h3>
+                      </header>
+                      
+                      <div className="ai-panel-content">
+                        <section className="ai-section-card ai-card-neutral">
+                          <h4 className="ai-section-title"><span className="ai-icon">✨</span> Visión Profunda</h4>
+                          <div className="ai-text-content">
+                            {aiResponse.aiSummary.split('\n').filter(p => p.trim()).map((p, idx) => (
+                              <p key={idx}>{p}</p>
+                            ))}
+                          </div>
+                        </section>
+
+                        <section className="ai-section-card ai-card-structured">
+                          <h4 className="ai-section-title"><span className="ai-icon">🔍</span> Lectura Detallada</h4>
+                          <div className="ai-text-content">
+                            {(() => {
+                              const STEP_LABELS = [
+                                "Situación inicial",
+                                "Bloqueo o desarrollo",
+                                "Dirección o consejo",
+                              ];
+
+                              // Try to detect structured lines (title: content)
+                              const rawLines = aiResponse.deepInterpretation.split('\n').filter(p => p.trim());
+                              let currentCard: { title: string, text: string[] } | null = null;
+                              const cards: { title: string, text: string[] }[] = [];
+                              const intro: string[] = [];
+
+                              rawLines.forEach(line => {
+                                if (line.includes(':') && line.length < 80) {
+                                  if (currentCard) cards.push(currentCard);
+                                  currentCard = { title: line, text: [] };
+                                } else {
+                                  if (currentCard) {
+                                    currentCard.text.push(line);
+                                  } else {
+                                    intro.push(line);
+                                  }
+                                }
+                              });
+                              if (currentCard) cards.push(currentCard);
+
+                              // Fallback: split single block into 3 parts with fixed labels
+                              if (cards.length === 0) {
+                                const fullText = aiResponse.deepInterpretation.trim();
+                                // Try splitting by sentence boundaries into ~3 chunks
+                                const sentences = fullText.match(/[^.!?]+[.!?]+/g) ?? [fullText];
+                                const chunkSize = Math.ceil(sentences.length / 3);
+                                for (let i = 0; i < 3; i++) {
+                                  const chunk = sentences.slice(i * chunkSize, (i + 1) * chunkSize).join(' ').trim();
+                                  if (chunk) {
+                                    cards.push({ title: STEP_LABELS[i], text: [chunk] });
+                                  }
+                                }
+                              }
+
+                              // Ensure labels are readable (replace with step labels if AI titles are too long)
+                              const labeledCards = cards.map((c, i) => ({
+                                ...c,
+                                title: c.title.replace(/^(carta\s*\d+|step\s*\d+)/i, '').trim() || STEP_LABELS[i] || c.title,
+                              }));
+
+                              return (
+                                <div className="ai-timeline-container">
+                                  {intro.length > 0 && (
+                                    <div className="ai-timeline-intro">
+                                      {intro.map((p, idx) => <p key={`i-${idx}`}>{p}</p>)}
+                                    </div>
+                                  )}
+                                  <ul className="ai-timeline">
+                                    {labeledCards.map((c, i) => (
+                                      <li key={i} className="ai-timeline-item">
+                                        <div className="ai-timeline-marker">
+                                          <span className="ai-timeline-step">{i + 1}</span>
+                                        </div>
+                                        <div className="ai-timeline-content">
+                                          <h5 className="ai-timeline-title">{c.title}</h5>
+                                          {c.text.map((p, idx) => <p key={idx}>{p}</p>)}
+                                        </div>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </section>
+
+                        <section className="ai-section-card ai-card-light">
+                          <h4 className="ai-section-title"><span className="ai-icon">🧩</span> Conexiones Ocultas</h4>
+                          <div className="ai-text-content">
+                            {aiResponse.cardConnections.split('\n').filter(p => p.trim()).map((p, idx) => (
+                              <p key={idx}>{p}</p>
+                            ))}
+                          </div>
+                        </section>
+
+                        <section className="ai-section-card ai-section-highlight">
+                          <h4 className="ai-section-title"><span className="ai-icon">⚡</span> Consejo Práctico</h4>
+                          <div className="ai-text-content">
+                            {aiResponse.practicalAdvice.split('\n').filter(p => p.trim()).map((p, idx) => (
+                              <p key={idx}>{p}</p>
+                            ))}
+                          </div>
+                        </section>
+
+                        <section className="ai-section-card ai-card-minimal">
+                          <h4 className="ai-section-title"><span className="ai-icon">❓</span> Preguntas de Reflexión</h4>
+                          <ul className="ai-reflection-list">
+                            {aiResponse.reflectionQuestions.map((q, idx) => (
+                              <li key={idx}><span>{q}</span></li>
+                            ))}
+                          </ul>
+                        </section>
+
+                        <div className="ai-warning-box">
+                          <small><em>{aiResponse.warning}</em></small>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               </section>
