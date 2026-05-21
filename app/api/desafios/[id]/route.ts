@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
+import { ensureChallengeIsNatural } from "../route";
 
 export const runtime = "nodejs";
 
@@ -15,7 +16,7 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const challenge = await prisma.challenge.findUnique({
+  let challenge = await prisma.challenge.findUnique({
     where: { id },
     include: {
       questions: {
@@ -27,6 +28,8 @@ export async function GET(_request: Request, context: RouteContext) {
   if (!challenge) {
     return NextResponse.json({ error: "Desafío no encontrado" }, { status: 404 });
   }
+
+  challenge = await ensureChallengeIsNatural(challenge);
 
   return NextResponse.json({
     challenge,

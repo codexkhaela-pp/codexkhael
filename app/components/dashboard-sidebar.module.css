@@ -1,4 +1,4 @@
-﻿.sidebar {
+.sidebar {
   width: 260px;
   height: 100vh;
   background-color: #0b0a13;
@@ -12,10 +12,7 @@
   top: 0;
   left: 0;
   z-index: 20;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: hidden;
   transition: width 0.22s ease, padding 0.22s ease;
   z-index: 9999;
 }
@@ -37,6 +34,16 @@
   flex-direction: column;
   min-height: 0;
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.top::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
 }
 
 .logoArea {

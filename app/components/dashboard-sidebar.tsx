@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import styles from "./dashboard-sidebar.module.css";
 
 type SidebarItem = {
@@ -15,6 +15,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { key: "bitacora", label: "Bitácora", href: "/diario", icon: "✍" },
   { key: "repaso", label: "Repaso", href: "/aprendizaje", icon: "🔄" },
   { key: "desafios", label: "Desafíos", href: "/desafios", icon: "🏆" },
+  { key: "ajustes", label: "Ajustes", href: "/ajustes", icon: "⚙️" },
 ];
 
 type DashboardSidebarProps = {

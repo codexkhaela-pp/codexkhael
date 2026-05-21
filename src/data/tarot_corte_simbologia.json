@@ -1,0 +1,234 @@
+{
+  "Bastos": {
+    "Sota de Bastos": {
+      "upright": [
+        { "name": "Joven", "meaning": "curiosidad, inicio de aprendizaje" },
+        { "name": "Basto", "meaning": "energía, impulso creativo" },
+        { "name": "Desierto", "meaning": "territorio por explorar" },
+        { "name": "Vestimenta", "meaning": "identidad en formación" }
+      ],
+      "reversed": [
+        { "name": "Joven", "meaning": "inmadurez, impulsividad" },
+        { "name": "Basto", "meaning": "energía mal dirigida" },
+        { "name": "Desierto", "meaning": "falta de rumbo" },
+        { "name": "Vestimenta", "meaning": "identidad confusa" }
+      ]
+    },
+    "Caballero de Bastos": {
+      "upright": [
+        { "name": "Caballo", "meaning": "movimiento, acción rápida" },
+        { "name": "Basto", "meaning": "impulso, pasión" },
+        { "name": "Armadura", "meaning": "protección activa" },
+        { "name": "Fuego", "meaning": "intensidad, energía" }
+      ],
+      "reversed": [
+        { "name": "Caballo", "meaning": "impulsividad sin control" },
+        { "name": "Basto", "meaning": "energía desbordada" },
+        { "name": "Armadura", "meaning": "acción imprudente" },
+        { "name": "Fuego", "meaning": "ira, explosión" }
+      ]
+    },
+    "Reina de Bastos": {
+      "upright": [
+        { "name": "Trono", "meaning": "confianza, autoridad" },
+        { "name": "Girasol", "meaning": "vitalidad, alegría" },
+        { "name": "Gato", "meaning": "intuición, independencia" },
+        { "name": "Basto", "meaning": "energía creativa" }
+      ],
+      "reversed": [
+        { "name": "Trono", "meaning": "inseguridad" },
+        { "name": "Girasol", "meaning": "energía apagada" },
+        { "name": "Gato", "meaning": "manipulación" },
+        { "name": "Basto", "meaning": "creatividad bloqueada" }
+      ]
+    },
+    "Rey de Bastos": {
+      "upright": [
+        { "name": "Trono", "meaning": "liderazgo" },
+        { "name": "Basto", "meaning": "visión, poder creativo" },
+        { "name": "León", "meaning": "fuerza, dominio" },
+        { "name": "Fuego", "meaning": "determinación" }
+      ],
+      "reversed": [
+        { "name": "Trono", "meaning": "autoritarismo" },
+        { "name": "Basto", "meaning": "control excesivo" },
+        { "name": "León", "meaning": "ego dominante" },
+        { "name": "Fuego", "meaning": "impaciencia" }
+      ]
+    }
+  },
+  "Copas": {
+    "Sota de Copas": {
+      "upright": [
+        { "name": "Joven", "meaning": "sensibilidad, apertura" },
+        { "name": "Copa", "meaning": "emoción emergente" },
+        { "name": "Pez", "meaning": "intuición inesperada" },
+        { "name": "Agua", "meaning": "inconsciente" }
+      ],
+      "reversed": [
+        { "name": "Joven", "meaning": "inmadurez emocional" },
+        { "name": "Copa", "meaning": "emociones bloqueadas" },
+        { "name": "Pez", "meaning": "intuición ignorada" },
+        { "name": "Agua", "meaning": "confusión emocional" }
+      ]
+    },
+    "Caballero de Copas": {
+      "upright": [
+        { "name": "Caballo", "meaning": "avance emocional" },
+        { "name": "Copa", "meaning": "oferta emocional" },
+        { "name": "Río", "meaning": "flujo de sentimientos" },
+        { "name": "Armadura", "meaning": "protección emocional" }
+      ],
+      "reversed": [
+        { "name": "Caballo", "meaning": "inestabilidad emocional" },
+        { "name": "Copa", "meaning": "promesas vacías" },
+        { "name": "Río", "meaning": "emociones desbordadas" },
+        { "name": "Armadura", "meaning": "defensa emocional" }
+      ]
+    },
+    "Reina de Copas": {
+      "upright": [
+        { "name": "Trono", "meaning": "estabilidad emocional" },
+        { "name": "Copa", "meaning": "profundidad emocional" },
+        { "name": "Agua", "meaning": "intuición" },
+        { "name": "Decoración", "meaning": "riqueza interior" }
+      ],
+      "reversed": [
+        { "name": "Trono", "meaning": "dependencia emocional" },
+        { "name": "Copa", "meaning": "emociones desbordadas" },
+        { "name": "Agua", "meaning": "confusión" },
+        { "name": "Decoración", "meaning": "sensibilidad extrema" }
+      ]
+    },
+    "Rey de Copas": {
+      "upright": [
+        { "name": "Trono", "meaning": "control emocional" },
+        { "name": "Copa", "meaning": "equilibrio emocional" },
+        { "name": "Mar", "meaning": "emociones profundas" },
+        { "name": "Barco", "meaning": "navegar emociones" }
+      ],
+      "reversed": [
+        { "name": "Trono", "meaning": "inestabilidad" },
+        { "name": "Copa", "meaning": "represión emocional" },
+        { "name": "Mar", "meaning": "tormenta interna" },
+        { "name": "Barco", "meaning": "descontrol emocional" }
+      ]
+    }
+  },
+  "Espadas": {
+    "Sota de Espadas": {
+      "upright": [
+        { "name": "Joven", "meaning": "curiosidad mental" },
+        { "name": "Espada", "meaning": "verdad, pensamiento" },
+        { "name": "Viento", "meaning": "cambio, movimiento" },
+        { "name": "Nubes", "meaning": "ideas en formación" }
+      ],
+      "reversed": [
+        { "name": "Joven", "meaning": "inmadurez mental" },
+        { "name": "Espada", "meaning": "palabras dañinas" },
+        { "name": "Viento", "meaning": "inestabilidad" },
+        { "name": "Nubes", "meaning": "confusión" }
+      ]
+    },
+    "Caballero de Espadas": {
+      "upright": [
+        { "name": "Caballo", "meaning": "acción rápida" },
+        { "name": "Espada", "meaning": "decisión directa" },
+        { "name": "Viento", "meaning": "velocidad" },
+        { "name": "Armadura", "meaning": "protección mental" }
+      ],
+      "reversed": [
+        { "name": "Caballo", "meaning": "impulsividad" },
+        { "name": "Espada", "meaning": "agresión verbal" },
+        { "name": "Viento", "meaning": "caos mental" },
+        { "name": "Armadura", "meaning": "defensa excesiva" }
+      ]
+    },
+    "Reina de Espadas": {
+      "upright": [
+        { "name": "Trono", "meaning": "claridad" },
+        { "name": "Espada", "meaning": "verdad" },
+        { "name": "Nubes", "meaning": "pensamiento elevado" },
+        { "name": "Mano", "meaning": "juicio justo" }
+      ],
+      "reversed": [
+        { "name": "Trono", "meaning": "frialdad" },
+        { "name": "Espada", "meaning": "crítica dura" },
+        { "name": "Nubes", "meaning": "confusión mental" },
+        { "name": "Mano", "meaning": "juicio injusto" }
+      ]
+    },
+    "Rey de Espadas": {
+      "upright": [
+        { "name": "Trono", "meaning": "autoridad mental" },
+        { "name": "Espada", "meaning": "verdad absoluta" },
+        { "name": "Mariposas", "meaning": "transformación mental" },
+        { "name": "Cielo", "meaning": "claridad total" }
+      ],
+      "reversed": [
+        { "name": "Trono", "meaning": "autoritarismo mental" },
+        { "name": "Espada", "meaning": "manipulación" },
+        { "name": "Mariposas", "meaning": "cambio forzado" },
+        { "name": "Cielo", "meaning": "rigidez" }
+      ]
+    }
+  },
+  "Oros": {
+    "Sota de Oros": {
+      "upright": [
+        { "name": "Joven", "meaning": "aprendizaje" },
+        { "name": "Oro", "meaning": "oportunidad material" },
+        { "name": "Campo", "meaning": "potencial" },
+        { "name": "Montañas", "meaning": "meta" }
+      ],
+      "reversed": [
+        { "name": "Joven", "meaning": "falta de enfoque" },
+        { "name": "Oro", "meaning": "oportunidad ignorada" },
+        { "name": "Campo", "meaning": "potencial desperdiciado" },
+        { "name": "Montañas", "meaning": "meta lejana" }
+      ]
+    },
+    "Caballero de Oros": {
+      "upright": [
+        { "name": "Caballo", "meaning": "progreso lento" },
+        { "name": "Oro", "meaning": "trabajo constante" },
+        { "name": "Campo", "meaning": "esfuerzo" },
+        { "name": "Armadura", "meaning": "disciplina" }
+      ],
+      "reversed": [
+        { "name": "Caballo", "meaning": "estancamiento" },
+        { "name": "Oro", "meaning": "obsesión material" },
+        { "name": "Campo", "meaning": "trabajo sin sentido" },
+        { "name": "Armadura", "meaning": "rigidez" }
+      ]
+    },
+    "Reina de Oros": {
+      "upright": [
+        { "name": "Trono", "meaning": "estabilidad" },
+        { "name": "Oro", "meaning": "abundancia" },
+        { "name": "Conejo", "meaning": "fertilidad" },
+        { "name": "Jardín", "meaning": "cuidado" }
+      ],
+      "reversed": [
+        { "name": "Trono", "meaning": "inseguridad" },
+        { "name": "Oro", "meaning": "dependencia" },
+        { "name": "Conejo", "meaning": "inestabilidad" },
+        { "name": "Jardín", "meaning": "descuido" }
+      ]
+    },
+    "Rey de Oros": {
+      "upright": [
+        { "name": "Trono", "meaning": "poder material" },
+        { "name": "Oro", "meaning": "riqueza" },
+        { "name": "Viñas", "meaning": "crecimiento sostenido" },
+        { "name": "Toro", "meaning": "estabilidad" }
+      ],
+      "reversed": [
+        { "name": "Trono", "meaning": "control excesivo" },
+        { "name": "Oro", "meaning": "materialismo" },
+        { "name": "Viñas", "meaning": "exceso" },
+        { "name": "Toro", "meaning": "terquedad" }
+      ]
+    }
+  }
+}

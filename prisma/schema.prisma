@@ -126,6 +126,7 @@ model User {
   learningProgress CardLearningProgress[]
   xpTransactions   UserXpTransaction[]
   challengeAttempts UserChallengeAttempt[]
+  challenges      Challenge[]
 
   @@index([email])
 }
@@ -193,14 +194,18 @@ model Challenge {
   activeFrom   DateTime?
   activeTo     DateTime?
   isActive     Boolean       @default(true)
+  userId       String?       @db.Uuid
+  fechaLocal   String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
+  user      User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   questions ChallengeQuestion[]
   attempts  UserChallengeAttempt[]
 
   @@index([isActive, type])
   @@index([isDaily, isActive])
+  @@index([userId, fechaLocal])
 }
 
 model ChallengeQuestion {

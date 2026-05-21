@@ -6,6 +6,7 @@ import styles from "@/app/desafios/desafios.module.css";
 import type { ChallengeDetail } from "@/app/desafios/components/types";
 import { ChallengeQuestionCard } from "@/app/desafios/components/challenge-question-card";
 import { ChallengeFeedback } from "@/app/desafios/components/challenge-feedback";
+import { cleanQuestionText, cleanDescription } from "@/app/desafios/components/challenge-mappers";
 
 type ChallengePlayerProps = {
   challenge: ChallengeDetail;
@@ -26,7 +27,14 @@ export function ChallengePlayer({ challenge }: ChallengePlayerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const currentQuestion = challenge.questions[currentIndex] ?? null;
+  const currentQuestionRaw = challenge.questions[currentIndex] ?? null;
+  const currentQuestion = useMemo(() => {
+    if (!currentQuestionRaw) return null;
+    return {
+      ...currentQuestionRaw,
+      questionText: cleanQuestionText(currentQuestionRaw.questionText, challenge.isDaily),
+    };
+  }, [currentQuestionRaw, challenge.isDaily]);
   const finished = currentIndex >= challenge.questions.length;
 
   const progressLabel = useMemo(() => {
@@ -127,7 +135,7 @@ export function ChallengePlayer({ challenge }: ChallengePlayerProps) {
     return (
       <section className={styles.playerContainer}>
         <h1 className={styles.playerTitle}>{challenge.title}</h1>
-        <p className={styles.playerDescription}>{challenge.description}</p>
+        <p className={styles.playerDescription}>{cleanDescription(challenge.description, challenge.isDaily)}</p>
         <p className={styles.playerMeta}>
           Dificultad: <strong>{challenge.difficulty}</strong> · XP base: <strong>{challenge.baseXp}</strong>
         </p>

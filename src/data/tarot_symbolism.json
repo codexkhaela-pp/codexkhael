@@ -1,0 +1,384 @@
+{
+  "El Loco": {
+    "upright": [
+      { "name": "Sol", "meaning": "vitalidad, claridad, inicio" },
+      { "name": "Perro", "meaning": "instinto, impulso, advertencia" },
+      { "name": "Precipicio", "meaning": "riesgo, salto, decisión" },
+      { "name": "Flor", "meaning": "inocencia, pureza" },
+      { "name": "Vara", "meaning": "voluntad, camino" },
+      { "name": "Montañas", "meaning": "retos, crecimiento" }
+    ],
+    "reversed": [
+      { "name": "Sol", "meaning": "falta de dirección" },
+      { "name": "Perro", "meaning": "impulsividad" },
+      { "name": "Precipicio", "meaning": "peligro ignorado" },
+      { "name": "Flor", "meaning": "ingenuidad excesiva" },
+      { "name": "Vara", "meaning": "decisiones erráticas" },
+      { "name": "Montañas", "meaning": "bloqueos" }
+    ]
+  },
+  "El Mago": {
+    "upright": [
+      { "name": "Infinito", "meaning": "potencial ilimitado" },
+      { "name": "Vara", "meaning": "canalización de energía" },
+      { "name": "Mesa", "meaning": "herramientas disponibles" },
+      { "name": "Elementos", "meaning": "dominio material" },
+      { "name": "Jardín", "meaning": "creación activa" }
+    ],
+    "reversed": [
+      { "name": "Infinito", "meaning": "energía bloqueada" },
+      { "name": "Vara", "meaning": "manipulación" },
+      { "name": "Mesa", "meaning": "mal uso de recursos" },
+      { "name": "Elementos", "meaning": "desequilibrio" },
+      { "name": "Jardín", "meaning": "creación fallida" }
+    ]
+  },
+  "La Sacerdotisa": {
+    "upright": [
+      { "name": "Columnas", "meaning": "dualidad, umbral, equilibrio" },
+      { "name": "Velo", "meaning": "misterio, acceso oculto" },
+      { "name": "Luna", "meaning": "intuición, ciclos internos" },
+      { "name": "Agua", "meaning": "inconsciente, profundidad emocional" },
+      { "name": "Libro", "meaning": "sabiduría reservada" }
+    ],
+    "reversed": [
+      { "name": "Columnas", "meaning": "confusión interna" },
+      { "name": "Velo", "meaning": "secretos bloqueados" },
+      { "name": "Luna", "meaning": "intuición ignorada" },
+      { "name": "Agua", "meaning": "emociones reprimidas" },
+      { "name": "Libro", "meaning": "conocimiento mal aplicado" }
+    ]
+  },
+  "La Emperatriz": {
+    "upright": [
+      { "name": "Corona", "meaning": "autoridad natural" },
+      { "name": "Trigo", "meaning": "abundancia, cosecha" },
+      { "name": "Río", "meaning": "flujo emocional" },
+      { "name": "Trono", "meaning": "estabilidad fértil" },
+      { "name": "Bosque", "meaning": "crecimiento, vida" },
+      { "name": "Escudo", "meaning": "amor, receptividad" }
+    ],
+    "reversed": [
+      { "name": "Corona", "meaning": "dependencia afectiva" },
+      { "name": "Trigo", "meaning": "escasez creativa" },
+      { "name": "Río", "meaning": "bloqueo emocional" },
+      { "name": "Trono", "meaning": "inseguridad interna" },
+      { "name": "Bosque", "meaning": "crecimiento estancado" },
+      { "name": "Escudo", "meaning": "amor posesivo" }
+    ]
+  },
+  "El Emperador": {
+    "upright": [
+      { "name": "Trono", "meaning": "autoridad, estabilidad" },
+      { "name": "Carnero", "meaning": "liderazgo, iniciativa" },
+      { "name": "Cetro", "meaning": "mando, decisión" },
+      { "name": "Armadura", "meaning": "protección, firmeza" },
+      { "name": "Montañas", "meaning": "estructura, resistencia" }
+    ],
+    "reversed": [
+      { "name": "Trono", "meaning": "autoritarismo" },
+      { "name": "Carnero", "meaning": "terquedad, impulsividad" },
+      { "name": "Cetro", "meaning": "abuso de poder" },
+      { "name": "Armadura", "meaning": "rigidez emocional" },
+      { "name": "Montañas", "meaning": "bloqueo, dureza" }
+    ]
+  },
+  "El Hierofante": {
+    "upright": [
+      { "name": "Columnas", "meaning": "tradición, institución" },
+      { "name": "Triple corona", "meaning": "autoridad espiritual" },
+      { "name": "Llaves", "meaning": "acceso al conocimiento" },
+      { "name": "Báculo", "meaning": "guía, enseñanza" },
+      { "name": "Discípulos", "meaning": "aprendizaje, comunidad" }
+    ],
+    "reversed": [
+      { "name": "Columnas", "meaning": "dogma rígido" },
+      { "name": "Triple corona", "meaning": "autoridad cuestionada" },
+      { "name": "Llaves", "meaning": "conocimiento negado" },
+      { "name": "Báculo", "meaning": "guía impuesta" },
+      { "name": "Discípulos", "meaning": "conformismo" }
+    ]
+  },
+  "Los Enamorados": {
+    "upright": [
+      { "name": "Ángel", "meaning": "bendición, guía superior" },
+      { "name": "Sol", "meaning": "claridad, vitalidad" },
+      { "name": "Hombre", "meaning": "conciencia activa" },
+      { "name": "Mujer", "meaning": "receptividad, intuición" },
+      { "name": "Árbol", "meaning": "elección, conocimiento" },
+      { "name": "Montaña", "meaning": "unión que exige ascenso" }
+    ],
+    "reversed": [
+      { "name": "Ángel", "meaning": "desconexión espiritual" },
+      { "name": "Sol", "meaning": "claridad perdida" },
+      { "name": "Hombre", "meaning": "decisión inmadura" },
+      { "name": "Mujer", "meaning": "intuición ignorada" },
+      { "name": "Árbol", "meaning": "elección confusa" },
+      { "name": "Montaña", "meaning": "distancia emocional" }
+    ]
+  },
+  "El Carro": {
+    "upright": [
+      { "name": "Carro", "meaning": "avance, dirección" },
+      { "name": "Esfinges", "meaning": "fuerzas opuestas dominadas" },
+      { "name": "Corona", "meaning": "victoria, dominio" },
+      { "name": "Armadura", "meaning": "disciplina, protección" },
+      { "name": "Ciudad", "meaning": "origen dejado atrás" },
+      { "name": "Estrellas", "meaning": "propósito superior" }
+    ],
+    "reversed": [
+      { "name": "Carro", "meaning": "avance sin control" },
+      { "name": "Esfinges", "meaning": "contradicción interna" },
+      { "name": "Corona", "meaning": "ego dominante" },
+      { "name": "Armadura", "meaning": "defensa excesiva" },
+      { "name": "Ciudad", "meaning": "huida del origen" },
+      { "name": "Estrellas", "meaning": "rumbo perdido" }
+    ]
+  },
+  "La Fuerza": {
+    "upright": [
+      { "name": "León", "meaning": "instinto, pasión dominada" },
+      { "name": "Mujer", "meaning": "suavidad, dominio interno" },
+      { "name": "Infinito", "meaning": "fuerza constante" },
+      { "name": "Flores", "meaning": "ternura, armonía" },
+      { "name": "Montaña", "meaning": "meta interior" }
+    ],
+    "reversed": [
+      { "name": "León", "meaning": "instinto desbordado" },
+      { "name": "Mujer", "meaning": "inseguridad" },
+      { "name": "Infinito", "meaning": "energía agotada" },
+      { "name": "Flores", "meaning": "dulzura usada como máscara" },
+      { "name": "Montaña", "meaning": "meta evitada" }
+    ]
+  },
+  "El Ermitaño": {
+    "upright": [
+      { "name": "Lámpara", "meaning": "guía interior" },
+      { "name": "Estrella", "meaning": "verdad espiritual" },
+      { "name": "Bastón", "meaning": "apoyo, experiencia" },
+      { "name": "Capa", "meaning": "retiro, protección" },
+      { "name": "Montaña", "meaning": "sabiduría alcanzada" }
+    ],
+    "reversed": [
+      { "name": "Lámpara", "meaning": "luz ignorada" },
+      { "name": "Estrella", "meaning": "verdad nublada" },
+      { "name": "Bastón", "meaning": "dependencia" },
+      { "name": "Capa", "meaning": "aislamiento excesivo" },
+      { "name": "Montaña", "meaning": "soledad pesada" }
+    ]
+  },
+  "La Rueda de la Fortuna": {
+    "upright": [
+      { "name": "Rueda", "meaning": "ciclos, movimiento" },
+      { "name": "Esfinge", "meaning": "sabiduría ante el cambio" },
+      { "name": "Serpiente", "meaning": "descenso, transformación" },
+      { "name": "Anubis", "meaning": "renacimiento, transición" },
+      { "name": "Criaturas aladas", "meaning": "orden universal" },
+      { "name": "Nubes", "meaning": "fuerzas invisibles" }
+    ],
+    "reversed": [
+      { "name": "Rueda", "meaning": "ciclo repetido" },
+      { "name": "Esfinge", "meaning": "lección no aprendida" },
+      { "name": "Serpiente", "meaning": "caída descontrolada" },
+      { "name": "Anubis", "meaning": "renacimiento resistido" },
+      { "name": "Criaturas aladas", "meaning": "desorden interno" },
+      { "name": "Nubes", "meaning": "incertidumbre" }
+    ]
+  },
+  "La Justicia": {
+    "upright": [
+      { "name": "Balanza", "meaning": "equilibrio, consecuencia" },
+      { "name": "Espada", "meaning": "verdad, decisión" },
+      { "name": "Corona", "meaning": "autoridad moral" },
+      { "name": "Columnas", "meaning": "ley, estructura" },
+      { "name": "Cortina", "meaning": "verdad tras el juicio" }
+    ],
+    "reversed": [
+      { "name": "Balanza", "meaning": "desequilibrio" },
+      { "name": "Espada", "meaning": "juicio injusto" },
+      { "name": "Corona", "meaning": "autoridad parcial" },
+      { "name": "Columnas", "meaning": "rigidez legal" },
+      { "name": "Cortina", "meaning": "verdad ocultada" }
+    ]
+  },
+  "El Colgado": {
+    "upright": [
+      { "name": "Árbol", "meaning": "sacrificio, pausa sagrada" },
+      { "name": "Pierna cruzada", "meaning": "rendición consciente" },
+      { "name": "Halo", "meaning": "nueva perspectiva" },
+      { "name": "Cuerdas", "meaning": "suspensión voluntaria" },
+      { "name": "Rostro sereno", "meaning": "aceptación" }
+    ],
+    "reversed": [
+      { "name": "Árbol", "meaning": "sacrificio inútil" },
+      { "name": "Pierna cruzada", "meaning": "postura rígida" },
+      { "name": "Halo", "meaning": "perspectiva bloqueada" },
+      { "name": "Cuerdas", "meaning": "atadura mental" },
+      { "name": "Rostro sereno", "meaning": "resignación falsa" }
+    ]
+  },
+  "La Muerte": {
+    "upright": [
+      { "name": "Esqueleto", "meaning": "fin inevitable" },
+      { "name": "Caballo blanco", "meaning": "purificación, avance" },
+      { "name": "Bandera", "meaning": "transformación profunda" },
+      { "name": "Sol naciente", "meaning": "renacimiento" },
+      { "name": "Río", "meaning": "paso entre etapas" },
+      { "name": "Figuras caídas", "meaning": "rendición ante el cambio" }
+    ],
+    "reversed": [
+      { "name": "Esqueleto", "meaning": "resistencia al final" },
+      { "name": "Caballo blanco", "meaning": "avance detenido" },
+      { "name": "Bandera", "meaning": "cambio negado" },
+      { "name": "Sol naciente", "meaning": "renacer postergado" },
+      { "name": "Río", "meaning": "tránsito bloqueado" },
+      { "name": "Figuras caídas", "meaning": "apego a lo muerto" }
+    ]
+  },
+  "La Templanza": {
+    "upright": [
+      { "name": "Ángel", "meaning": "armonía, guía" },
+      { "name": "Copas", "meaning": "mezcla, equilibrio" },
+      { "name": "Agua", "meaning": "flujo emocional" },
+      { "name": "Pie en tierra", "meaning": "realidad práctica" },
+      { "name": "Pie en agua", "meaning": "intuición activa" },
+      { "name": "Camino", "meaning": "integración gradual" }
+    ],
+    "reversed": [
+      { "name": "Ángel", "meaning": "guía ignorada" },
+      { "name": "Copas", "meaning": "mezcla desequilibrada" },
+      { "name": "Agua", "meaning": "emociones desbordadas" },
+      { "name": "Pie en tierra", "meaning": "poca estabilidad" },
+      { "name": "Pie en agua", "meaning": "intuición confusa" },
+      { "name": "Camino", "meaning": "proceso interrumpido" }
+    ]
+  },
+  "El Diablo": {
+    "upright": [
+      { "name": "Diablo", "meaning": "sombra, deseo, dominio" },
+      { "name": "Cadenas", "meaning": "ataduras elegidas" },
+      { "name": "Pareja", "meaning": "dependencia compartida" },
+      { "name": "Antorcha", "meaning": "pasión instintiva" },
+      { "name": "Pentagrama", "meaning": "materia dominante" },
+      { "name": "Pedestal", "meaning": "poder ilusorio" }
+    ],
+    "reversed": [
+      { "name": "Diablo", "meaning": "sombra reconocida" },
+      { "name": "Cadenas", "meaning": "liberación posible" },
+      { "name": "Pareja", "meaning": "dependencia rota" },
+      { "name": "Antorcha", "meaning": "deseo descontrolado" },
+      { "name": "Pentagrama", "meaning": "materialismo cuestionado" },
+      { "name": "Pedestal", "meaning": "falso poder cae" }
+    ]
+  },
+  "La Torre": {
+    "upright": [
+      { "name": "Rayo", "meaning": "revelación súbita" },
+      { "name": "Torre", "meaning": "estructura falsa" },
+      { "name": "Corona", "meaning": "ego derribado" },
+      { "name": "Fuego", "meaning": "purificación violenta" },
+      { "name": "Figuras cayendo", "meaning": "pérdida de control" },
+      { "name": "Nubes", "meaning": "crisis inevitable" }
+    ],
+    "reversed": [
+      { "name": "Rayo", "meaning": "verdad resistida" },
+      { "name": "Torre", "meaning": "derrumbe interno" },
+      { "name": "Corona", "meaning": "ego aferrado" },
+      { "name": "Fuego", "meaning": "tensión acumulada" },
+      { "name": "Figuras cayendo", "meaning": "miedo al cambio" },
+      { "name": "Nubes", "meaning": "crisis aplazada" }
+    ]
+  },
+  "La Estrella": {
+    "upright": [
+      { "name": "Estrella grande", "meaning": "esperanza, guía" },
+      { "name": "Siete estrellas", "meaning": "armonía espiritual" },
+      { "name": "Agua", "meaning": "sanación emocional" },
+      { "name": "Jarras", "meaning": "dar y recibir" },
+      { "name": "Mujer desnuda", "meaning": "autenticidad, vulnerabilidad" },
+      { "name": "Ave", "meaning": "mensaje espiritual" }
+    ],
+    "reversed": [
+      { "name": "Estrella grande", "meaning": "esperanza debilitada" },
+      { "name": "Siete estrellas", "meaning": "desarmonía interna" },
+      { "name": "Agua", "meaning": "sanación bloqueada" },
+      { "name": "Jarras", "meaning": "energía desperdiciada" },
+      { "name": "Mujer desnuda", "meaning": "miedo a mostrarse" },
+      { "name": "Ave", "meaning": "mensaje ignorado" }
+    ]
+  },
+  "La Luna": {
+    "upright": [
+      { "name": "Luna", "meaning": "intuición, ilusión" },
+      { "name": "Perro", "meaning": "instinto domesticado" },
+      { "name": "Lobo", "meaning": "instinto salvaje" },
+      { "name": "Cangrejo", "meaning": "emoción emergente" },
+      { "name": "Torres", "meaning": "umbral incierto" },
+      { "name": "Camino", "meaning": "viaje subconsciente" }
+    ],
+    "reversed": [
+      { "name": "Luna", "meaning": "confusión revelada" },
+      { "name": "Perro", "meaning": "miedo aprendido" },
+      { "name": "Lobo", "meaning": "ansiedad instintiva" },
+      { "name": "Cangrejo", "meaning": "emociones reprimidas" },
+      { "name": "Torres", "meaning": "límites confusos" },
+      { "name": "Camino", "meaning": "rumbo incierto" }
+    ]
+  },
+  "El Sol": {
+    "upright": [
+      { "name": "Sol", "meaning": "vitalidad, éxito" },
+      { "name": "Niño", "meaning": "alegría, inocencia" },
+      { "name": "Caballo blanco", "meaning": "pureza, avance" },
+      { "name": "Girasoles", "meaning": "crecimiento, optimismo" },
+      { "name": "Muro", "meaning": "seguridad alcanzada" },
+      { "name": "Bandera", "meaning": "celebración, libertad" }
+    ],
+    "reversed": [
+      { "name": "Sol", "meaning": "claridad disminuida" },
+      { "name": "Niño", "meaning": "inmadurez" },
+      { "name": "Caballo blanco", "meaning": "avance lento" },
+      { "name": "Girasoles", "meaning": "alegría bloqueada" },
+      { "name": "Muro", "meaning": "seguridad excesiva" },
+      { "name": "Bandera", "meaning": "libertad postergada" }
+    ]
+  },
+  "El Juicio": {
+    "upright": [
+      { "name": "Ángel", "meaning": "llamado superior" },
+      { "name": "Trompeta", "meaning": "despertar, anuncio" },
+      { "name": "Bandera", "meaning": "renovación espiritual" },
+      { "name": "Tumbas", "meaning": "pasado que resurge" },
+      { "name": "Personas levantándose", "meaning": "renacimiento consciente" },
+      { "name": "Montañas", "meaning": "juicio final, destino" }
+    ],
+    "reversed": [
+      { "name": "Ángel", "meaning": "llamado ignorado" },
+      { "name": "Trompeta", "meaning": "despertar evitado" },
+      { "name": "Bandera", "meaning": "renovación bloqueada" },
+      { "name": "Tumbas", "meaning": "pasado no resuelto" },
+      { "name": "Personas levantándose", "meaning": "culpa, autojuicio" },
+      { "name": "Montañas", "meaning": "peso kármico" }
+    ]
+  },
+  "El Mundo": {
+    "upright": [
+      { "name": "Corona oval", "meaning": "ciclo completo" },
+      { "name": "Danzante", "meaning": "integración, plenitud" },
+      { "name": "Bastones", "meaning": "equilibrio de fuerzas" },
+      { "name": "Toro", "meaning": "materia, estabilidad" },
+      { "name": "León", "meaning": "fuego, voluntad" },
+      { "name": "Águila", "meaning": "visión, transformación" },
+      { "name": "Ángel", "meaning": "conciencia, guía" }
+    ],
+    "reversed": [
+      { "name": "Corona oval", "meaning": "ciclo inconcluso" },
+      { "name": "Danzante", "meaning": "integración incompleta" },
+      { "name": "Bastones", "meaning": "fuerzas dispersas" },
+      { "name": "Toro", "meaning": "estancamiento material" },
+      { "name": "León", "meaning": "voluntad bloqueada" },
+      { "name": "Águila", "meaning": "visión limitada" },
+      { "name": "Ángel", "meaning": "guía desconectada" }
+    ]
+  }
+}

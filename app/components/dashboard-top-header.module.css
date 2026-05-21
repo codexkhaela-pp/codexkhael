@@ -8,6 +8,9 @@
   border-bottom: 1px solid rgba(197, 168, 128, 0.06);
   background-color: #080710;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
 .menuToggleBtn {
@@ -85,6 +88,8 @@
   height: 100%;
   object-fit: cover;
   object-position: center 22%;
+  transform: scale(1.55);
+  transform-origin: center 22%;
   display: block;
 }
 

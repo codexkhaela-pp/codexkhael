@@ -1,4 +1,5 @@
 import type { ChallengeCategory, ChallengeItem, ChallengeDetail } from "@/app/desafios/components/types";
+import { tarotCards } from "@/src/data/tarotCards";
 
 export function challengeTypeToCategory(type: ChallengeItem["type"]): Exclude<ChallengeCategory, "TODOS"> {
   if (type === "DAILY") return "DIARIOS";
@@ -43,65 +44,54 @@ export function toChallengeItem(detail: ChallengeDetail): ChallengeItem {
     category: challengeTypeToCategory(detail.type),
     icon: challengeTypeToIcon(detail.type),
     name: detail.title,
-    description: detail.description,
+    description: detail.type === "DAILY"
+      ? "Analiza la combinación de cartas y elige la interpretación correcta."
+      : detail.description,
     difficulty: detail.difficulty as ChallengeItem["difficulty"],
     xpReward: detail.baseXp,
   };
 }
 
+function findTarotCard(cardId: string) {
+  if (!cardId) return undefined;
+  const idClean = cardId.toLowerCase().trim().replace(/[-_\s]/g, "");
+  return tarotCards.find((c) => {
+    const cId = c.id.toLowerCase().replace(/[-_\s]/g, "");
+    const cNameEs = c.nameEs.toLowerCase().replace(/[-_\s]/g, "");
+    const cNameEn = c.nameEn.toLowerCase().replace(/[-_\s]/g, "");
+    const cSlug = c.slug.toLowerCase().replace(/[-_\s]/g, "");
+    return cId === idClean || cNameEs === idClean || cNameEn === idClean || cSlug === idClean;
+  });
+}
+
 export function cardIdToImage(cardId: string): string {
-  const clean = cardId.replace(/^major-/, "");
-  const map: Record<string, string> = {
-    "00": "/tarot/the_fool.jpg",
-    "01": "/tarot/the_magician.jpg",
-    "02": "/tarot/the_high_priestess.jpg",
-    "03": "/tarot/the_empress.jpg",
-    "04": "/tarot/the_emperor.jpg",
-    "05": "/tarot/the_hierophant.jpg",
-    "06": "/tarot/the_lovers.jpg",
-    "07": "/tarot/the_chariot.jpg",
-    "08": "/tarot/strength.jpg",
-    "09": "/tarot/the_hermit.jpg",
-    "10": "/tarot/wheel_of_fortune.jpg",
-    "11": "/tarot/justice.jpg",
-    "12": "/tarot/the_hanged_man.jpg",
-    "13": "/tarot/death.jpg",
-    "14": "/tarot/temperance.jpg",
-    "15": "/tarot/the_devil.jpg",
-    "16": "/tarot/the_tower.jpg",
-    "17": "/tarot/the_star.jpg",
-    "18": "/tarot/the_moon.jpg",
-    "19": "/tarot/the_sun.jpg",
-    "20": "/tarot/judgement.jpg",
-    "21": "/tarot/the_world.jpg",
-  };
-  return map[clean] ?? "/tarot/the_fool.jpg";
+  const found = findTarotCard(cardId);
+  if (found) {
+    return found.image;
+  }
+  console.error("Card image not found for key:", cardId);
+  return "/tarot/placeholder.jpg";
 }
 
 export function cardIdToLabel(cardId: string): string {
-  const map: Record<string, string> = {
-    "major-00": "El Loco",
-    "major-01": "El Mago",
-    "major-02": "La Sacerdotisa",
-    "major-03": "La Emperatriz",
-    "major-04": "El Emperador",
-    "major-05": "El Hierofante",
-    "major-06": "Los Enamorados",
-    "major-07": "El Carro",
-    "major-08": "La Fuerza",
-    "major-09": "El Ermitaño",
-    "major-10": "Rueda de la Fortuna",
-    "major-11": "La Justicia",
-    "major-12": "El Colgado",
-    "major-13": "La Muerte",
-    "major-14": "La Templanza",
-    "major-15": "El Diablo",
-    "major-16": "La Torre",
-    "major-17": "La Estrella",
-    "major-18": "La Luna",
-    "major-19": "El Sol",
-    "major-20": "El Juicio",
-    "major-21": "El Mundo",
-  };
-  return map[cardId] ?? cardId;
+  const found = findTarotCard(cardId);
+  if (found) {
+    return found.nameEs;
+  }
+  console.error("Card label not found for key:", cardId);
+  return cardId;
+}
+
+export function cleanQuestionText(text: string, isDaily?: boolean): string {
+  if (isDaily || text.startsWith("Dada la tirada:") || text.includes("¿cuál es la interpretación más adecuada?")) {
+    return "¿Cuál es la interpretación más adecuada?";
+  }
+  return text;
+}
+
+export function cleanDescription(description: string, isDaily?: boolean): string {
+  if (isDaily || description.startsWith("Un desafío de interpretación intuitiva") || description.includes("tirada del día")) {
+    return "Analiza la combinación de cartas y elige la interpretación correcta.";
+  }
+  return description;
 }

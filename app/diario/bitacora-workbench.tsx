@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -436,6 +436,9 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
   const [reflection, setReflection] = useState<JournalReadingReflection>(buildEmptyReflection);
   const [placements, setPlacements] = useState<JournalCardPlacement[]>([]);
   const [flippedPlacementIds, setFlippedPlacementIds] = useState<string[]>([]);
+  const [interpretationResult, setInterpretationResult] = useState<any | null>(null);
+  const [isInterpreting, setIsInterpreting] = useState(false);
+  const [interpretationError, setInterpretationError] = useState<string | null>(null);
   const [flipStats, setFlipStats] = useState<JournalFlipStat[]>([]);
   const [flipEvents, setFlipEvents] = useState<JournalFlipEvent[]>([]);
   const [activeDragCard, setActiveDragCard] = useState<TarotCard | null>(null);
@@ -912,6 +915,47 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
     }
   }
 
+  async function handleInterpret() {
+    if (placements.length === 0) {
+      alert("Coloca al menos una carta para interpretar.");
+      return;
+    }
+
+    setIsInterpreting(true);
+    setInterpretationError(null);
+    setInterpretationResult(null);
+
+    try {
+      const response = await fetch("/api/tiradas/interpretar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: metadata.question || null,
+          cards: placements.map((p) => ({
+            cardId: p.cardId,
+            name: p.cardName,
+            orientation: p.isReversed ? "REVERSED" : "UPRIGHT",
+            positionName: p.positionName || null,
+            order: p.order,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error || "Error al obtener la interpretación.");
+      }
+
+      const data = await response.json();
+      setInterpretationResult(data);
+    } catch (err: any) {
+      console.error("Error al interpretar tirada:", err);
+      setInterpretationError(err.message || "Error interno al conectar con los astros.");
+    } finally {
+      setIsInterpreting(false);
+    }
+  }
+
   return (
     <section className="journal-tool" aria-label="Diario / Bitácora">
       <div className="journal-topbar">
@@ -1135,12 +1179,172 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
           <button type="button" className="btn btn-primary" onClick={persistEntry}>
             Guardar entrada
           </button>
-          <button type="button" className="btn btn-secondary" onClick={onBack}>
+          {spread.id === "free" && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{
+                background: "linear-gradient(135deg, #c9a66b, #af8a4a)",
+                color: "#141118",
+                border: "none",
+                fontWeight: "bold",
+                boxShadow: "0 4px 14px rgba(201, 166, 107, 0.3)",
+                marginLeft: "8px",
+              }}
+              onClick={handleInterpret}
+            >
+              ✨ Interpretar tirada
+            </button>
+          )}
+          <button type="button" className="btn btn-secondary" onClick={onBack} style={{ marginLeft: "8px" }}>
             Volver al historial
           </button>
           {saveMessage && <p>{saveMessage}</p>}
         </div>
       </section>
+
+      {/* Modal de Lectura Guiada */}
+      {interpretationResult && (
+        <div className="card-modal-backdrop" style={{ zIndex: 90 }} onClick={() => setInterpretationResult(null)}>
+          <div className="card-modal" style={{ width: "min(680px, 95vw)", maxHeight: "85vh", display: "flex", flexDirection: "column", padding: "20px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="card-modal-header" style={{ paddingBottom: "10px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <h3 style={{ fontSize: "22px", color: "#f0dcae" }}>✨ Lectura Guiada PRO</h3>
+                <p className="card-modal-subtitle" style={{ margin: "4px 0 0 0" }}>Interpretación automatizada local de tu tirada libre</p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary card-modal-close"
+                onClick={() => setInterpretationResult(null)}
+                style={{ borderRadius: "50%", width: "36px", height: "36px", padding: 0, display: "grid", placeItems: "center" }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="card-modal-body" style={{ overflowY: "auto", flex: 1, paddingRight: "8px", marginTop: "12px", display: "flex", flexDirection: "column", gap: "20px" }}>
+              
+              {/* Tono dominante */}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                <strong style={{ fontSize: "14px" }}>Tono dominante:</strong>
+                <span className="interpretation-tone-pill-active" style={{ padding: "4px 12px", borderRadius: "20px", fontSize: "12px", background: "rgba(201, 166, 107, 0.15)", color: "#e8c789", border: "1px solid rgba(201, 166, 107, 0.3)", fontWeight: "bold" }}>
+                  {interpretationResult.dominantTone}
+                </span>
+              </div>
+
+              {/* Resumen */}
+              <div style={{ background: "rgba(201, 166, 107, 0.05)", borderLeft: "4px solid #c9a66b", padding: "14px", borderRadius: "0 12px 12px 0" }}>
+                <h4 style={{ color: "#e8c789", margin: "0 0 6px 0", fontSize: "15px" }}>Resumen General</h4>
+                <p style={{ margin: 0, color: "rgba(231, 227, 242, 0.9)", fontSize: "14px", lineHeight: "1.6" }}>{interpretationResult.summary}</p>
+              </div>
+
+              {/* Carta por carta */}
+              <div>
+                <h4 style={{ color: "#e8c789", margin: "0 0 12px 0", fontSize: "15px", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "6px" }}>Interpretación Carta por Carta</h4>
+                <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                  {interpretationResult.cards.map((c: any, i: number) => {
+                    const matchingPlacement = placements.find(p => p.cardName === c.name);
+                    const cardImg = matchingPlacement?.image || "/tarot/the_fool.jpg";
+                    const isReversed = c.orientation === "Invertida";
+                    
+                    return (
+                      <div key={i} style={{ display: "flex", gap: "14px", background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "12px" }}>
+                        <div style={{ width: "50px", flexShrink: 0, height: "86px", overflow: "hidden", borderRadius: "6px", border: "1px solid rgba(201, 166, 107, 0.3)" }}>
+                          <img src={cardImg} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover", transform: isReversed ? "rotate(180deg)" : "none" }} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                            <strong style={{ fontSize: "14px", color: "#f4ead3" }}>{i + 1}. {c.name}</strong>
+                            <span style={{ 
+                              fontSize: "11px", 
+                              padding: "2px 8px", 
+                              borderRadius: "12px", 
+                              background: isReversed ? "rgba(239, 68, 68, 0.15)" : "rgba(34, 197, 94, 0.15)",
+                              color: isReversed ? "#ef4444" : "#22c55e",
+                              border: `1px solid ${isReversed ? "rgba(239, 68, 68, 0.3)" : "rgba(34, 197, 94, 0.3)"}`,
+                              fontWeight: "bold"
+                            }}>
+                              {c.orientation}
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, color: "rgba(231, 227, 242, 0.85)", fontSize: "13.5px", lineHeight: "1.5" }}>{c.interpretation}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Conexiones */}
+              <div style={{ background: "rgba(34, 197, 94, 0.03)", border: "1px solid rgba(34, 197, 94, 0.15)", padding: "14px", borderRadius: "12px" }}>
+                <h4 style={{ color: "#86efac", margin: "0 0 6px 0", fontSize: "15px" }}>Relaciones y Elementos</h4>
+                <p style={{ margin: 0, color: "rgba(231, 227, 242, 0.9)", fontSize: "14px", lineHeight: "1.6" }}>{interpretationResult.connections}</p>
+              </div>
+
+              {/* Bloqueos */}
+              <div style={{ background: "rgba(239, 68, 68, 0.03)", border: "1px solid rgba(239, 68, 68, 0.15)", padding: "14px", borderRadius: "12px" }}>
+                <h4 style={{ color: "#fca5a5", margin: "0 0 6px 0", fontSize: "15px" }}>Posibles Bloqueos</h4>
+                <p style={{ margin: 0, color: "rgba(231, 227, 242, 0.9)", fontSize: "14px", lineHeight: "1.6" }}>{interpretationResult.blockages}</p>
+              </div>
+
+              {/* Consejo */}
+              <div style={{ 
+                background: "linear-gradient(135deg, rgba(109, 40, 217, 0.15), rgba(192, 132, 252, 0.05))", 
+                border: "1px solid rgba(168, 85, 247, 0.3)", 
+                padding: "16px", 
+                borderRadius: "12px",
+                boxShadow: "0 4px 15px rgba(168, 85, 247, 0.08)"
+              }}>
+                <h4 style={{ color: "#d8b4fe", margin: "0 0 6px 0", fontSize: "15px" }}>Consejo del Tarot</h4>
+                <p style={{ margin: 0, color: "rgba(231, 227, 242, 0.95)", fontSize: "14px", lineHeight: "1.6", fontWeight: "500" }}>{interpretationResult.advice}</p>
+              </div>
+
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "14px", paddingTop: "10px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setInterpretationResult(null)}
+              >
+                Cerrar lectura
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Error */}
+      {interpretationError && (
+        <div className="card-modal-backdrop" style={{ zIndex: 100 }} onClick={() => setInterpretationError(null)}>
+          <div className="card-modal" style={{ width: "400px", padding: "20px", border: "1px solid rgba(239, 68, 68, 0.4)", background: "linear-gradient(180deg, #1f1115, #0f0709)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="card-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ color: "#ef4444", fontSize: "20px", margin: 0 }}>⚠️ Error</h3>
+              <button type="button" className="btn btn-secondary card-modal-close" onClick={() => setInterpretationError(null)} style={{ borderRadius: "50%", width: "30px", height: "30px", padding: 0, display: "grid", placeItems: "center" }}>✕</button>
+            </div>
+            <div className="card-modal-body" style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px solid rgba(239,68,68,0.2)" }}>
+              <p style={{ color: "rgba(255,255,255,0.9)", margin: 0, fontSize: "14px", lineHeight: "1.5" }}>{interpretationError}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Loading */}
+      {isInterpreting && (
+        <div className="card-modal-backdrop" style={{ zIndex: 100 }}>
+          <div className="card-modal" style={{ textAlign: "center", width: "320px", padding: "30px 20px" }}>
+            <style>{`
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+            `}</style>
+            <div className="tarot-loader" style={{ margin: "0 auto 20px auto", width: "50px", height: "50px", border: "3px solid rgba(201, 166, 107, 0.2)", borderTop: "3px solid #c9a66b", borderRadius: "50%", animation: "spin 1s linear infinite" }}></div>
+            <h4 style={{ color: "#e8c789", margin: "0 0 8px 0" }}>Consultando los astros...</h4>
+            <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>Conectando simbolismo e interpretando el mapa de tu tirada.</p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

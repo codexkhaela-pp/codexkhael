@@ -16,6 +16,7 @@ function resolveActiveKey(pathname: string): string {
   if (pathname.startsWith("/diario")) return "bitacora";
   if (pathname.startsWith("/aprendizaje")) return "repaso";
   if (pathname.startsWith("/desafios")) return "desafios";
+  if (pathname.startsWith("/ajustes")) return "ajustes";
   return "inicio";
 }
 

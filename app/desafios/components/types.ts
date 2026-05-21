@@ -47,6 +47,7 @@ export type ChallengeDetail = {
   isRepeatable: boolean;
   maxDailyXp: number | null;
   questions: ChallengeQuestion[];
+  nextResetAt?: string;
 };
 
 export type UserProgressData = {

@@ -1,8 +1,26 @@
+import tarotSymbolism from "./tarot_symbolism.json";
+import tarotMenores1to10 from "./tarot_menores_1_10.json";
+import tarotCorteSimbologia from "./tarot_corte_simbologia.json";
+
 export type TarotDeck = "rider-waite" | "marsella" | "egipcio";
 
 export type TarotSuit = "major" | "wands" | "cups" | "swords" | "pentacles";
 
 export type TarotArcana = "major" | "minor";
+
+export type CardSymbol = {
+  name: string;
+  meaning: string;
+};
+
+export type MinorStructuredMeaning = {
+  core: {
+    number: string;
+    suit: string;
+  };
+  upright: string;
+  reversed: string;
+};
 
 export type TarotCard = {
   id: string;
@@ -17,9 +35,14 @@ export type TarotCard = {
   image: string;
   keywordsUpright: string;
   keywordsReversed: string;
+  symbols?: {
+    upright: CardSymbol[];
+    reversed: CardSymbol[];
+  };
+  structuredMeaning?: MinorStructuredMeaning;
 };
 
-export const tarotCards: TarotCard[] = [
+export const rawTarotCards: Omit<TarotCard, "symbols">[] = [
   {
     "id": "major-00",
     "deck": "rider-waite",
@@ -1035,3 +1058,33 @@ export const tarotCards: TarotCard[] = [
     "keywordsReversed": "posesividad, rigidez financiera, control excesivo"
   }
 ];
+
+function getCourtSymbolism(cardName: string) {
+  for (const suit of Object.values(tarotCorteSimbologia)) {
+    if (cardName in suit) {
+      return (suit as any)[cardName];
+    }
+  }
+  return undefined;
+}
+
+function getMinorStructuredMeaning(cardName: string) {
+  for (const suit of Object.values(tarotMenores1to10)) {
+    if (cardName in suit) {
+      return (suit as any)[cardName];
+    }
+  }
+  return undefined;
+}
+
+export const tarotCards: TarotCard[] = rawTarotCards.map((card) => {
+  const majorSymbols = (tarotSymbolism as Record<string, any>)[card.nameEs];
+  const courtSymbols = getCourtSymbolism(card.nameEs);
+  const minorStructured = getMinorStructuredMeaning(card.nameEs);
+
+  return {
+    ...card,
+    symbols: majorSymbols || courtSymbols || undefined,
+    structuredMeaning: minorStructured || undefined,
+  };
+});

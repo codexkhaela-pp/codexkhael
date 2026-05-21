@@ -1,0 +1,210 @@
+{
+  "Bastos": {
+    "As de Bastos": {
+      "core": { "number": "inicio, impulso", "suit": "acción, energía" },
+      "upright": "nuevo impulso creativo, motivación, chispa inicial",
+      "reversed": "bloqueo de energía, falta de dirección o motivación"
+    },
+    "Dos de Bastos": {
+      "core": { "number": "elección, proyección", "suit": "acción, energía" },
+      "upright": "planificación, decisión entre caminos, visión futura",
+      "reversed": "miedo a decidir, estancamiento, falta de planificación"
+    },
+    "Tres de Bastos": {
+      "core": { "number": "expansión, avance", "suit": "acción, energía" },
+      "upright": "expansión, resultados en camino, confianza en el proceso",
+      "reversed": "retrasos, falta de progreso, expectativas fallidas"
+    },
+    "Cuatro de Bastos": {
+      "core": { "number": "estabilidad, base", "suit": "acción, energía" },
+      "upright": "celebración, estabilidad lograda, armonía",
+      "reversed": "inestabilidad, celebración retrasada, tensión"
+    },
+    "Cinco de Bastos": {
+      "core": { "number": "conflicto, fricción", "suit": "acción, energía" },
+      "upright": "competencia, choque de egos, caos productivo",
+      "reversed": "conflicto evitado o mal gestionado, tensión interna"
+    },
+    "Seis de Bastos": {
+      "core": { "number": "victoria, reconocimiento", "suit": "acción, energía" },
+      "upright": "éxito público, reconocimiento, avance triunfante",
+      "reversed": "ego herido, falta de reconocimiento, éxito incompleto"
+    },
+    "Siete de Bastos": {
+      "core": { "number": "defensa, desafío", "suit": "acción, energía" },
+      "upright": "defender posición, resistencia, mantenerse firme",
+      "reversed": "rendición, agotamiento, perder terreno"
+    },
+    "Ocho de Bastos": {
+      "core": { "number": "movimiento, rapidez", "suit": "acción, energía" },
+      "upright": "avance rápido, noticias, impulso sin freno",
+      "reversed": "bloqueo, retrasos, energía dispersa"
+    },
+    "Nueve de Bastos": {
+      "core": { "number": "resistencia, perseverancia", "suit": "acción, energía" },
+      "upright": "cansancio pero firmeza, última defensa",
+      "reversed": "agotamiento extremo, rendición, vulnerabilidad"
+    },
+    "Diez de Bastos": {
+      "core": { "number": "carga, exceso", "suit": "acción, energía" },
+      "upright": "sobrecarga, responsabilidad excesiva, presión",
+      "reversed": "liberación de carga o incapacidad de soltar"
+    }
+  },
+  "Copas": {
+    "As de Copas": {
+      "core": { "number": "inicio emocional", "suit": "emociones, vínculos" },
+      "upright": "nuevo vínculo, apertura emocional, amor",
+      "reversed": "bloqueo emocional, incapacidad de conectar"
+    },
+    "Dos de Copas": {
+      "core": { "number": "unión, conexión", "suit": "emociones, vínculos" },
+      "upright": "relación equilibrada, conexión mutua",
+      "reversed": "desconexión, desequilibrio emocional"
+    },
+    "Tres de Copas": {
+      "core": { "number": "celebración, grupo", "suit": "emociones, vínculos" },
+      "upright": "amistad, celebración, comunidad",
+      "reversed": "exceso, superficialidad, aislamiento"
+    },
+    "Cuatro de Copas": {
+      "core": { "number": "apatía, introspección", "suit": "emociones, vínculos" },
+      "upright": "desinterés, reflexión, insatisfacción",
+      "reversed": "nueva oportunidad emocional, apertura"
+    },
+    "Cinco de Copas": {
+      "core": { "number": "pérdida, duelo", "suit": "emociones, vínculos" },
+      "upright": "tristeza, arrepentimiento, pérdida",
+      "reversed": "aceptación, sanación emocional"
+    },
+    "Seis de Copas": {
+      "core": { "number": "pasado, nostalgia", "suit": "emociones, vínculos" },
+      "upright": "recuerdos, inocencia, conexión pasada",
+      "reversed": "quedarse en el pasado, dificultad para avanzar"
+    },
+    "Siete de Copas": {
+      "core": { "number": "opciones, ilusión", "suit": "emociones, vínculos" },
+      "upright": "fantasía, múltiples opciones, confusión",
+      "reversed": "claridad, decisión, ver la realidad"
+    },
+    "Ocho de Copas": {
+      "core": { "number": "abandono, búsqueda", "suit": "emociones, vínculos" },
+      "upright": "dejar atrás, búsqueda interna",
+      "reversed": "resistencia a soltar, apego emocional"
+    },
+    "Nueve de Copas": {
+      "core": { "number": "satisfacción", "suit": "emociones, vínculos" },
+      "upright": "deseo cumplido, satisfacción emocional",
+      "reversed": "placer superficial, insatisfacción interna"
+    },
+    "Diez de Copas": {
+      "core": { "number": "plenitud", "suit": "emociones, vínculos" },
+      "upright": "felicidad plena, armonía familiar",
+      "reversed": "tensión familiar, felicidad aparente"
+    }
+  },
+  "Espadas": {
+    "As de Espadas": {
+      "core": { "number": "inicio mental", "suit": "mente, conflicto" },
+      "upright": "claridad, verdad, nueva idea",
+      "reversed": "confusión, verdad distorsionada"
+    },
+    "Dos de Espadas": {
+      "core": { "number": "bloqueo, decisión", "suit": "mente, conflicto" },
+      "upright": "indecisión, negación, bloqueo mental",
+      "reversed": "decisión forzada, ruptura del bloqueo"
+    },
+    "Tres de Espadas": {
+      "core": { "number": "dolor", "suit": "mente, conflicto" },
+      "upright": "herida emocional, traición",
+      "reversed": "sanación, liberación del dolor"
+    },
+    "Cuatro de Espadas": {
+      "core": { "number": "reposo", "suit": "mente, conflicto" },
+      "upright": "descanso, recuperación",
+      "reversed": "agotamiento, no parar"
+    },
+    "Cinco de Espadas": {
+      "core": { "number": "conflicto", "suit": "mente, conflicto" },
+      "upright": "victoria amarga, conflicto desigual",
+      "reversed": "reconciliación o resentimiento persistente"
+    },
+    "Seis de Espadas": {
+      "core": { "number": "transición", "suit": "mente, conflicto" },
+      "upright": "paso a calma, alejamiento",
+      "reversed": "dificultad para avanzar"
+    },
+    "Siete de Espadas": {
+      "core": { "number": "estrategia", "suit": "mente, conflicto" },
+      "upright": "engaño, estrategia, evasión",
+      "reversed": "verdad revelada, culpa"
+    },
+    "Ocho de Espadas": {
+      "core": { "number": "restricción", "suit": "mente, conflicto" },
+      "upright": "limitación mental, sentirse atrapado",
+      "reversed": "liberación, cambio de perspectiva"
+    },
+    "Nueve de Espadas": {
+      "core": { "number": "ansiedad", "suit": "mente, conflicto" },
+      "upright": "preocupación, angustia",
+      "reversed": "superación del miedo"
+    },
+    "Diez de Espadas": {
+      "core": { "number": "final", "suit": "mente, conflicto" },
+      "upright": "final doloroso, colapso",
+      "reversed": "renacer tras crisis"
+    }
+  },
+  "Oros": {
+    "As de Oros": {
+      "core": { "number": "inicio material", "suit": "recursos, estabilidad" },
+      "upright": "oportunidad material, inicio sólido",
+      "reversed": "oportunidad perdida"
+    },
+    "Dos de Oros": {
+      "core": { "number": "equilibrio", "suit": "recursos, estabilidad" },
+      "upright": "adaptación, manejo de recursos",
+      "reversed": "desequilibrio financiero"
+    },
+    "Tres de Oros": {
+      "core": { "number": "colaboración", "suit": "recursos, estabilidad" },
+      "upright": "trabajo en equipo, aprendizaje",
+      "reversed": "falta de coordinación"
+    },
+    "Cuatro de Oros": {
+      "core": { "number": "control", "suit": "recursos, estabilidad" },
+      "upright": "retención, seguridad",
+      "reversed": "apego excesivo o pérdida"
+    },
+    "Cinco de Oros": {
+      "core": { "number": "crisis", "suit": "recursos, estabilidad" },
+      "upright": "carencia, dificultad material",
+      "reversed": "recuperación o negación de ayuda"
+    },
+    "Seis de Oros": {
+      "core": { "number": "intercambio", "suit": "recursos, estabilidad" },
+      "upright": "dar y recibir, equilibrio",
+      "reversed": "desigualdad, dependencia"
+    },
+    "Siete de Oros": {
+      "core": { "number": "evaluación", "suit": "recursos, estabilidad" },
+      "upright": "paciencia, espera de resultados",
+      "reversed": "frustración, abandono"
+    },
+    "Ocho de Oros": {
+      "core": { "number": "trabajo", "suit": "recursos, estabilidad" },
+      "upright": "esfuerzo, aprendizaje constante",
+      "reversed": "trabajo sin sentido"
+    },
+    "Nueve de Oros": {
+      "core": { "number": "autosuficiencia", "suit": "recursos, estabilidad" },
+      "upright": "independencia, logro material",
+      "reversed": "dependencia o inseguridad"
+    },
+    "Diez de Oros": {
+      "core": { "number": "legado", "suit": "recursos, estabilidad" },
+      "upright": "estabilidad a largo plazo, herencia",
+      "reversed": "inestabilidad familiar o financiera"
+    }
+  }
+}

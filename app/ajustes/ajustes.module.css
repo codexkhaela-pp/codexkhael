@@ -1,0 +1,176 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  color: #e9dec4;
+}
+
+.header {
+  margin-bottom: 10px;
+}
+
+.title {
+  font-family: var(--font-serif), serif;
+  font-size: 28px;
+  color: #e5c9a3;
+  margin: 0 0 5px 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #787596;
+  margin: 0;
+}
+
+.section {
+  background: linear-gradient(145deg, #0f0e1a, #161326);
+  border: 1px solid rgba(197, 168, 128, 0.22);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.sectionTitle {
+  font-family: var(--font-serif), serif;
+  font-size: 18px;
+  color: #e5c9a3;
+  margin: 0 0 20px 0;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(197, 168, 128, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  font-size: 13px;
+  color: #c8c3d9;
+  font-weight: 500;
+}
+
+.input {
+  background: #0b0a13;
+  border: 1px solid rgba(197, 168, 128, 0.3);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  max-width: 400px;
+}
+
+.input:focus {
+  border-color: #c9a66b;
+  box-shadow: 0 0 0 2px rgba(201, 166, 107, 0.2);
+}
+
+.button {
+  background: linear-gradient(135deg, #443773, #2e2454);
+  color: #fff;
+  border: 1px solid rgba(197, 168, 128, 0.4);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: fit-content;
+}
+
+.button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #514285, #3a2d66);
+  border-color: #c9a66b;
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.buttonPrimary {
+  background: linear-gradient(135deg, #c9a66b, #967d59);
+  color: #110f1f;
+  border: none;
+  font-weight: 600;
+}
+
+.buttonPrimary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dfbc7e, #a88d66);
+}
+
+.message {
+  margin-top: 15px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.messageSuccess {
+  background: rgba(41, 128, 109, 0.15);
+  border: 1px solid rgba(41, 128, 109, 0.4);
+  color: #8ce6cc;
+}
+
+.messageError {
+  background: rgba(224, 83, 83, 0.15);
+  border: 1px solid rgba(224, 83, 83, 0.4);
+  color: #ff9e9e;
+}
+
+.planCard {
+  background: #0b0a13;
+  border: 1px solid rgba(197, 168, 128, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.planInfo h4 {
+  margin: 0 0 4px 0;
+  color: #fff;
+  font-size: 16px;
+}
+
+.planInfo p {
+  margin: 0;
+  color: #787596;
+  font-size: 13px;
+}
+
+.planStatus {
+  background: rgba(41, 128, 109, 0.2);
+  color: #8ce6cc;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  margin-top: 8px;
+}

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
+import { ensureChallengeIsNatural } from "../../route";
 
 export const runtime = "nodejs";
 
@@ -35,6 +36,10 @@ export async function GET(_request: Request, context: RouteContext) {
 
   if (!attempt) {
     return NextResponse.json({ error: "Intento no encontrado" }, { status: 404 });
+  }
+
+  if (attempt.challenge) {
+    attempt.challenge = await ensureChallengeIsNatural(attempt.challenge);
   }
 
   return NextResponse.json({ attempt });

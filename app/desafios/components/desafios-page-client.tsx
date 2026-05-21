@@ -52,13 +52,16 @@ export function DesafiosPageClient() {
   const [errorProgress, setErrorProgress] = useState<string | null>(null);
   const [errorRanking, setErrorRanking] = useState<string | null>(null);
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
   useEffect(() => {
     let cancelled = false;
     async function loadChallenges() {
       setLoadingChallenges(true);
       setErrorChallenges(null);
       try {
-        const response = await fetch("/api/desafios", { cache: "no-store", credentials: "same-origin" });
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const response = await fetch(`/api/desafios?timezone=${encodeURIComponent(tz)}`, { cache: "no-store", credentials: "same-origin" });
         const data = (await response.json()) as ChallengesApiResponse;
         if (!response.ok) throw new Error(data.error ?? "No se pudieron cargar los desafíos.");
         if (!cancelled) setChallenges(data.items ?? []);
@@ -72,7 +75,7 @@ export function DesafiosPageClient() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -151,7 +154,7 @@ export function DesafiosPageClient() {
             <p className={styles.error}>{errorChallenges}</p>
           </section>
         ) : (
-          <DailyChallengeCard challenge={dailyChallenge} />
+          <DailyChallengeCard challenge={dailyChallenge} onReset={() => setRefreshKey((prev) => prev + 1)} />
         )}
 
         <section className={styles.availableCard}>
