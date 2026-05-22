@@ -390,23 +390,113 @@ async function main() {
     permissions.set(permission.code, permission as { id: string; code: PermissionCode });
   }
 
-  const freePlan = await prisma.plan.upsert({
-    where: { name: "FREE" },
-    update: {
-      type: "FREE",
-      status: "ACTIVE",
-      price: 0,
-      currency: "USD",
-    },
-    create: {
+  // ── Plans ──────────────────────────────────────────────────────────────────
+  const ALL_PLAN_PERMISSION_CODES = new Set<PermissionCode>([
+    "BITACORA_CREATE",
+    "BITACORA_VIEW",
+    "TIRADA_CREATE",
+    "TIRADA_VIEW",
+  ]);
+
+  const PLANS = [
+    {
       name: "FREE",
-      type: "FREE",
-      status: "ACTIVE",
+      type: "FREE" as const,
       price: 0,
       currency: "USD",
+      permissionCodes: FREE_PLAN_PERMISSION_CODES,
+      limits: [
+        { code: "AI_PER_DAY",       value: 5  },
+        { code: "READINGS_PER_DAY", value: 3  },
+        { code: "BITACORA_LIMIT",   value: 20 },
+      ],
     },
-    select: { id: true, name: true },
-  });
+    {
+      name: "BASIC",
+      type: "BASIC" as const,
+      price: 9.99,
+      currency: "USD",
+      permissionCodes: ALL_PLAN_PERMISSION_CODES,
+      limits: [
+        { code: "AI_PER_DAY",       value: 20 },
+        { code: "READINGS_PER_DAY", value: 10 },
+        { code: "BITACORA_LIMIT",   value: -1 }, // -1 = unlimited
+      ],
+    },
+    {
+      name: "PRO",
+      type: "PRO" as const,
+      price: 19.99,
+      currency: "USD",
+      permissionCodes: ALL_PLAN_PERMISSION_CODES,
+      limits: [
+        { code: "AI_PER_DAY",       value: 200 },
+        { code: "READINGS_PER_DAY", value: 200 },
+        { code: "BITACORA_LIMIT",   value: -1  },
+      ],
+    },
+  ] as const;
+
+  const seededPlans: { id: string; name: string }[] = [];
+
+  for (const planDef of PLANS) {
+    const plan = await prisma.plan.upsert({
+      where: { name: planDef.name },
+      update: {
+        type: planDef.type,
+        status: "ACTIVE",
+        price: planDef.price,
+        currency: planDef.currency,
+      },
+      create: {
+        name: planDef.name,
+        type: planDef.type,
+        status: "ACTIVE",
+        price: planDef.price,
+        currency: planDef.currency,
+      },
+      select: { id: true, name: true },
+    });
+
+    seededPlans.push(plan);
+
+    // Upsert PlanLimit records
+    for (const limitDef of planDef.limits) {
+      const existing = await prisma.planLimit.findFirst({
+        where: { planId: plan.id, code: limitDef.code },
+      });
+      if (existing) {
+        await prisma.planLimit.update({
+          where: { id: existing.id },
+          data: { value: limitDef.value },
+        });
+      } else {
+        await prisma.planLimit.create({
+          data: { planId: plan.id, code: limitDef.code, value: limitDef.value },
+        });
+      }
+    }
+
+    // Sync plan permissions
+    for (const permission of permissions.values()) {
+      if (planDef.permissionCodes.has(permission.code as PermissionCode)) {
+        await prisma.planPermission.upsert({
+          where: {
+            planId_permissionId: { planId: plan.id, permissionId: permission.id },
+          },
+          update: {},
+          create: { planId: plan.id, permissionId: permission.id },
+        });
+      } else {
+        await prisma.planPermission.deleteMany({
+          where: { planId: plan.id, permissionId: permission.id },
+        });
+      }
+    }
+  }
+
+  const freePlan = seededPlans.find((p) => p.name === "FREE")!;
+  // ── End Plans ───────────────────────────────────────────────────────────────
 
   const adminRole = roles.get("ADMIN");
   if (!adminRole) {
@@ -458,31 +548,6 @@ async function main() {
         permissionId: permission.id,
       },
     });
-
-    // FREE plan receives only the non-admin tarot usage permissions.
-    if (FREE_PLAN_PERMISSION_CODES.has(permission.code)) {
-      await prisma.planPermission.upsert({
-        where: {
-          planId_permissionId: {
-            planId: freePlan.id,
-            permissionId: permission.id,
-          },
-        },
-        update: {},
-        create: {
-          planId: freePlan.id,
-          permissionId: permission.id,
-        },
-      });
-    } else {
-      // Cleanup keeps seed idempotent and enforces FREE-plan permission scope.
-      await prisma.planPermission.deleteMany({
-        where: {
-          planId: freePlan.id,
-          permissionId: permission.id,
-        },
-      });
-    }
   }
 
   await seedLevelConfig();
@@ -491,7 +556,9 @@ async function main() {
   console.log("Seed completed successfully.");
   console.log(`Admin user: ${adminUser.email}`);
   console.log("Admin password (temporary): KhaelCodex147");
-  console.log(`Plan: ${freePlan.name}`);
+  for (const plan of seededPlans) {
+    console.log(`Plan seeded: ${plan.name} (id: ${plan.id})`);
+  }
 }
 
 main()

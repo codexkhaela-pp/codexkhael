@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { BitacoraWorkbench } from "@/app/diario/bitacora-workbench";
 import { createRereadingInApi, fetchJournalEntriesFromApi, fetchJournalEntryByIdFromApi } from "@/app/diario/api-client";
 import type { JournalEntry, JournalRereading } from "@/app/diario/types";
+import { useRouter } from "next/navigation";
 import styles from "./diario-hub.module.css";
 
 type ViewMode =
@@ -101,9 +102,13 @@ type DiarioHubProps = {
 };
 
 export function DiarioHub({ onViewTypeChange }: DiarioHubProps) {
+  const router = useRouter();
   const [view, setView] = useState<ViewMode>({ type: "list" });
   const [refreshToken, setRefreshToken] = useState(0);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [canCreateNew, setCanCreateNew] = useState(true);
+  const [limitReason, setLimitReason] = useState<string | null>(null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortKey>("recent");
   const [page, setPage] = useState(1);
@@ -113,9 +118,11 @@ export function DiarioHub({ onViewTypeChange }: DiarioHubProps) {
 
     async function loadEntries() {
       setIsLoading(true);
-      const nextEntries = await fetchJournalEntriesFromApi();
+      const result = await fetchJournalEntriesFromApi();
       if (!cancelled) {
-        setEntries(nextEntries);
+        setEntries(result.entries);
+        setCanCreateNew(result.canCreateNew);
+        setLimitReason(result.limitReason);
         setIsLoading(false);
       }
     }
@@ -214,7 +221,17 @@ export function DiarioHub({ onViewTypeChange }: DiarioHubProps) {
   return (
     <section className={styles.journalMain} aria-label="Historial de Diario / Bitácora">
       <div className={styles.topActions}>
-        <button type="button" className={styles.newEntryButton} onClick={() => setView({ type: "new" })}>
+        <button 
+          type="button" 
+          className={styles.newEntryButton} 
+          onClick={() => {
+            if (!canCreateNew) {
+              setShowLimitModal(true);
+              return;
+            }
+            setView({ type: "new" });
+          }}
+        >
           + Nuevo registro
         </button>
       </div>
@@ -332,6 +349,40 @@ export function DiarioHub({ onViewTypeChange }: DiarioHubProps) {
             </button>
           </div>
         </>
+      )}
+
+      {showLimitModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowLimitModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalIcon}>✦</div>
+            <h3 className={styles.modalTitle}>Límite Alcanzado</h3>
+            <p className={styles.modalText}>
+              {limitReason || "Has alcanzado el límite de bitácoras de tu plan."}
+            </p>
+            <p className={styles.modalSubText}>
+              Mejora tu plan para poder guardar más lecturas y seguir tu progreso sin límites.
+            </p>
+            <div className={styles.modalActions}>
+              <button 
+                type="button" 
+                className={styles.modalCancelBtn} 
+                onClick={() => setShowLimitModal(false)}
+              >
+                Cerrar
+              </button>
+              <button 
+                type="button" 
+                className={styles.modalUpgradeBtn}
+                onClick={() => {
+                  setShowLimitModal(false);
+                  router.push('/planes');
+                }}
+              >
+                Ver Planes
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

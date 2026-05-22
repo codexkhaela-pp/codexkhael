@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/auth-server";
 
 export const runtime = "nodejs";
 
+import { prisma } from "@/lib/prisma";
+
 export async function GET() {
   const user = await getCurrentUser();
 
@@ -10,5 +12,14 @@ export async function GET() {
     return NextResponse.json({ valid: false }, { status: 401 });
   }
 
-  return NextResponse.json({ valid: true, email: user.email });
+  const profile = await prisma.userProfile.findUnique({
+    where: { userId: user.id },
+    select: { userPlan: true },
+  });
+
+  return NextResponse.json({ 
+    valid: true, 
+    email: user.email,
+    plan: profile?.userPlan || "FREE"
+  });
 }

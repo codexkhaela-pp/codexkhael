@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,18 @@ export function DashboardTopHeader({
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [plan, setPlan] = useState<string>("FREE");
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.valid && data.plan) {
+          setPlan(data.plan);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch plan:", err));
+  }, []);
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -60,16 +72,21 @@ export function DashboardTopHeader({
 
       <div className={styles.headerRight}>
         <div className={styles.userMenu} ref={menuRef}>
-          <button
-            type="button"
-            className={styles.userMiniAvatar}
-            aria-label="Abrir menú de usuario"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((prev) => !prev)}
-          >
-            <img src={avatarSrc} alt="Avatar" />
-          </button>
+          <div className={styles.avatarContainer}>
+            <button
+              type="button"
+              className={styles.userMiniAvatar}
+              aria-label="Abrir menú de usuario"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <img src={avatarSrc} alt="Avatar" />
+            </button>
+            <div className={`${styles.planPill} ${styles[`planPill${plan}`] || styles.planPillFREE}`}>
+              {plan}
+            </div>
+          </div>
 
           {menuOpen ? (
             <div className={styles.userDropdown} role="menu" aria-label="Menú de usuario">

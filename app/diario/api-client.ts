@@ -1,8 +1,10 @@
-﻿import type { JournalEntry } from "@/app/diario/types";
+import type { JournalEntry } from "@/app/diario/types";
 import { getJournalEntries, getJournalEntryById } from "@/app/diario/storage";
 
 type ListResponse = {
   entries?: JournalEntry[];
+  canCreateNew?: boolean;
+  limitReason?: string | null;
   error?: string;
 };
 
@@ -42,31 +44,34 @@ async function parseJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function fetchJournalEntriesFromApi(): Promise<JournalEntry[]> {
+export type FetchJournalEntriesResult = {
+  entries: JournalEntry[];
+  canCreateNew: boolean;
+  limitReason: string | null;
+};
+
+export async function fetchJournalEntriesFromApi(): Promise<FetchJournalEntriesResult> {
+  const fallback: FetchJournalEntriesResult = { entries: getJournalEntries(), canCreateNew: true, limitReason: null };
   try {
     const response = await fetch("/api/diario/entries", {
       method: "GET",
       credentials: "same-origin",
     });
 
-    if (response.status === 401) {
-      return getJournalEntries();
-    }
-
-    if (!response.ok) {
-      return getJournalEntries();
+    if (response.status === 401 || !response.ok) {
+      return fallback;
     }
 
     const data = await parseJson<ListResponse>(response);
     const apiEntries = Array.isArray(data.entries) ? data.entries : [];
 
-    if (apiEntries.length > 0) {
-      return apiEntries;
-    }
-
-    return getJournalEntries();
+    return {
+      entries: apiEntries.length > 0 ? apiEntries : getJournalEntries(),
+      canCreateNew: data.canCreateNew ?? true,
+      limitReason: data.limitReason ?? null
+    };
   } catch {
-    return getJournalEntries();
+    return fallback;
   }
 }
 

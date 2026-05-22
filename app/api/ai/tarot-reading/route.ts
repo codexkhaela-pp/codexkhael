@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth-server";
+import { prisma } from "@/lib/prisma";
+import { resetIfNeeded } from "@/lib/usage/reset";
+import { canUseAI } from "@/lib/usage/limits";
+import { resolvePlanTier } from "@/lib/plans";
 
 export async function POST(req: Request) {
   try {
@@ -12,6 +16,19 @@ export async function POST(req: Request) {
     if (!apiKey) {
       return NextResponse.json({ error: "La IA no está configurada todavía." }, { status: 503 });
     }
+
+    // ── Usage guard ────────────────────────────────────────────────────────────
+    const profile = await getOrCreateProfile(user.id);
+    const freshProfile = await resetIfNeeded(profile);
+
+    const check = canUseAI(freshProfile);
+    if (!check.allowed) {
+      return NextResponse.json(
+        { error: "LIMIT_REACHED", reason: check.reason, plan: resolvePlanTier(freshProfile.userPlan), limit: check.limit },
+        { status: 403 }
+      );
+    }
+    // ── End usage guard ────────────────────────────────────────────────────────
 
     const payload = await req.json();
 
@@ -68,9 +85,27 @@ Tu respuesta DEBE ser obligatoriamente un JSON puro (sin formato markdown) con l
     const content = data.choices[0].message.content;
     const parsed = JSON.parse(content);
 
+    // Increment counter + log (only on success)
+    await prisma.$transaction([
+      prisma.userProfile.update({
+        where: { id: freshProfile.id },
+        data: { dailyAiCount: { increment: 1 } },
+      }),
+      prisma.usageLog.create({
+        data: { userId: user.id, type: "AI", planSnapshot: resolvePlanTier(freshProfile.userPlan) },
+      }),
+    ]);
+
     return NextResponse.json(parsed);
   } catch (err) {
     console.error("AI Route Error:", err);
     return NextResponse.json({ error: "Error interno procesando la lectura AI" }, { status: 500 });
   }
+}
+
+/** Finds or creates a UserProfile for the given userId. Always returns a non-null profile. */
+async function getOrCreateProfile(userId: string) {
+  const existing = await prisma.userProfile.findUnique({ where: { userId } });
+  if (existing) return existing;
+  return prisma.userProfile.create({ data: { userId } });
 }

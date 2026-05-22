@@ -29,8 +29,25 @@ enum PermissionCode {
   PLANS_MANAGE
 }
 
+/// Commercial tier — what the user can DO
+enum PlanTier {
+  FREE
+  BASIC
+  PRO
+}
+
+/// How the user pays — billing cycle (used in Plan model & subscriptions)
+enum BillingType {
+  MONTHLY
+  YEARLY
+  ONE_TIME
+}
+
+/// Legacy: kept for Plan model backward compatibility
 enum PlanType {
   FREE
+  BASIC
+  PRO
   MONTHLY
   YEARLY
   ONE_TIME
@@ -127,6 +144,7 @@ model User {
   xpTransactions   UserXpTransaction[]
   challengeAttempts UserChallengeAttempt[]
   challenges      Challenge[]
+  usageLogs       UsageLog[]
 
   @@index([email])
 }
@@ -147,6 +165,16 @@ model UserProfile {
   timezone       String   @default("America/Lima")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  // Plan & usage tracking
+  userPlan          PlanTier  @default(FREE)
+  billingType       BillingType?
+  planStartedAt     DateTime?
+  planExpiresAt     DateTime?
+  dailyAiCount      Int       @default(0)
+  lastAiReset       DateTime?
+  dailyReadingCount Int       @default(0)
+  lastReadingReset  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -494,4 +522,23 @@ model PasswordResetToken {
 
   @@index([userId])
   @@index([tokenHash])
+}
+
+enum UsageType {
+  AI
+  READING
+}
+
+model UsageLog {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  type          UsageType
+  planSnapshot  PlanTier  @default(FREE)
+  createdAt     DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+  @@index([planSnapshot])
 }

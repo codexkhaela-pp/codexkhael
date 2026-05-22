@@ -1,4 +1,4 @@
-﻿.journalMain {
+.journalMain {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -284,6 +284,119 @@
 
 .pageTotal {
   color: #a9a4bc !important;
+}
+
+/* --- Limit Modal Styles --- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 3, 10, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.modalContent {
+  background: radial-gradient(circle at top right, rgba(42, 30, 76, 0.25), transparent 60%),
+              linear-gradient(160deg, #110e1f, #0c0a16);
+  border: 1px solid rgba(201, 166, 107, 0.25);
+  border-radius: 20px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 166, 107, 0.08) inset;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modalIcon {
+  font-size: 36px;
+  color: #c9a66b;
+  margin-bottom: 16px;
+  text-shadow: 0 0 20px rgba(201, 166, 107, 0.4);
+}
+
+.modalTitle {
+  margin: 0 0 12px;
+  font-family: "Cinzel", "Times New Roman", serif;
+  font-size: 24px;
+  color: #f3ecdf;
+}
+
+.modalText {
+  margin: 0 0 12px;
+  color: #d8d3e5;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.modalSubText {
+  margin: 0 0 28px;
+  color: #8c89a3;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.modalCancelBtn {
+  background: transparent;
+  border: 1px solid rgba(201, 166, 107, 0.3);
+  color: #c9a66b;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.modalCancelBtn:hover {
+  background: rgba(201, 166, 107, 0.08);
+}
+
+.modalUpgradeBtn {
+  background: linear-gradient(145deg, #d8b36f, #c5a163);
+  border: 1px solid rgba(201, 166, 107, 0.7);
+  color: #1d1408;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.modalUpgradeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(201, 166, 107, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (max-width: 1500px) {
