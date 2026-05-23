@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { resetIfNeeded } from "@/lib/usage/reset";
 import { canUseAI } from "@/lib/usage/limits";
 import { resolvePlanTier } from "@/lib/plans";
+import { canUseSpread } from "@/lib/features";
 
 export async function POST(req: Request) {
   try {
@@ -31,10 +32,32 @@ export async function POST(req: Request) {
     // ── End usage guard ────────────────────────────────────────────────────────
 
     const payload = await req.json();
+    const plan = resolvePlanTier(freshProfile.userPlan);
+    const spreadType = payload.spreadType ?? "";
+
+    if (spreadType && !canUseSpread(plan, spreadType)) {
+      return NextResponse.json(
+        {
+          error: "FEATURE_NOT_ALLOWED",
+          feature: "SPREAD",
+          spreadType,
+          requiredPlan: "BASIC"
+        },
+        { status: 403 }
+      );
+    }
+
+    let baseInstructions = `Tu tarea es profundizar en una lectura de tarot basándote en la interpretación base proporcionada por el sistema.
+La IA NO reemplaza el motor base, SOLO amplía/profundiza la lectura existente.`;
+
+    if (plan === "PRO") {
+      baseInstructions += `\nINSTRUCCIÓN ESPECIAL (MODO MENTOR): Responde como un mentor de tarot. Explica paso a paso cómo se interpreta cada carta, por qué tiene ese significado y cómo se conecta con la tirada y su posición. Enseña, no solo respondas. Usa un lenguaje didáctico.`;
+    } else {
+      baseInstructions += `\nINSTRUCCIÓN ESPECIAL: Responde de forma breve, clara y directa. No expliques el razonamiento paso a paso. Da una interpretación general y concisa en máximo 2 o 3 párrafos.`;
+    }
 
     const systemPrompt = `Eres un guía experto en Tarot (Codex Khael).
-Tu tarea es profundizar en una lectura de tarot basándote en la interpretación base proporcionada por el sistema.
-La IA NO reemplaza el motor base, SOLO amplía/profundiza la lectura existente.
+${baseInstructions}
 
 Reglas:
 - Responder en español usando un tono de guía empático y reflexivo, no sentencia absoluta.

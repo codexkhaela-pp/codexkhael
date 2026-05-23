@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
@@ -18,6 +20,7 @@ import {
 import { tarotCards, type TarotCard } from "@/src/data/tarotCards";
 import { JOURNAL_SPREADS } from "@/app/diario/spreads";
 import { createJournalEntryInApi } from "@/app/diario/api-client";
+import { canUseSpread } from "@/lib/features";
 import type {
   JournalCardPlacement,
   JournalCanvasSnapshot,
@@ -124,9 +127,10 @@ type DragGroupState = {
 interface SpreadDropdownProps {
   spreadId: string;
   onSelect: (spreadId: string) => void;
+  currentPlan: string;
 }
 
-function SpreadDropdown({ spreadId, onSelect }: SpreadDropdownProps) {
+function SpreadDropdown({ spreadId, onSelect, currentPlan }: SpreadDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const selectedSpread = JOURNAL_SPREADS.find((spread) => spread.id === spreadId) ?? JOURNAL_SPREADS[0];
@@ -160,7 +164,7 @@ function SpreadDropdown({ spreadId, onSelect }: SpreadDropdownProps) {
       </button>
       {isOpen ? (
         <ul className="deck-menu" role="listbox" aria-label="Seleccionar tipo de tirada">
-          {JOURNAL_SPREADS.map((option) => (
+          {JOURNAL_SPREADS.filter((option) => canUseSpread(currentPlan, option.id)).map((option) => (
             <li key={option.id}>
               <button
                 type="button"
@@ -449,6 +453,19 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
   const [selectedPlacementIds, setSelectedPlacementIds] = useState<string[]>([]);
   const [saveMessage, setSaveMessage] = useState<string>("");
   const [trayQuery, setTrayQuery] = useState("");
+  const [currentPlan, setCurrentPlan] = useState<string>("FREE");
+  const router = useRouter();
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.valid && data.plan) {
+          setCurrentPlan(data.plan);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
@@ -911,7 +928,12 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
       setSaveMessage("Entrada guardada en base de datos.");
       onSaved?.(savedEntry);
     } catch (error) {
-      setSaveMessage(error instanceof Error ? error.message : "No se pudo guardar la entrada.");
+      const msg = error instanceof Error ? error.message : "No se pudo guardar la entrada.";
+      if (msg === "LIMIT_REACHED") {
+        setSaveMessage("Has alcanzado el límite de bitácoras de tu plan. Mejora a Básico o Pro.");
+      } else {
+        setSaveMessage(msg);
+      }
     }
   }
 
@@ -998,7 +1020,7 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
             </label>
             <div className="journal-dropdown-field journal-metadata-spread">
               <span>Tipo de tirada</span>
-              <SpreadDropdown spreadId={selectedSpreadId} onSelect={updateSpread} />
+              <SpreadDropdown spreadId={selectedSpreadId} onSelect={updateSpread} currentPlan={currentPlan} />
             </div>
             <label className="journal-metadata-question">
               Pregunta / tema

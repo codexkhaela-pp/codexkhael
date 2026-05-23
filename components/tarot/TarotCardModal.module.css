@@ -1,0 +1,679 @@
+/* TarotCardModal.module.css - Updates para Resumen y Simbología Explicita */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modalShell {
+  background: #0B0C10;
+  width: 98%;
+  max-width: 1600px; 
+  height: 92vh;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-cormorant), 'Times New Roman', serif;
+  color: #E2DFD2;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  background: #111218;
+  height: 70px;
+}
+
+.titleBlock {
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+}
+
+.nombreCarta {
+  font-family: var(--font-cinzel), serif;
+  font-size: 32px;
+  color: #D4AF37;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.arcanoNumero {
+  font-size: 14px;
+  color: #8A7A5D;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.orientationToggle {
+  display: flex;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 20px;
+  padding: 0.2rem;
+  gap: 0.2rem;
+}
+
+.toggleBtn {
+  background: transparent;
+  border: none;
+  color: #8A7A5D;
+  padding: 0.4rem 1.2rem;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-cinzel), serif;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.toggleBtn.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(165, 138, 89, 0.4) 100%);
+  color: #FDFBF7;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: #8A7A5D;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+  color: #D4AF37;
+}
+
+/* BODY GRID */
+.bodyGrid {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  background: #0E0F14;
+}
+
+/* LEFT PANEL */
+.leftPanel {
+  flex: 0 0 25%;
+  border-right: 1px solid rgba(212, 175, 55, 0.15);
+  padding: 1.5rem;
+  background: #111218;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none;
+}
+
+.cardImageFrame {
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  max-height: 520px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.6), 0 0 0 1px rgba(212, 175, 55, 0.3);
+  margin-bottom: 1.5rem;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fallbackFrame {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #111218 0%, #1a1b24 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(212, 175, 55, 0.3);
+}
+
+.fallbackIcon {
+  font-size: 40px;
+  color: rgba(212, 175, 55, 0.5);
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.6s ease;
+}
+
+.imagePlaceholder.reversed {
+  transform: rotate(180deg);
+}
+
+.keywordsTitle {
+  font-family: var(--font-cinzel), serif;
+  color: #D4AF37;
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+
+.keywordsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.keywordItem {
+  background: rgba(212, 175, 55, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #E2DFD2;
+}
+
+.keyMessageCard {
+  background: rgba(20, 20, 25, 0.6);
+  border-left: 2px solid #D4AF37;
+  padding: 1rem;
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 1.5rem;
+}
+
+.keyMessageTitle {
+  font-family: var(--font-cinzel), serif;
+  font-size: 13px;
+  color: #D4AF37;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+
+.keyMessageText {
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.4;
+  color: #E2DFD2;
+}
+
+/* RIGHT PANEL */
+.rightPanel {
+  flex: 0 0 75%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.tabsBar {
+  display: flex;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  padding: 0.5rem 1.5rem 0;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: #111218;
+}
+
+.tabBtn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #8A7A5D;
+  font-family: var(--font-cinzel), serif;
+  font-size: 14px;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover:not(.locked) {
+  color: #E2DFD2;
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.tabBtn.active {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-bottom: none;
+  color: #D4AF37;
+}
+
+.tabBtn.locked {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+/* CONTENT GRID */
+.contentGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 73% 27%;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+}
+
+.contentGrid.fullWidth {
+  grid-template-columns: 1fr;
+}
+
+.mainContentArea {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tabTitle {
+  font-family: var(--font-cinzel), serif;
+  font-size: 20px;
+  color: #D4AF37;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 0.5rem;
+  margin: 0;
+}
+
+/* DASHBOARD DE RESUMEN */
+.resumenContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.resumenAmbitosGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.resumenMainCard {
+  background: linear-gradient(180deg, rgba(20, 21, 28, 0.9) 0%, rgba(15, 16, 22, 0.95) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 8px;
+  padding: 1.2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.resumenAmbitoCard {
+  background: rgba(15, 16, 22, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 8px;
+  padding: 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.resumenAmbitoCard:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+  background: rgba(20, 21, 28, 0.8);
+}
+
+.resumenCardTitle {
+  font-family: var(--font-cinzel), serif;
+  color: #D4AF37;
+  font-size: 16px;
+  margin: 0 0 1rem 0;
+  border-bottom: 1px dashed rgba(212, 175, 55, 0.2);
+  padding-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.resumenSplit {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.resumenHalf {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.resumenLabel {
+  font-size: 12px;
+  color: #D4AF37;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.resumenText {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #E2DFD2;
+  margin: 0;
+}
+
+.resumenSymbolsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.resumenSymbolItem {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.resumenSymbolName {
+  color: #D4AF37;
+  font-weight: bold;
+}
+
+.resumenSymbolDesc {
+  color: #E2DFD2;
+}
+
+/* INTERPRETATION CARDS */
+.interpretationGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  gap: 1.2rem;
+  flex: 1;
+}
+
+.uprightCard, .reversedCard {
+  background: linear-gradient(180deg, rgba(20, 21, 28, 0.9) 0%, rgba(15, 16, 22, 0.95) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 10px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+}
+
+.uprightCard.active, .reversedCard.active {
+  border-color: rgba(212, 175, 55, 0.7);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.2rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  padding-bottom: 0.8rem;
+}
+
+.sectionIcon {
+  font-size: 18px;
+  color: #D4AF37;
+}
+
+.sectionTitle {
+  font-family: var(--font-cinzel), serif;
+  color: #D4AF37;
+  font-size: 18px; 
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* SUB BLOCKS */
+.subBlocksContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.subBlock {
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid rgba(212, 175, 55, 0.4);
+  padding: 0.8rem 1rem;
+  border-radius: 0 6px 6px 0;
+}
+
+.subBlockHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.subBlockIcon {
+  font-size: 14px;
+}
+
+.subBlockTitle {
+  font-family: var(--font-cinzel), serif;
+  color: #C9A66B;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.subBlockText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #E2DFD2;
+  margin: 0;
+}
+
+.lockedSubBlock {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px dashed rgba(212, 175, 55, 0.3);
+  padding: 1rem;
+  border-radius: 6px;
+  color: rgba(212, 175, 55, 0.8);
+  font-style: italic;
+  font-size: 14px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* SYMBOLOGY GRID */
+.symbologyGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.symbolCard {
+  background: linear-gradient(180deg, rgba(20, 21, 28, 0.9) 0%, rgba(15, 16, 22, 0.95) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.symbolTitle {
+  font-family: var(--font-cinzel), serif;
+  color: #D4AF37;
+  font-size: 18px;
+  margin: 0 0 0.5rem 0;
+  border-bottom: 1px dashed rgba(212, 175, 55, 0.2);
+  padding-bottom: 0.5rem;
+}
+
+.symbolSections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.symbolSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.8rem;
+  border-radius: 6px;
+  border-left: 2px solid rgba(212, 175, 55, 0.3);
+}
+
+.symbolLabel {
+  font-size: 12px;
+  color: #D4AF37;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.symbolText {
+  font-size: 14px;
+  color: #E2DFD2;
+  line-height: 1.5;
+}
+
+/* SIDE CONTENT AREA */
+.sideContentArea {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-left: 1px dashed rgba(212, 175, 55, 0.15); 
+  padding-left: 1.5rem;
+}
+
+.momentCard, .questionsCard, .affirmationCard {
+  background: rgba(10, 11, 15, 0.4);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.cardHeader {
+  font-family: var(--font-cinzel), serif;
+  color: #8A7A5D;
+  font-size: 13px; 
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.05);
+  padding-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.cardText {
+  color: #B0A58F;
+  line-height: 1.4;
+  font-size: 13px;
+}
+
+.emptyState {
+  color: #6A5D4D;
+  font-style: italic;
+  font-size: 13px;
+  text-align: left;
+}
+
+.questionsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.questionsList li {
+  position: relative;
+  padding-left: 14px;
+  margin-bottom: 6px;
+  color: #B0A58F;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.questionsList li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: #8A7A5D;
+  font-size: 10px;
+  top: 2px;
+}
+
+/* BOTTOM BAR */
+.bottomBarArea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 1rem 1.5rem;
+  background: #111218;
+  gap: 1.5rem;
+}
+
+.practicalTipBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.practicalTipBar .tipIcon {
+  font-size: 20px;
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.practicalTipBar .tipContent h4 {
+  font-family: var(--font-cinzel), serif;
+  color: #D4AF37;
+  margin: 0 0 0.2rem 0;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.practicalTipBar .tipContent p {
+  margin: 0;
+  line-height: 1.4;
+  font-size: 13px;
+  color: #E2DFD2;
+}
+
+@media (max-width: 1200px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .bodyGrid {
+    flex-direction: column;
+  }
+  .leftPanel, .rightPanel {
+    flex: auto;
+  }
+  .leftPanel {
+    border-right: none;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  }
+}

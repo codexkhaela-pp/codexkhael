@@ -296,6 +296,36 @@
   box-shadow: 0 12px 24px rgba(220, 178, 60, 0.3);
 }
 
+.limitBanner {
+  background: rgba(220, 178, 60, 0.1);
+  border: 1px solid rgba(220, 178, 60, 0.4);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 40px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(220, 178, 60, 0.15);
+  animation: slideDown 0.4s ease-out forwards;
+}
+
+.limitBannerTitle {
+  color: #f5d769;
+  font-family: "Cinzel", serif;
+  font-size: 22px;
+  margin: 0 0 12px;
+}
+
+.limitBannerText {
+  color: #e9dec4;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .planesFooter {
   margin-top: 60px;
   display: flex;

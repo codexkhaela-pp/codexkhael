@@ -49,6 +49,13 @@ export async function requestAiTarotReading(payload: AiTarotReadingRequest): Pro
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
+    if (errorData.error === "FEATURE_NOT_ALLOWED") {
+      const required = errorData.requiredPlan === "PRO" ? "Pro" : "Básico";
+      throw new Error(`Esta función está disponible desde el plan ${required}.`);
+    }
+    if (errorData.error === "LIMIT_REACHED") {
+      throw new Error("LIMIT_REACHED");
+    }
     throw new Error(errorData.error || "Error al conectar con la IA");
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getQuickInterpretation, type InterpretationTone } from "@/lib/quick-interpretation";
 import { tarotCards, type TarotCard } from "@/src/data/tarotCards";
@@ -8,6 +9,7 @@ import { tarotSpreads } from "@/src/data/tarotSpreads";
 import { SpreadLayout } from "@/app/tiradas/components/spread-layout";
 import type { DrawnCard, ReadingStatus } from "@/app/tiradas/types";
 import { requestAiTarotReading, type AiTarotReadingResponse, type AiTarotReadingRequest } from "@/lib/ai-client";
+import { canUseSpread } from "@/lib/features";
 
 type ReadingResult = {
   spreadId: string;
@@ -127,6 +129,7 @@ function renderText(text: string): string {
 }
 
 export function SpreadReader() {
+  const router = useRouter();
   const riderWaiteDeck = useMemo(() => tarotCards.filter((card) => card.deck === "rider-waite"), []);
 
   const [spreadId, setSpreadId] = useState(tarotSpreads[0]?.id ?? "");
@@ -138,6 +141,19 @@ export function SpreadReader() {
   const [interpretationTone, setInterpretationTone] = useState<InterpretationTone>("psychological");
   const [aiDepthState, setAiDepthState] = useState<"idle" | "loading" | "ready">("idle");
   const [aiResponse, setAiResponse] = useState<AiTarotReadingResponse | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<string>("FREE");
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.valid && data.plan) {
+          setCurrentPlan(data.plan);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const [aiDepthError, setAiDepthError] = useState<string | null>(null);
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
@@ -286,6 +302,10 @@ export function SpreadReader() {
       setAiDepthState("ready");
     } catch (err: any) {
       console.error("Error AI:", err);
+      if (err.message === "LIMIT_REACHED") {
+        router.push("/planes?from=limit");
+        return;
+      }
       setAiDepthError(err.message || "Error conectando con la IA");
       setAiDepthState("idle");
     }
@@ -312,19 +332,37 @@ export function SpreadReader() {
   return (
     <section className="reading-tool" aria-label="Generador de tiradas">
       <div className="reading-spreads" role="radiogroup" aria-label="Tipo de tirada">
-        {tarotSpreads.map((spread) => (
-          <button
-            key={spread.id}
-            type="button"
-            role="radio"
-            aria-checked={spread.id === spreadId}
-            className={`spread-chip${spread.id === spreadId ? " spread-chip-active" : ""}`}
-            onClick={() => setSpreadId(spread.id)}
-            disabled={isBusy}
-          >
-            {spread.name}
-          </button>
-        ))}
+        {tarotSpreads.map((spread) => {
+          const isAllowed = canUseSpread(currentPlan, spread.id);
+          const requiredPlan = isAllowed ? "" : (
+            currentPlan === "FREE" && ["five-cards", "horseshoe", "celtic-cross", "line-seven"].includes(spread.id)
+              ? "Básico"
+              : "Pro"
+          );
+
+          return (
+            <button
+              key={spread.id}
+              type="button"
+              role="radio"
+              aria-checked={spread.id === spreadId}
+              className={`spread-chip${spread.id === spreadId ? " spread-chip-active" : ""}${!isAllowed ? " spread-chip-locked" : ""}`}
+              onClick={() => {
+                if (!isAllowed) {
+                  router.push(`/planes?from=feature&feature=${spread.id}`);
+                  return;
+                }
+                setSpreadId(spread.id);
+              }}
+              disabled={isBusy}
+            >
+              {spread.name}
+              {!isAllowed && (
+                <span className="spread-chip-badge">🔒 {requiredPlan}</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <div className="reading-board">

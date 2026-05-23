@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BitacoraWorkbench } from "@/app/diario/bitacora-workbench";
-import { createRereadingInApi, fetchJournalEntriesFromApi, fetchJournalEntryByIdFromApi } from "@/app/diario/api-client";
+import { createRereadingInApi, fetchJournalEntriesFromApi, fetchJournalEntryByIdFromApi, deleteJournalEntryInApi, exportJournalEntryToPdf } from "@/app/diario/api-client";
 import type { JournalEntry, JournalRereading } from "@/app/diario/types";
 import { useRouter } from "next/navigation";
 import styles from "./diario-hub.module.css";
@@ -399,6 +399,21 @@ function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
   const [form, setForm] = useState(buildInitialRereadingForm);
   const [saveMessage, setSaveMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<string>("FREE");
+  const router = useRouter();
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.valid && data.plan) {
+          setCurrentPlan(data.plan);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -445,6 +460,38 @@ function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
     }
   }
 
+  async function handleDelete() {
+    if (!entry || isDeleting) return;
+    const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.");
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteJournalEntryInApi(entry.id);
+      onBack(); // Go back to list, which should refresh since we increment refreshToken in parent usually (wait, onBack in detail view does `setRefreshToken(v=>v+1)` and `setView({ type: "list" })`)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Error al eliminar");
+      setIsDeleting(false);
+    }
+  }
+
+  async function handleExportPdf() {
+    if (currentPlan !== "PRO") {
+      router.push("/planes?from=feature&feature=export-pdf");
+      return;
+    }
+
+    if (!entry || isExporting) return;
+    setIsExporting(true);
+    try {
+      await exportJournalEntryToPdf(entry.id);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Error al exportar PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <section className="journal-history">
@@ -473,11 +520,19 @@ function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
 
   return (
     <section className="journal-detail" aria-label="Detalle de entrada de bitácora">
-      <div className="journal-history-header">
+      <div className="journal-history-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>Entrada registrada</h2>
-        <button type="button" className="btn btn-secondary" onClick={onBack}>
-          Volver al historial
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button type="button" className="btn btn-secondary" onClick={handleExportPdf} disabled={isExporting}>
+            {isExporting ? "Generando..." : (currentPlan === "PRO" ? "Descargar PDF" : "🔒 Descargar PDF")}
+          </button>
+          <button type="button" className="btn btn-secondary" style={{ borderColor: "#cc0000", color: "#cc0000" }} onClick={handleDelete} disabled={isDeleting}>
+            {isDeleting ? "Eliminando..." : "🗑️ Eliminar"}
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={onBack}>
+            Volver al historial
+          </button>
+        </div>
       </div>
 
       <article className="journal-detail-card">

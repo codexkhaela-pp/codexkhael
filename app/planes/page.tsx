@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./planes.module.css";
 
-export default function PlanesPage() {
+function PlanesContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentPlan, setCurrentPlan] = useState<string>("FREE");
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const proCardRef = useRef<HTMLElement>(null);
+
+  const fromLimit = searchParams?.get("from") === "limit";
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -19,6 +23,14 @@ export default function PlanesPage() {
       })
       .catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (fromLimit && proCardRef.current) {
+      setTimeout(() => {
+        proCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 500);
+    }
+  }, [fromLimit]);
 
   const handleUpgrade = async (planToUpgrade: string) => {
     if (isUpgrading) return;
@@ -32,6 +44,7 @@ export default function PlanesPage() {
       if (res.ok) {
         const data = await res.json();
         setCurrentPlan(data.plan);
+        router.replace("/planes"); // clear query param
         router.refresh();
       } else {
         alert("Hubo un error al procesar el plan.");
@@ -50,6 +63,16 @@ export default function PlanesPage() {
 
   return (
     <div className={styles.planesContainer}>
+      {fromLimit && (
+        <div className={styles.limitBanner}>
+          <h2 className={styles.limitBannerTitle}>Ya usaste tus interpretaciones del día</h2>
+          <p className={styles.limitBannerText}>
+            🔓 <strong>Básico:</strong> hasta 20 interpretaciones por día <br/>
+            🔮 <strong>Pro:</strong> interpretaciones ilimitadas + explicaciones completas
+          </p>
+        </div>
+      )}
+
       <header className={styles.planesHeader}>
         <h1 className={styles.planesTitle}>Desbloquea todo tu potencial en el Tarot</h1>
         <p className={styles.planesSubtitle}>
@@ -165,7 +188,7 @@ export default function PlanesPage() {
         </article>
 
         {/* PRO PLAN */}
-        <article className={`${styles.planCard} ${styles.cardPro}`}>
+        <article ref={proCardRef} className={`${styles.planCard} ${styles.cardPro}`}>
           <div className={styles.cardHeader}>
             <div className={styles.recommendedBadge}>Avanzado</div>
             <h2 className={styles.planName}>🟣 PRO</h2>
@@ -183,11 +206,7 @@ export default function PlanesPage() {
               </li>
               <li className={styles.featureItem}>
                 <div className={styles.featureIcon}>✓</div>
-                Interpretaciones profundas
-              </li>
-              <li className={styles.featureItem}>
-                <div className={styles.featureIcon}>✓</div>
-                IA tipo mentor (explica el porqué)
+                Interpretaciones guiadas paso a paso (modo mentor)
               </li>
               <li className={styles.featureItem}>
                 <div className={styles.featureIcon}>✓</div>
@@ -209,6 +228,14 @@ export default function PlanesPage() {
                 <div className={styles.featureIcon}>✓</div>
                 Acceso anticipado a nuevas funciones
               </li>
+              <li className={styles.featureItem} style={{ color: "#f5d769", marginTop: "8px" }}>
+                <div className={styles.featureIcon}>⭐</div>
+                Respuestas detalladas y explicadas
+              </li>
+              <li className={styles.featureItem} style={{ fontStyle: "italic", opacity: 0.8 }}>
+                <div className={styles.featureIcon}>✓</div>
+                Incluye todo lo del plan Básico
+              </li>
             </ul>
             <button 
               type="button" 
@@ -227,5 +254,13 @@ export default function PlanesPage() {
         <p>✦ Tus datos siempre son tuyos</p>
       </div>
     </div>
+  );
+}
+
+export default function PlanesPage() {
+  return (
+    <Suspense fallback={<div style={{ color: "#fff", padding: "40px", textAlign: "center" }}>Cargando planes...</div>}>
+      <PlanesContent />
+    </Suspense>
   );
 }

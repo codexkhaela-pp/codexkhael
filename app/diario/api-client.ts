@@ -103,8 +103,15 @@ export async function createJournalEntryInApi(payload: CreatePayload): Promise<J
     body: JSON.stringify(payload),
   });
 
-  const data = await parseJson<DetailResponse>(response);
+  const data = await parseJson<DetailResponse & { requiredPlan?: string }>(response);
   if (!response.ok || !data.entry) {
+    if (data.error === "FEATURE_NOT_ALLOWED") {
+      const required = data.requiredPlan === "PRO" ? "Pro" : "Básico";
+      throw new Error(`Esta tirada está disponible en el plan ${required}.`);
+    }
+    if (data.error === "LIMIT_REACHED") {
+      throw new Error("LIMIT_REACHED");
+    }
     throw new Error(data.error ?? "No se pudo guardar la entrada en base de datos");
   }
 
@@ -135,4 +142,49 @@ export async function createRereadingInApi(entryId: string, payload: CreateRerea
   }
 
   return data.entry;
+}
+
+export async function deleteJournalEntryInApi(id: string): Promise<void> {
+  const response = await fetch(`/api/diario/entries/${id}`, {
+    method: "DELETE",
+    credentials: "same-origin",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Error al eliminar la entrada.");
+  }
+}
+
+export async function exportJournalEntryToPdf(id: string): Promise<void> {
+  const response = await fetch(`/api/diario/export`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "same-origin",
+    body: JSON.stringify({ entryId: id }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    if (errorData.error === "FEATURE_NOT_ALLOWED") {
+      throw new Error("Exportar en PDF está disponible en el plan Pro");
+    }
+    throw new Error(errorData.error || "Error al generar el PDF.");
+  }
+
+  // Assuming the response is a binary PDF
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.style.display = "none";
+  a.href = url;
+  const dateStr = new Date().toISOString().split("T")[0];
+  const shortId = id.substring(0, 8);
+  a.download = `Lectura_Tarot_${dateStr}_${shortId}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 }

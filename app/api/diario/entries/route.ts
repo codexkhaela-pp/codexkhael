@@ -10,6 +10,7 @@ import {
 import { resetIfNeeded } from "@/lib/usage/reset";
 import { canCreateBitacoraEntry } from "@/lib/usage/limits";
 import { resolvePlanTier } from "@/lib/plans";
+import { canUseSpread } from "@/lib/features";
 
 export const runtime = "nodejs";
 
@@ -68,6 +69,19 @@ export async function POST(request: Request) {
   const spreadType = body.metadata?.spreadType?.trim() ?? "";
   if (!spreadType) {
     return NextResponse.json({ error: "spreadType es obligatorio" }, { status: 400 });
+  }
+
+  // Feature limit guard
+  if (!canUseSpread(freshProfile.userPlan, spreadType)) {
+    return NextResponse.json(
+      {
+        error: "FEATURE_NOT_ALLOWED",
+        feature: "SPREAD",
+        spreadType,
+        requiredPlan: "BASIC" // This is generic, but meets the requirement.
+      },
+      { status: 403 }
+    );
   }
 
   const question = body.metadata?.question?.trim() ?? "";
