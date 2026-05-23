@@ -8,7 +8,8 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const nextRaw = params.next;
-  const nextCandidate = Array.isArray(nextRaw) ? nextRaw[0] : nextRaw;
+  let nextCandidate = Array.isArray(nextRaw) ? nextRaw[0] : nextRaw;
+  if (nextCandidate === "/dashboard") nextCandidate = "/dashboard-preview";
   const nextPath =
     nextCandidate && nextCandidate.startsWith("/") ? nextCandidate : "/dashboard-preview";
 

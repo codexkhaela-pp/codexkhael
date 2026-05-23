@@ -403,7 +403,7 @@ export function SpreadReader() {
             <button type="button" className="btn btn-secondary" onClick={startReading} disabled={isBusy}>
               Nueva tirada
             </button>
-            <Link className="btn btn-secondary" href="/dashboard">
+            <Link className="btn btn-secondary" href="/dashboard-preview">
               Volver al dashboard
             </Link>
           </div>

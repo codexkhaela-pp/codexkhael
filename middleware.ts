@@ -25,6 +25,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname === "/dashboard") {
+    return NextResponse.redirect(new URL("/dashboard-preview", request.url));
+  }
+
   if (authenticated) {
     return NextResponse.next();
   }

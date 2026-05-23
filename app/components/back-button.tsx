@@ -8,7 +8,7 @@ type BackButtonProps = {
 };
 
 export function BackButton({
-  fallbackHref = "/dashboard",
+  fallbackHref = "/dashboard-preview",
   label = "Volver",
 }: BackButtonProps) {
   const router = useRouter();

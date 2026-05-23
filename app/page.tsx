@@ -13,7 +13,7 @@ export default function HomePage() {
           <a href="#v1">Plataforma</a>
           <a href="#acceso">Acceso</a>
         </nav>
-        <Link className="btn btn-primary header-access" href="/dashboard">
+        <Link className="btn btn-primary header-access" href="/dashboard-preview">
           Acceder
         </Link>
       </header>
@@ -31,7 +31,7 @@ export default function HomePage() {
               interpretaciones y construir tu propio grimorio vivo con una metodología clara.
             </p>
             <div className="actions">
-              <Link className="btn btn-primary" href="/dashboard">
+              <Link className="btn btn-primary" href="/dashboard-preview">
                 Acceder
               </Link>
               <a className="btn btn-secondary" href="#v1">

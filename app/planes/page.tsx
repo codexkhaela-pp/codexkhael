@@ -119,7 +119,7 @@ function PlanesContent() {
               type="button" 
               className={`${styles.actionBtn} ${styles.btnFree}`}
               disabled={isBasic || isPro || isUpgrading}
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/dashboard-preview")}
             >
               {isFree ? "Plan actual" : "Plan actual"}
             </button>

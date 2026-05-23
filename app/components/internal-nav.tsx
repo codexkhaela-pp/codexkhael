@@ -9,12 +9,12 @@ export async function InternalNav() {
   return (
     <header className="internal-nav">
       <SessionGuard />
-      <Link href="/dashboard" className="brand">
+      <Link href="/dashboard-preview" className="brand">
         <span className="brand-mark">✦</span>
         <span>CodexKhael</span>
       </Link>
       <nav className="internal-links">
-        <Link href="/dashboard">Panel</Link>
+        <Link href="/dashboard-preview">Panel</Link>
         <Link href="/cartas">Cartas</Link>
         <Link href="/tiradas">Tiradas</Link>
         <Link href="/diario">Diario / Bitácora</Link>

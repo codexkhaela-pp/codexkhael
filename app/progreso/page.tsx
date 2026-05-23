@@ -33,7 +33,7 @@ export default function ProgresoPage() {
       </section>
 
       <div style={{ marginTop: "24px" }}>
-        <Link href="/dashboard" className="btn btn-secondary">
+        <Link href="/dashboard-preview" className="btn btn-secondary">
           Volver al panel
         </Link>
       </div>
