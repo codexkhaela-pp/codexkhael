@@ -290,6 +290,8 @@ type QuickInterpretationInput = {
   spreadId: string;
   cards: SpreadInterpretationCard[];
   tone: InterpretationTone;
+  question?: string | null;
+  spreadName?: string | null;
 };
 
 function normalize(value: string): string {
@@ -438,6 +440,7 @@ function buildSummary(
   cards: SpreadInterpretationCard[],
   tone: InterpretationTone,
   seed: number,
+  question?: string | null,
 ): string {
   const total = cards.length;
   const rightCount = cards.filter((c) => !c.reversed).length;
@@ -499,13 +502,20 @@ function buildSummary(
           "La energia aparece distribuida, sin un palo imponiendose con claridad.",
         ];
 
+  const questionText = question?.trim()
+    ? `La pregunta que organiza la lectura es: "${question.trim()}".`
+    : "";
+
   return [
+    questionText,
     pickVariant(openers, seed, 1),
     pickVariant(balanceVariants, seed, 2),
     pickVariant(majorVariants, seed, 3),
     pickVariant(dominantSuitVariants, seed, 4),
     getOpeningByTone(tone),
-  ].join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function buildRelationships(spreadId: string, total: number, seed: number): string {
@@ -618,10 +628,140 @@ function buildFinalAdvice(cards: SpreadInterpretationCard[], tone: Interpretatio
   return `${pickVariant(openers, seed, 20)} ${pickVariant(bridge, seed, 21)} ${closingByTone[tone]}`;
 }
 
+function detectQuestionContext(question?: string | null): "love" | "work" | "decision" | "general" {
+  const q = question ? question.toLowerCase() : "";
+  if (
+    q.includes("amor") ||
+    q.includes("relacion") ||
+    q.includes("relación") ||
+    q.includes("pareja") ||
+    q.includes("vinculo") ||
+    q.includes("vínculo") ||
+    q.includes("persona") ||
+    q.match(/\b(el|él|ella)\b/)
+  ) {
+    return "love";
+  }
+  if (
+    q.includes("trabajo") ||
+    q.includes("dinero") ||
+    q.includes("empleo") ||
+    q.includes("negocio") ||
+    q.includes("proyecto") ||
+    q.includes("finanzas")
+  ) {
+    return "work";
+  }
+  if (
+    q.includes("decision") ||
+    q.includes("decisión") ||
+    q.includes("elegir") ||
+    q.includes("opcion") ||
+    q.includes("camino") ||
+    q.includes("que hacer") ||
+    q.includes("qué hacer")
+  ) {
+    return "decision";
+  }
+  return "general";
+}
+
+function buildManualInterpretation(
+  cards: SpreadInterpretationCard[],
+  question: string | null | undefined,
+  tone: InterpretationTone,
+  seed: number,
+): QuickInterpretationOutput {
+  const context = detectQuestionContext(question);
+  const majors = cards.filter((c) => c.card.arcana === "major").length;
+  
+  let summaryContext = "La lectura avanza con cuidado.";
+  if (context === "love") summaryContext = "La dinámica afectiva se muestra en movimiento, pidiendo honestidad y ajustes.";
+  else if (context === "work") summaryContext = "El panorama material requiere orden y prioridades claras para sostenerse.";
+  else if (context === "decision") summaryContext = "Las opciones sobre la mesa exigen claridad interna antes de actuar.";
+
+  const summaryVariants = [
+    `${summaryContext} ${majors >= cards.length / 2 ? "Aparecen fuerzas de destino importantes; no es un tránsito menor, hay un aprendizaje profundo." : "La situación avanza paso a paso, sostenida en decisiones cotidianas más que en grandes giros del destino."}`,
+    `El tablero muestra una progresión clara. ${summaryContext} Observa cómo se compensan las fuerzas: donde hay freno, también aparece una salida.`,
+    `No hay una definición cerrada aún, pero sí una tendencia marcada. ${summaryContext} ${majors >= cards.length / 2 ? "Hay un componente kármico fuerte impulsando el cambio." : ""}`
+  ];
+  const summary = pickVariant(summaryVariants, seed, 100);
+
+  const positionReadings: PositionReading[] = cards.map((card, idx) => {
+    const role = detectRole(card.position, idx, cards.length);
+    let phrase = getRolePhrase(card, role, tone);
+    // Remove capitalized first letter if it exists to flow better in the sentence
+    phrase = phrase.charAt(0).toLowerCase() + phrase.slice(1);
+    
+    let interpretation = "";
+    if (context === "love") {
+      const vars = [
+        `Aquí se ve una etapa donde ${phrase}. En el plano afectivo, esto se traduce en una necesidad de claridad; no basta con sentir, hay que organizar cómo se intercambia la energía.`,
+        `Esta posición indica que ${phrase}. Aplicado a la relación, sugiere una dinámica donde las emociones buscan encauzarse, tal vez dejando atrás posturas rígidas.`,
+        `Se percibe que ${phrase}. En este vínculo, significa que hay movimiento, aunque se requiere de acuerdos o gestos concretos para no quedarse en la duda.`
+      ];
+      interpretation = pickVariant(vars, seed, 200 + idx);
+    } else if (context === "work") {
+      const vars = [
+        `En lo material o profesional, esto marca que ${phrase}. Es un momento para revisar recursos y no dispersar esfuerzos en varios frentes.`,
+        `Esta influencia refleja que ${phrase}. A nivel laboral, exige pragmatismo: no se trata de empujar por empujar, sino de ordenar la base.`,
+        `Apunta a que ${phrase}. El crecimiento en esta área dependerá de la estructura; si hay desorden, es hora de frenar y ajustar prioridades.`
+      ];
+      interpretation = pickVariant(vars, seed, 200 + idx);
+    } else if (context === "decision") {
+      const vars = [
+        `Respecto a tu elección, esto señala que ${phrase}. Observa si estás decidiendo desde la ansiedad o desde una verdadera necesidad de cambio.`,
+        `El peso de esta posición radica en que ${phrase}. Antes de dar el paso, evalúa si tienes la base firme o si estás forzando el momento.`,
+        `Esto marca una pauta clara: ${phrase}. La ruta a seguir se despeja cuando dejas de sobreanalizar y asumes el costo de elegir.`
+      ];
+      interpretation = pickVariant(vars, seed, 200 + idx);
+    } else {
+      const vars = [
+        `Se observa que ${phrase}. Esto condiciona la situación, exigiendo una mirada más madura sobre lo que realmente está pasando.`,
+        `La tendencia indica que ${phrase}. Hay un proceso activo que necesita tu atención consciente, sin evasiones.`,
+        `Esto sugiere que ${phrase}. El escenario te pide equilibrio; los excesos o la inacción retrasan el desenlace natural.`
+      ];
+      interpretation = pickVariant(vars, seed, 200 + idx);
+    }
+
+    return {
+      positionNumber: idx + 1,
+      positionName: getPositionLabel(card.position),
+      positionSubtitle: getPositionSubtitle(card.position),
+      cardName: card.card.nameEs,
+      orientation: card.reversed ? "Invertida" : "Derecha",
+      interpretation,
+    };
+  });
+
+  const relVariants = [
+    "El recorrido va de una tensión inicial hacia una búsqueda de estabilidad, terminando en una apertura para actuar. Indica que el proceso avanza si logras pasar de la duda a una postura más clara y sostenida.",
+    "Las cartas dialogan mostrando un contraste evidente entre lo que retiene y lo que empuja. La situación evoluciona a tu favor siempre y cuando no fuerces los ritmos ni caigas en la pasividad.",
+    "Hay un hilo conductor que conecta el origen del bloqueo con su posible salida. La progresión de la mesa exige dejar atrás esquemas antiguos para permitir que la energía fluya hacia un desenlace más orgánico."
+  ];
+  const relationships = pickVariant(relVariants, seed, 300);
+
+  let adviceContext = "No fuerces una definición inmediata. Observa los hechos reales antes de exigir garantías.";
+  if (context === "love") adviceContext = "La clave no es solo que exista cariño, sino que ese afecto se sostenga con hechos. Observa la constancia.";
+  if (context === "work") adviceContext = "No arriesgues la base por impaciencia. Primero ordena lo que tienes seguro y desde ahí planifica el salto.";
+  if (context === "decision") adviceContext = "Decidir implica renunciar a la otra opción. Toma el camino que te brinde mayor paz a mediano plazo, no solo alivio inmediato.";
+
+  const adviceVariants = [
+    `${adviceContext} ${closingByTone[tone]}`,
+    `Aterriza tus expectativas. ${adviceContext} ${closingByTone[tone]}`,
+    `Da un paso a la vez. ${adviceContext} ${closingByTone[tone]}`
+  ];
+  const finalAdvice = pickVariant(adviceVariants, seed, 400);
+
+  return { summary, positionReadings, relationships, finalAdvice };
+}
+
 export function getQuickInterpretation({
   spreadId,
   cards,
   tone,
+  question,
+  spreadName: providedSpreadName,
 }: QuickInterpretationInput): QuickInterpretationOutput {
   if (cards.length === 0) {
     return {
@@ -633,10 +773,14 @@ export function getQuickInterpretation({
   }
 
   const selectedSpread = tarotSpreads.find((s) => s.id === spreadId);
-  const spreadName = selectedSpread ? selectedSpread.name : "Tirada";
+  const spreadName = providedSpreadName?.trim() || (selectedSpread ? selectedSpread.name : "Tirada");
   const seed = getInterpretationSeed(spreadId, cards, tone);
 
-  const summary = buildSummary(spreadName, cards, tone, seed);
+  if (spreadId === "manual-free") {
+    return buildManualInterpretation(cards, question, tone, seed);
+  }
+
+  const summary = buildSummary(spreadName, cards, tone, seed, question);
   const relationships = buildRelationships(spreadId, cards.length, seed);
   const finalAdvice = buildFinalAdvice(cards, tone, seed);
 

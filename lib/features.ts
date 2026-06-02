@@ -16,6 +16,14 @@ export const SPREAD_ACCESS_BY_PLAN: Record<PlanTier, string[]> = {
   PRO: ["*"], // Todas las tiradas permitidas
 };
 
+export const MANUAL_SPREAD_ID = "manual-free";
+
+export const MANUAL_SPREAD_MAX_CARDS_BY_PLAN: Record<PlanTier, number> = {
+  FREE: 3,
+  BASIC: 10,
+  PRO: 10,
+};
+
 export function canUseSpread(plan: string | null | undefined, spreadId: string): boolean {
   const planTier = plan === "BASIC" || plan === "PRO" ? plan : "FREE";
   const allowedSpreads = SPREAD_ACCESS_BY_PLAN[planTier as PlanTier] || [];
@@ -25,4 +33,17 @@ export function canUseSpread(plan: string | null | undefined, spreadId: string):
   }
   
   return allowedSpreads.includes(spreadId);
+}
+
+export function getManualSpreadMaxCards(plan: string | null | undefined): number {
+  const planTier = plan === "BASIC" || plan === "PRO" ? plan : "FREE";
+  return MANUAL_SPREAD_MAX_CARDS_BY_PLAN[planTier as PlanTier];
+}
+
+export function canUseManualSpreadCardCount(plan: string | null | undefined, count: number): boolean {
+  if (!Number.isInteger(count) || count < 1) {
+    return false;
+  }
+
+  return count <= getManualSpreadMaxCards(plan);
 }

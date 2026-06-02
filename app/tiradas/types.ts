@@ -8,3 +8,13 @@ export type DrawnCard = {
   card: TarotCard;
   reversed: boolean;
 };
+
+export type ManualBoardCard = {
+  id: string; // row-col
+  row: number;
+  col: number;
+  cardId: string;
+  cardSearch: string;
+  reversed: boolean;
+  label: string;
+};

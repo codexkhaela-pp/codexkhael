@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { resetIfNeeded } from "@/lib/usage/reset";
 import { canUseAI } from "@/lib/usage/limits";
 import { resolvePlanTier } from "@/lib/plans";
-import { canUseSpread } from "@/lib/features";
+import { canUseManualSpreadCardCount, canUseSpread, MANUAL_SPREAD_ID } from "@/lib/features";
+import { tarotSpreads } from "@/src/data/tarotSpreads";
 
 export async function POST(req: Request) {
   try {
@@ -33,18 +34,36 @@ export async function POST(req: Request) {
 
     const payload = await req.json();
     const plan = resolvePlanTier(freshProfile.userPlan);
-    const spreadType = payload.spreadType ?? "";
+    const spreadType = typeof payload.spreadType === "string" ? payload.spreadType : "";
+    const cardCount = Array.isArray(payload.cards) ? payload.cards.length : 0;
 
-    if (spreadType && !canUseSpread(plan, spreadType)) {
-      return NextResponse.json(
-        {
-          error: "FEATURE_NOT_ALLOWED",
-          feature: "SPREAD",
-          spreadType,
-          requiredPlan: "BASIC"
-        },
-        { status: 403 }
-      );
+    if (spreadType === MANUAL_SPREAD_ID) {
+      if (!canUseManualSpreadCardCount(plan, cardCount)) {
+        return NextResponse.json(
+          {
+            error: "FEATURE_NOT_ALLOWED",
+            feature: "SPREAD",
+            spreadType,
+            requiredPlan: "BASIC",
+          },
+          { status: 403 }
+        );
+      }
+    } else if (spreadType) {
+      const resolvedSpreadId =
+        tarotSpreads.find((spread) => spread.id === spreadType || spread.name === spreadType)?.id ?? spreadType;
+
+      if (!canUseSpread(plan, resolvedSpreadId)) {
+        return NextResponse.json(
+          {
+            error: "FEATURE_NOT_ALLOWED",
+            feature: "SPREAD",
+            spreadType: resolvedSpreadId,
+            requiredPlan: "BASIC"
+          },
+          { status: 403 }
+        );
+      }
     }
 
     let baseInstructions = `Tu tarea es profundizar en una lectura de tarot basándote en la interpretación base proporcionada por el sistema.
