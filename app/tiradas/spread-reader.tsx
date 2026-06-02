@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuthSession } from "@/lib/use-auth-session";
 import { getQuickInterpretation, type InterpretationTone } from "@/lib/quick-interpretation";
 import { tarotCards, type TarotCard } from "@/src/data/tarotCards";
 import { tarotSpreads } from "@/src/data/tarotSpreads";
@@ -141,18 +142,8 @@ export function SpreadReader() {
   const [interpretationTone, setInterpretationTone] = useState<InterpretationTone>("psychological");
   const [aiDepthState, setAiDepthState] = useState<"idle" | "loading" | "ready">("idle");
   const [aiResponse, setAiResponse] = useState<AiTarotReadingResponse | null>(null);
-  const [currentPlan, setCurrentPlan] = useState<string>("FREE");
-
-  useEffect(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.valid && data.plan) {
-          setCurrentPlan(data.plan);
-        }
-      })
-      .catch(console.error);
-  }, []);
+  const authSession = useAuthSession();
+  const currentPlan = authSession.plan;
 
   const [aiDepthError, setAiDepthError] = useState<string | null>(null);
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
@@ -333,7 +324,7 @@ export function SpreadReader() {
     <section className="reading-tool" aria-label="Generador de tiradas">
       <div className="reading-spreads" role="radiogroup" aria-label="Tipo de tirada">
         {tarotSpreads.map((spread) => {
-          const isAllowed = canUseSpread(currentPlan, spread.id);
+          const isAllowed = currentPlan ? canUseSpread(currentPlan, spread.id) : false;
           const requiredPlan = isAllowed ? "" : (
             currentPlan === "FREE" && ["five-cards", "horseshoe", "celtic-cross", "line-seven"].includes(spread.id)
               ? "Básico"
@@ -354,7 +345,7 @@ export function SpreadReader() {
                 }
                 setSpreadId(spread.id);
               }}
-              disabled={isBusy}
+              disabled={isBusy || authSession.status === "loading"}
             >
               {spread.name}
               {!isAllowed && (
@@ -407,6 +398,7 @@ export function SpreadReader() {
               Volver al dashboard
             </Link>
           </div>
+          {authSession.status === "loading" ? <p className="reading-status">Cargando sesion...</p> : null}
         </aside>
 
         <section className={`reading-main${status === "completada" ? " reading-main-complete" : ""}`} aria-label="Resultado de tirada">

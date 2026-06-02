@@ -1,9 +1,12 @@
+import { requireCurrentUser } from "@/lib/require-auth";
 import { DashboardPageHeader } from "@/app/components/dashboard-page-header";
 import { CardsBrowser } from "@/app/cartas/cards-browser";
 import { tarotCards } from "@/src/data/tarotCards";
 import styles from "./cartas.module.css";
 
-export default function CartasPage() {
+export default async function CartasPage() {
+  await requireCurrentUser("/cartas");
+
   return (
     <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
       <DashboardPageHeader
@@ -15,4 +18,3 @@ export default function CartasPage() {
     </main>
   );
 }
-

@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth-server";
+import type { PlanTier } from "@/lib/plans";
 
 export const runtime = "nodejs";
 
 import { prisma } from "@/lib/prisma";
+
+function normalizePlan(plan: string | null | undefined): PlanTier | null {
+  if (plan === "FREE" || plan === "BASIC" || plan === "PRO") {
+    return plan;
+  }
+  return null;
+}
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -17,9 +25,9 @@ export async function GET() {
     select: { userPlan: true },
   });
 
-  return NextResponse.json({ 
-    valid: true, 
+  return NextResponse.json({
+    valid: true,
     email: user.email,
-    plan: profile?.userPlan || "FREE"
+    plan: normalizePlan(profile?.userPlan),
   });
 }

@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthSession } from "@/lib/use-auth-session";
 import styles from "./dashboard-top-header.module.css";
 
 type DashboardTopHeaderProps = {
@@ -16,21 +18,11 @@ export function DashboardTopHeader({
   onToggleSidebar,
 }: DashboardTopHeaderProps) {
   const router = useRouter();
+  const pathname = usePathname() ?? "/";
+  const authSession = useAuthSession();
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [plan, setPlan] = useState<string>("FREE");
-
-  useEffect(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.valid && data.plan) {
-          setPlan(data.plan);
-        }
-      })
-      .catch((err) => console.error("Failed to fetch plan:", err));
-  }, []);
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -67,35 +59,47 @@ export function DashboardTopHeader({
         aria-label={isSidebarCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
         onClick={onToggleSidebar}
       >
-        ☰
+        {"\u2630"}
       </button>
 
       <div className={styles.headerRight}>
-        <div className={styles.userMenu} ref={menuRef}>
-          <div className={styles.avatarContainer}>
-            <button
-              type="button"
-              className={styles.userMiniAvatar}
-              aria-label="Abrir menú de usuario"
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((prev) => !prev)}
-            >
-              <img src={avatarSrc} alt="Avatar" />
-            </button>
-            <div className={`${styles.planPill} ${styles[`planPill${plan}`] || styles.planPillFREE}`}>
-              {plan}
-            </div>
-          </div>
-
-          {menuOpen ? (
-            <div className={styles.userDropdown} role="menu" aria-label="Menú de usuario">
-              <button type="button" className={styles.userDropdownItem} onClick={onLogout} disabled={isLoggingOut}>
-                {isLoggingOut ? "Saliendo..." : "Cerrar sesión"}
+        {authSession.status === "loading" ? (
+          <div className={`${styles.planPill} ${styles.planPillFREE}`}>...</div>
+        ) : authSession.status === "authenticated" ? (
+          <div className={styles.userMenu} ref={menuRef}>
+            <div className={styles.avatarContainer}>
+              <button
+                type="button"
+                className={styles.userMiniAvatar}
+                aria-label="Abrir menú de usuario"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((prev) => !prev)}
+              >
+                <img src={avatarSrc} alt="Avatar" />
               </button>
+              {authSession.plan ? (
+                <div
+                  className={`${styles.planPill} ${styles[`planPill${authSession.plan}`] || styles.planPillFREE}`}
+                >
+                  {authSession.plan}
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
+
+            {menuOpen ? (
+              <div className={styles.userDropdown} role="menu" aria-label="Menú de usuario">
+                <button type="button" className={styles.userDropdownItem} onClick={onLogout} disabled={isLoggingOut}>
+                  {isLoggingOut ? "Saliendo..." : "Cerrar sesión"}
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <Link href={`/login?next=${encodeURIComponent(pathname)}`} className={styles.planPill}>
+            Iniciar sesión
+          </Link>
+        )}
       </div>
     </header>
   );

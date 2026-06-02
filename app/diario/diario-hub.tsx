@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BitacoraWorkbench } from "@/app/diario/bitacora-workbench";
 import { createRereadingInApi, fetchJournalEntriesFromApi, fetchJournalEntryByIdFromApi, deleteJournalEntryInApi, exportJournalEntryToPdf } from "@/app/diario/api-client";
 import type { JournalEntry, JournalRereading } from "@/app/diario/types";
+import { useAuthSession } from "@/lib/use-auth-session";
 import { useRouter } from "next/navigation";
 import styles from "./diario-hub.module.css";
 
@@ -401,19 +402,9 @@ function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<string>("FREE");
+  const authSession = useAuthSession();
   const router = useRouter();
-
-  useEffect(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.valid && data.plan) {
-          setCurrentPlan(data.plan);
-        }
-      })
-      .catch(console.error);
-  }, []);
+  const currentPlan = authSession.plan;
 
   useEffect(() => {
     let cancelled = false;
@@ -476,6 +467,11 @@ function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
   }
 
   async function handleExportPdf() {
+    if (authSession.status !== "authenticated") {
+      router.push("/login?next=/diario");
+      return;
+    }
+
     if (currentPlan !== "PRO") {
       router.push("/planes?from=feature&feature=export-pdf");
       return;
@@ -524,7 +520,13 @@ function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
         <h2>Entrada registrada</h2>
         <div style={{ display: "flex", gap: "10px" }}>
           <button type="button" className="btn btn-secondary" onClick={handleExportPdf} disabled={isExporting}>
-            {isExporting ? "Generando..." : (currentPlan === "PRO" ? "Descargar PDF" : "🔒 Descargar PDF")}
+            {isExporting
+              ? "Generando..."
+              : authSession.status === "loading"
+                ? "Cargando plan..."
+                : currentPlan === "PRO"
+                  ? "Descargar PDF"
+                  : "PDF bloqueado"}
           </button>
           <button type="button" className="btn btn-secondary" style={{ borderColor: "#cc0000", color: "#cc0000" }} onClick={handleDelete} disabled={isDeleting}>
             {isDeleting ? "Eliminando..." : "🗑️ Eliminar"}

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { redirect } from "next/navigation";
 import { PreviewShadowContent } from "@/app/dashboard-preview/preview-shadow-content";
 import { getCurrentUser } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
@@ -328,16 +329,7 @@ async function resolvePreviewUser() {
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
-    return {
-      userId: null as string | null,
-      displayName: "CodexKhael.app",
-      sexo: null as string | null,
-      nivel: 1,
-      totalXp: 0,
-      currentStreak: 0,
-      rankTitle: "Iniciado",
-      progressPercent: 1,
-    };
+    redirect("/login?next=/dashboard-preview");
   }
 
   const [profile, userRow] = await Promise.all([
@@ -491,4 +483,3 @@ export default async function DashboardPreviewPage() {
     </>
   );
 }
-

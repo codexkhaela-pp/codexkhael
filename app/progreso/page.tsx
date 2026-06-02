@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireCurrentUser } from "@/lib/require-auth";
 import { InternalNav } from "@/app/components/internal-nav";
 
 export const metadata = {
@@ -6,7 +7,9 @@ export const metadata = {
   description: "Resumen de modulos, lecciones y cartas.",
 };
 
-export default function ProgresoPage() {
+export default async function ProgresoPage() {
+  await requireCurrentUser("/progreso");
+
   return (
     <main className="app-shell">
       <InternalNav />

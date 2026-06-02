@@ -1,3 +1,4 @@
+import { requireCurrentUser } from "@/lib/require-auth";
 import { DashboardPageHeader } from "@/app/components/dashboard-page-header";
 import { NewQuizForm } from "@/app/aprendizaje/components/new-quiz-form";
 import styles from "@/app/aprendizaje/aprendizaje.module.css";
@@ -7,7 +8,9 @@ export const metadata = {
   description: "Configura una nueva sesión de aprendizaje por orientación.",
 };
 
-export default function NuevoAprendizajePage() {
+export default async function NuevoAprendizajePage() {
+  await requireCurrentUser("/aprendizaje/nuevo");
+
   return (
     <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
       <DashboardPageHeader
@@ -19,4 +22,3 @@ export default function NuevoAprendizajePage() {
     </main>
   );
 }
-

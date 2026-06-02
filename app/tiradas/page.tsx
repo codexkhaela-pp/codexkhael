@@ -1,7 +1,10 @@
+import { requireCurrentUser } from "@/lib/require-auth";
 import { DashboardPageHeader } from "@/app/components/dashboard-page-header";
 import { SpreadReader } from "@/app/tiradas/spread-reader";
 
-export default function TiradasPage() {
+export default async function TiradasPage() {
+  await requireCurrentUser("/tiradas");
+
   return (
     <main className="app-shell dashboard-preview-bg">
       <DashboardPageHeader
@@ -14,4 +17,3 @@ export default function TiradasPage() {
     </main>
   );
 }
-

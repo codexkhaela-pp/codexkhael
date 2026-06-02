@@ -88,7 +88,7 @@ export function TarotCardModal({ isOpen, onClose, cardId, imageUrl, simulatePlan
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<any>(null);
-  const [userPlan, setUserPlan] = useState<string>("FREE");
+  const [userPlan, setUserPlan] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("resumen");
   const [orientation, setOrientation] = useState<OrientationType>("derecho");
   const [mounted, setMounted] = useState(false);
@@ -110,7 +110,7 @@ export function TarotCardModal({ isOpen, onClose, cardId, imageUrl, simulatePlan
       .then((res) => {
         if (isMounted) {
           setData(res.carta);
-          setUserPlan(res.plan || "FREE");
+          setUserPlan(res.plan === "FREE" || res.plan === "BASIC" || res.plan === "PRO" ? res.plan : null);
         }
       })
       .catch((err) => {
@@ -139,7 +139,8 @@ export function TarotCardModal({ isOpen, onClose, cardId, imageUrl, simulatePlan
     setActiveTab(tabId);
   };
 
-  const isTabLocked = (tabId: TabType, plan: string) => {
+  const isTabLocked = (tabId: TabType, plan: string | null) => {
+    if (!plan) return true;
     if (plan === "PRO") return false;
     if (plan === "BASIC") {
       return ["viajes", "espiritual", "simbologia"].includes(tabId);

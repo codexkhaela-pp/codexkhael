@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuthSession } from "@/lib/use-auth-session";
 import {
   DndContext,
   DragOverlay,
@@ -127,7 +128,7 @@ type DragGroupState = {
 interface SpreadDropdownProps {
   spreadId: string;
   onSelect: (spreadId: string) => void;
-  currentPlan: string;
+  currentPlan: string | null;
 }
 
 function SpreadDropdown({ spreadId, onSelect, currentPlan }: SpreadDropdownProps) {
@@ -161,12 +162,12 @@ function SpreadDropdown({ spreadId, onSelect, currentPlan }: SpreadDropdownProps
       >
         <span>{selectedSpread.name}</span>
         <span className={`deck-chevron${isOpen ? " deck-chevron-open" : ""}`}>v</span>
-      </button>
-      {isOpen ? (
-        <ul className="deck-menu" role="listbox" aria-label="Seleccionar tipo de tirada">
-          {JOURNAL_SPREADS.filter((option) => canUseSpread(currentPlan, option.id)).map((option) => (
-            <li key={option.id}>
-              <button
+        </button>
+        {isOpen ? (
+          <ul className="deck-menu" role="listbox" aria-label="Seleccionar tipo de tirada">
+          {JOURNAL_SPREADS.filter((option) => currentPlan && canUseSpread(currentPlan, option.id)).map((option) => (
+              <li key={option.id}>
+                <button
                 type="button"
                 className={`deck-option${spreadId === option.id ? " deck-option-active" : ""}`}
                 onClick={() => {
@@ -453,19 +454,9 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
   const [selectedPlacementIds, setSelectedPlacementIds] = useState<string[]>([]);
   const [saveMessage, setSaveMessage] = useState<string>("");
   const [trayQuery, setTrayQuery] = useState("");
-  const [currentPlan, setCurrentPlan] = useState<string>("FREE");
+  const authSession = useAuthSession();
   const router = useRouter();
-
-  useEffect(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.valid && data.plan) {
-          setCurrentPlan(data.plan);
-        }
-      })
-      .catch(console.error);
-  }, []);
+  const currentPlan = authSession.plan;
 
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
