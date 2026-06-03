@@ -13,6 +13,7 @@ type DashboardShellProps = {
 function resolveActiveKey(pathname: string): string {
   if (pathname.startsWith("/cartas")) return "cartas";
   if (pathname.startsWith("/tiradas")) return "tiradas";
+  if (pathname.startsWith("/bitacora")) return "bitacora";
   if (pathname.startsWith("/diario")) return "bitacora";
   if (pathname.startsWith("/aprendizaje")) return "repaso";
   if (pathname.startsWith("/desafios")) return "desafios";
@@ -61,4 +62,3 @@ export function DashboardShell({ children }: DashboardShellProps) {
     </div>
   );
 }
-

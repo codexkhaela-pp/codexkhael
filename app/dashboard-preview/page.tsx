@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
 import { resolveLevelByXp } from "@/lib/xp/service";
 import { tarotCards } from "@/src/data/tarotCards";
+import { getOrGenerateDailyCard } from "@/lib/carta-del-dia/service";
 
 function readSourceHtml(): string {
   const preferred = path.join(process.cwd(), "docs", "design", "dashboard-final", "dashboard-final.html");
@@ -277,6 +278,108 @@ function buildReviewCardsHtml(cards: ReviewCardItem[]): string {
     })
     .join("");
 }
+function buildRecentPracticesHtml(entries: any[]): string {
+  if (entries.length === 0) {
+    return `<div class="practice-node" style="justify-content: center; opacity: 0.7;">
+      <div class="node-details" style="text-align: center;">
+        <p style="font-size: 13px; font-style: italic;">Aún no tienes prácticas recientes</p>
+      </div>
+    </div>`;
+  }
+
+  return entries.map(entry => {
+    const title = entry.spreadType || "Tirada Libre";
+    const subtitle = entry.question ? (entry.question.length > 30 ? entry.question.substring(0, 30) + "..." : entry.question) : "Práctica de Tarot";
+    const dateStr = entry.readingDate ? new Date(entry.readingDate).toLocaleDateString("es-ES", { day: "numeric", month: "short" }).replace(".", "") : "Hoy";
+
+    return `
+      <div class="practice-node">
+          <div class="practice-left-group">
+              <div class="mini-tarot-card-render"><span class="mini-tarot-art">🃏</span></div>
+              <div class="node-details">
+                  <h4>${escapeHtml(title)}</h4>
+                  <p>${escapeHtml(subtitle)}</p>
+              </div>
+          </div>
+          <div class="node-date">${dateStr}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function buildDailyCardHtml(dailyCard: any, cardData: any): string {
+  if (!dailyCard || !cardData) {
+    return `<div class="parchment-container">
+        <div class="parchment-content">
+            <span>Tu portal de registro</span>
+            <h3>El Diario del Mago</h3>
+            <p>Explora tu Carta del Día, registra tu Reflexión Nocturna y monitorea tu Historial Energético.</p>
+        </div>
+    </div>`;
+  }
+
+  return `<div class="parchment-container" style="flex-grow: 1;">
+      <div class="parchment-content">
+          <span style="text-transform:uppercase; font-size:10px; letter-spacing:1px; color:#7d6f5e; font-weight:bold;">Tu Carta del Día</span>
+          <h3 style="margin-bottom: 6px;">${escapeHtml(cardData.nameEs)} <span style="font-size:11px; opacity:0.8;">${dailyCard.orientation === "REVERSED" ? "· INVERTIDA" : "· DERECHA"}</span></h3>
+          <p style="font-size: 13px; line-height: 1.4; margin:0;">
+            ${escapeHtml(dailyCard.mensajeDia)}
+          </p>
+      </div>
+      <div class="tarot-card-right-mock" style="padding:0; overflow:hidden; position:relative; min-width: 75px; width: 75px; height: 115px; border-radius: 6px; border: 1px solid rgba(201,166,107,0.3); flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.5); align-self: center;">
+         <img src="${cardData.image}" style="width:100%; height:100%; object-fit:cover; ${dailyCard.orientation === "REVERSED" ? "transform: rotate(180deg);" : ""}" />
+      </div>
+  </div>`;
+}
+
+function buildChallengeHtml(challenge: any): string {
+  if (!challenge) {
+    return `<div class="challenge-container-box">
+        <span class="sub">Desafío Semanal</span>
+        <h3>Próximamente</h3>
+        <p class="desc">Nuevos desafíos para poner a prueba tu intuición llegarán pronto.</p>
+        <div class="challenge-progress-meta">
+            <span>Progreso</span>
+            <span>0 / 0</span>
+        </div>
+        <div class="challenge-bar-bg">
+            <div class="challenge-bar-fill" style="width: 0%;"></div>
+        </div>
+    </div>`;
+  }
+
+  const title = challenge.title;
+  const desc = challenge.description;
+  const sub = challenge.isDaily ? "Desafío Diario" : "Desafío Semanal";
+
+  return `<div class="challenge-container-box">
+        <span class="sub">${escapeHtml(sub)}</span>
+        <h3>${escapeHtml(title)}</h3>
+        <p class="desc">${escapeHtml(desc)}</p>
+        <div class="challenge-progress-meta">
+            <span>Progreso</span>
+            <span>0 / 1</span>
+        </div>
+        <div class="challenge-bar-bg">
+            <div class="challenge-bar-fill" style="width: 0%;"></div>
+        </div>
+    </div>`;
+}
+
+async function resolveRecentPractices(userId: string) {
+  return await prisma.bitacoraEntry.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+  });
+}
+
+async function resolveNextChallenge() {
+  return await prisma.challenge.findFirst({
+    where: { isActive: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
 
 function applyAssetReplacements(
   html: string,
@@ -288,8 +391,15 @@ function applyAssetReplacements(
   streakDays: number,
   progress: ReturnType<typeof getProgressByPercent>,
   reviewCards: ReviewCardItem[],
+  recentPractices: any[],
+  challenge: any,
+  dailyCard: any,
+  cardData: any
 ): string {
   const reviewCardsHtml = buildReviewCardsHtml(reviewCards);
+  const recentPracticesHtml = buildRecentPracticesHtml(recentPractices);
+  const challengeHtml = buildChallengeHtml(challenge);
+  const dailyCardHtml = buildDailyCardHtml(dailyCard, cardData);
 
   return html
     .replace(
@@ -322,6 +432,57 @@ function applyAssetReplacements(
     .replace(
       /<div class="mini-cards-row-flex">[\s\S]*?<\/div>(\s*<button class="btn-action-trigger">Ver todas las cartas<\/button>)/i,
       `<div class="mini-cards-row-flex">${reviewCardsHtml}</div>$1`,
+    )
+    .replace(
+      /<div class="practice-items-stack">[\s\S]*?<\/div>(\s*<button class="btn-action-trigger">Ver todas mis prácticas<\/button>)/i,
+      `<div class="practice-items-stack">${recentPracticesHtml}</div>\n<a href="/bitacora" style="text-decoration:none;">$1</a>`
+    )
+    .replace(
+      /<div class="parchment-container">[\s\S]*?<\/div>\s*<\/div>/i,
+      dailyCardHtml
+    )
+    .replace(
+      /(<article class="card">\s*<div class="card-title">✍ )Mi Bitácora(<\/div>[\s\S]*?)<button class="btn-action-trigger">Ir a mi bitácora<\/button>/i,
+      `$1Mi Carta del Día$2<a href="/diario" style="text-decoration:none; margin-top: auto;"><button class="btn-action-trigger">Registrar mi experiencia</button></a>`
+    )
+    .replace(
+      /<article class="card">\s*<div class="card-title">âš¡ Accesos RÃ¡pidos<\/div>/i,
+      `<article class="card quick-access-card"><div class="card-title">âš¡ Accesos RÃ¡pidos</div>`
+    )
+    .replace(
+      /<div class="quick-actions-quad">[\s\S]*?<\/div>(\s*<button class="btn-action-trigger">Explorar Atajos<\/button>)/i,
+      `<div class="quick-actions-quad">
+          <a href="/tiradas" style="text-decoration:none; color:inherit; display:block;">
+            <div class="action-node">
+                <h4>Nueva Tirada</h4>
+                <p>Mazo Interactivo</p>
+            </div>
+          </a>
+          <a href="/bitacora" style="text-decoration:none; color:inherit; display:block;">
+            <div class="action-node">
+                <h4>Bitácora</h4>
+                <p>Historial</p>
+            </div>
+          </a>
+          <div class="action-node" style="opacity: 0.4; cursor: not-allowed; border-color: rgba(255,255,255,0.01);">
+              <h4>Mis Cursos</h4>
+              <p>Próximamente</p>
+          </div>
+          <a href="/aprendizaje" style="text-decoration:none; color:inherit; display:block;">
+            <div class="action-node">
+                <h4>Repaso</h4>
+                <p>Memoria Activa</p>
+            </div>
+          </a>
+      </div>`
+    )
+    .replace(
+      /<div class="challenge-container-box">[\s\S]*?<\/div>/i,
+      challengeHtml
+    )
+    .replace(
+      /(<article class="card">\s*<div class="card-title">✨ Mi Próximo Desafío<\/div>[\s\S]*?)<button class="btn-action-trigger">Ver desafíos<\/button>/i,
+      `$1<a href="/desafios" style="text-decoration:none;"><button class="btn-action-trigger">Ver desafíos</button></a>`
     );
 }
 
@@ -378,6 +539,10 @@ export default async function DashboardPreviewPage() {
   const rankTitle = previewUser.rankTitle || getRankByLevel(previewUser.nivel, previewUser.sexo);
   const progress = getProgressByPercent(previewUser.progressPercent);
   const reviewCards = await resolveReviewCards(previewUser.userId);
+  const recentPractices = await resolveRecentPractices(previewUser.userId);
+  const challenge = await resolveNextChallenge();
+  const dailyCard = await getOrGenerateDailyCard(previewUser.userId);
+  const cardData = tarotCards.find(c => c.id === dailyCard?.cardId);
 
   const replacedBody = applyAssetReplacements(
     body,
@@ -389,6 +554,10 @@ export default async function DashboardPreviewPage() {
     previewUser.currentStreak,
     progress,
     reviewCards,
+    recentPractices,
+    challenge,
+    dailyCard,
+    cardData
   );
   const { mainInner } = extractSections(replacedBody);
 
@@ -465,6 +634,29 @@ export default async function DashboardPreviewPage() {
         -webkit-box-orient: vertical;
         overflow: hidden;
         min-height: 24px;
+      }
+
+      .quick-access-card {
+        justify-content: flex-start;
+      }
+
+      .quick-access-card .quick-actions-quad {
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+
+      .card:has(.quick-actions-quad) {
+        justify-content: flex-start;
+      }
+
+      .card:has(.quick-actions-quad) .card-title {
+        margin-bottom: 0;
+      }
+
+      .card:has(.quick-actions-quad) .quick-actions-quad {
+        flex: 1;
+        align-content: center;
+        margin: 0;
       }
     `;
 

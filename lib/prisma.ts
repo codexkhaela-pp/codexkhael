@@ -52,11 +52,24 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter: new PrismaPg({ connectionString }),
+function createPrismaClient() {
+  return new PrismaClient({
+    adapter: new PrismaPg({ connectionString: connectionString! }),
   });
+}
+
+function hasExpectedDelegates(client: PrismaClient): boolean {
+  // In dev, Next can retain a singleton created before `prisma generate`.
+  // Recreate it if the cached client predates the current schema.
+  return typeof (client as PrismaClient & { dailyJournalEntry?: unknown }).dailyJournalEntry !== "undefined";
+}
+
+const cachedPrisma = globalForPrisma.prisma;
+
+export const prisma =
+  cachedPrisma && hasExpectedDelegates(cachedPrisma)
+    ? cachedPrisma
+    : createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

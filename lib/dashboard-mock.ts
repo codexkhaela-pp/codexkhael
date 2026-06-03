@@ -158,7 +158,7 @@ export const weeklyChallengeMock: WeeklyChallengeItem[] = [
 
 export const quickAccessMock: QuickAccess[] = [
   { id: "new-reading", label: "Nueva Tirada", sub: "Realiza una tirada", href: "/tiradas", icon: "✦" },
-  { id: "write-journal", label: "Escribir en Bitacora", sub: "Registra tu dia", href: "/diario", icon: "✍" },
+  { id: "write-journal", label: "Abrir Bitacora", sub: "Gestiona tus lecturas", href: "/bitacora", icon: "✍" },
   { id: "my-courses", label: "Mis Cursos", sub: "Continua aprendiendo", icon: "◈" },
   {
     id: "daily-review",

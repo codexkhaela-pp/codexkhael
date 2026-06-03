@@ -41,7 +41,7 @@ export function JournalCard({ entries }: JournalCardProps) {
         ))}
       </div>
 
-      <Link href="/diario" className="db-card-btn" id="btn-ir-bitacora">
+      <Link href="/bitacora" className="db-card-btn" id="btn-ir-bitacora">
         Ir a mi bitacora
       </Link>
     </article>

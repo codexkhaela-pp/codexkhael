@@ -12,7 +12,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { key: "inicio", label: "Inicio", href: "/dashboard-preview", icon: "🔮" },
   { key: "cartas", label: "Cartas", href: "/cartas", icon: "🃏" },
   { key: "tiradas", label: "Tiradas", href: "/tiradas", icon: "🗺" },
-  { key: "bitacora", label: "Bitácora", href: "/diario", icon: "✍" },
+  { key: "bitacora", label: "Bitácora", href: "/bitacora", icon: "✍" },
   { key: "repaso", label: "Repaso", href: "/aprendizaje", icon: "🔄" },
   { key: "desafios", label: "Desafíos", href: "/desafios", icon: "🏆" },
   { key: "ajustes", label: "Ajustes", href: "/ajustes", icon: "⚙️" },

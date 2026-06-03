@@ -14,6 +14,7 @@ function isPanelRoute(pathname: string): boolean {
     pathname.startsWith("/cartas") ||
     pathname.startsWith("/tiradas") ||
     pathname.startsWith("/diario") ||
+    pathname.startsWith("/bitacora") ||
     pathname.startsWith("/desafios") ||
     pathname.startsWith("/aprendizaje") ||
     pathname.startsWith("/ajustes") ||
@@ -30,4 +31,3 @@ export function PanelShellGate({ children }: PanelShellGateProps) {
 
   return <DashboardShell>{children}</DashboardShell>;
 }
-

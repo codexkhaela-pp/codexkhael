@@ -34,8 +34,8 @@ export const dashboardCards: DashboardCard[] = [
     href: "/tiradas",
   },
   {
-    title: "Diario / Bitácora",
-    description: "Registra avances, dudas y aprendizajes de cada sesión.",
+    title: "Diario Energético",
+    description: "Registra cómo se manifestó tu Carta del Día y conserva tu entrada personal.",
     href: "/diario",
   },
   {

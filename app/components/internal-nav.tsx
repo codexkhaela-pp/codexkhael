@@ -17,7 +17,8 @@ export async function InternalNav() {
         <Link href="/dashboard-preview">Panel</Link>
         <Link href="/cartas">Cartas</Link>
         <Link href="/tiradas">Tiradas</Link>
-        <Link href="/diario">Diario / Bitácora</Link>
+        <Link href="/diario">Diario</Link>
+        <Link href="/bitacora">Bitácora</Link>
       </nav>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         {user ? (

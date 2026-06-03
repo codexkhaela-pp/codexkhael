@@ -70,6 +70,12 @@ enum CardOrientation {
   REVERSED
 }
 
+enum DailyJournalStatus {
+  EMPTY
+  PARTIAL
+  COMPLETED
+}
+
 enum LearningQuizMode {
   IMAGE_TO_MEANING
   MEANING_TO_CARD
@@ -124,56 +130,59 @@ enum ChallengeAttemptStatus {
 }
 
 model User {
-  id              String              @id @default(uuid()) @db.Uuid
-  name            String?
-  email           String              @unique
-  passwordHash    String?
-  sessionToken    String?
-  status          UserStatus          @default(ACTIVE)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  roles           UserRole[]
-  bitacoraEntries BitacoraEntry[]
-  reReadings      BitacoraReReading[]
-  subscriptions   UserSubscription[]
-  accessLogs      AccessLog[]
-  resetTokens     PasswordResetToken[]
-  profile         UserProfile?
-  learningSessions LearningQuizSession[]
-  learningProgress CardLearningProgress[]
-  xpTransactions   UserXpTransaction[]
+  id                String                 @id @default(uuid()) @db.Uuid
+  name              String?
+  email             String                 @unique
+  passwordHash      String?
+  sessionToken      String?
+  status            UserStatus             @default(ACTIVE)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  roles             UserRole[]
+  bitacoraEntries   BitacoraEntry[]
+  reReadings        BitacoraReReading[]
+  subscriptions     UserSubscription[]
+  accessLogs        AccessLog[]
+  resetTokens       PasswordResetToken[]
+  profile           UserProfile?
+  learningSessions  LearningQuizSession[]
+  learningProgress  CardLearningProgress[]
+  xpTransactions    UserXpTransaction[]
   challengeAttempts UserChallengeAttempt[]
-  challenges      Challenge[]
-  usageLogs       UsageLog[]
+  challenges        Challenge[]
+  usageLogs         UsageLog[]
+  cartasDelDia      CartaDelDia[]
+  reflexionesDia    ReflexionCartaDia[]
+  dailyJournalEntries DailyJournalEntry[]
 
   @@index([email])
 }
 
 model UserProfile {
-  id             String   @id @default(uuid()) @db.Uuid
-  userId         String   @unique @db.Uuid
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @unique @db.Uuid
   displayName    String?
   sexo           String?
   avatarType     String?
-  level          Int      @default(1)
-  learningStreak Int      @default(0)
-  totalXp        Int      @default(0)
-  currentLevel   Int      @default(1)
-  currentStreak  Int      @default(0)
-  bestStreak     Int      @default(0)
+  level          Int       @default(1)
+  learningStreak Int       @default(0)
+  totalXp        Int       @default(0)
+  currentLevel   Int       @default(1)
+  currentStreak  Int       @default(0)
+  bestStreak     Int       @default(0)
   lastStreakDate DateTime?
-  timezone       String   @default("America/Lima")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  timezone       String    @default("America/Lima")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   // Plan & usage tracking
-  userPlan          PlanTier  @default(FREE)
+  userPlan          PlanTier     @default(FREE)
   billingType       BillingType?
   planStartedAt     DateTime?
   planExpiresAt     DateTime?
-  dailyAiCount      Int       @default(0)
+  dailyAiCount      Int          @default(0)
   lastAiReset       DateTime?
-  dailyReadingCount Int       @default(0)
+  dailyReadingCount Int          @default(0)
   lastReadingReset  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -227,7 +236,7 @@ model Challenge {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  user      User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   questions ChallengeQuestion[]
   attempts  UserChallengeAttempt[]
 
@@ -248,25 +257,25 @@ model ChallengeQuestion {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challenge Challenge             @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   answers   UserChallengeAnswer[]
 
   @@index([challengeId, order])
 }
 
 model UserChallengeAttempt {
-  id           String                @id @default(uuid()) @db.Uuid
-  userId       String                @db.Uuid
-  challengeId  String                @db.Uuid
-  startedAt    DateTime              @default(now())
-  completedAt  DateTime?
-  status       ChallengeAttemptStatus @default(IN_PROGRESS)
-  score        Float                 @default(0)
-  correctCount Int                   @default(0)
-  incorrectCount Int                 @default(0)
-  earnedXp     Int                   @default(0)
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
+  id             String                 @id @default(uuid()) @db.Uuid
+  userId         String                 @db.Uuid
+  challengeId    String                 @db.Uuid
+  startedAt      DateTime               @default(now())
+  completedAt    DateTime?
+  status         ChallengeAttemptStatus @default(IN_PROGRESS)
+  score          Float                  @default(0)
+  correctCount   Int                    @default(0)
+  incorrectCount Int                    @default(0)
+  earnedXp       Int                    @default(0)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
 
   user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge Challenge             @relation(fields: [challengeId], references: [id], onDelete: Cascade)
@@ -277,13 +286,13 @@ model UserChallengeAttempt {
 }
 
 model UserChallengeAnswer {
-  id            String   @id @default(uuid()) @db.Uuid
-  attemptId     String   @db.Uuid
-  questionId    String   @db.Uuid
-  selectedAnswer String  @db.Text
-  isCorrect     Boolean
-  answeredAt    DateTime @default(now())
-  createdAt     DateTime @default(now())
+  id             String   @id @default(uuid()) @db.Uuid
+  attemptId      String   @db.Uuid
+  questionId     String   @db.Uuid
+  selectedAnswer String   @db.Text
+  isCorrect      Boolean
+  answeredAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
 
   attempt  UserChallengeAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   question ChallengeQuestion    @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -293,20 +302,20 @@ model UserChallengeAnswer {
 }
 
 model LearningQuizSession {
-  id                    String                   @id @default(uuid()) @db.Uuid
-  userId                String                   @db.Uuid
-  mode                  LearningQuizMode
-  questionCount         Int
-  selectedDeckScope     LearningDeckScope
-  selectedCardIdsJson   Json?
-  orientationScope      LearningOrientationScope
-  startedAt             DateTime                 @default(now())
-  finishedAt            DateTime?
-  totalCorrect          Int                      @default(0)
-  totalIncorrect        Int                      @default(0)
-  scorePercent          Float                    @default(0)
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
+  id                  String                   @id @default(uuid()) @db.Uuid
+  userId              String                   @db.Uuid
+  mode                LearningQuizMode
+  questionCount       Int
+  selectedDeckScope   LearningDeckScope
+  selectedCardIdsJson Json?
+  orientationScope    LearningOrientationScope
+  startedAt           DateTime                 @default(now())
+  finishedAt          DateTime?
+  totalCorrect        Int                      @default(0)
+  totalIncorrect      Int                      @default(0)
+  scorePercent        Float                    @default(0)
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
 
   user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   questions LearningQuizQuestion[]
@@ -530,15 +539,76 @@ enum UsageType {
 }
 
 model UsageLog {
-  id            String    @id @default(uuid()) @db.Uuid
-  userId        String    @db.Uuid
-  type          UsageType
-  planSnapshot  PlanTier  @default(FREE)
-  createdAt     DateTime  @default(now())
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  type         UsageType
+  planSnapshot PlanTier  @default(FREE)
+  createdAt    DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@index([type, createdAt])
   @@index([planSnapshot])
+}
+
+model CartaDelDia {
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @db.Uuid
+  cardId            String
+  orientation       CardOrientation
+  fechaLocal        String
+  isRevealed        Boolean         @default(false)
+  mensajeDia        String          @db.Text
+  preguntaReflexion String          @db.Text
+  createdAt         DateTime        @default(now())
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reflexion ReflexionCartaDia?
+
+  @@unique([userId, fechaLocal])
+  @@index([userId, fechaLocal])
+}
+
+model ReflexionCartaDia {
+  id                     String   @id @default(uuid()) @db.Uuid
+  cartaDelDiaId          String   @unique @db.Uuid
+  userId                 String   @db.Uuid
+  sintioEnergia          String
+  textoReflexion         String   @db.Text
+  aprendizaje            String   @db.Text
+  moodLevel              Int?
+  porcentajeCoincidencia Int?
+  analisisCoincidencia   String?  @db.Text
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  cartaDelDia CartaDelDia @relation(fields: [cartaDelDiaId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DailyJournalEntry {
+  id               String             @id @default(uuid()) @db.Uuid
+  userId           String             @db.Uuid
+  date             String
+  cardId           String
+  cardName         String
+  orientation      CardOrientation
+  cardImageUrl     String
+  dailyMessage     String             @db.Text
+  morningIntention String?            @db.Text
+  experience       String?            @db.Text
+  manifestedAreas  String[]
+  intensity        Int?
+  nightReflection  String?            @db.Text
+  status           DailyJournalStatus @default(EMPTY)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }

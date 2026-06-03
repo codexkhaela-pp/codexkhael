@@ -468,7 +468,7 @@ function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
 
   async function handleExportPdf() {
     if (authSession.status !== "authenticated") {
-      router.push("/login?next=/diario");
+      router.push("/login?next=/bitacora");
       return;
     }
 
