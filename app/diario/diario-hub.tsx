@@ -516,9 +516,9 @@ function JournalEntryDetail({ entryId, onBack }: JournalEntryDetailProps) {
 
   return (
     <section className="journal-detail" aria-label="Detalle de entrada de bitácora">
-      <div className="journal-history-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div className="journal-history-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
         <h2>Entrada registrada</h2>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", maxWidth: "100%" }}>
           <button type="button" className="btn btn-secondary" onClick={handleExportPdf} disabled={isExporting}>
             {isExporting
               ? "Generando..."

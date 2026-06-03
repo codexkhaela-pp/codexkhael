@@ -6,6 +6,14 @@ const PUBLIC_PREFIXES = ["/tarot/"];
 const AUTH_API_PATHS = new Set(["/api/auth/login", "/api/auth/logout", "/api/auth/register", "/api/auth/forgot-password", "/api/auth/reset-password"]);
 const INTERNAL_API_PATHS = new Set(["/api/cron/keepalive"]);
 
+function allowDevAiTestBypass(pathname: string): boolean {
+  return (
+    (pathname === "/api/ai/tarot-local" || pathname === "/api/ai/tarot-spread-local") &&
+    process.env.NODE_ENV === "development" &&
+    process.env.ALLOW_DEV_AI_TEST === "true"
+  );
+}
+
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) {
     return true;
@@ -17,6 +25,7 @@ export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const cookieValue = request.cookies.get(AUTH_COOKIE_NAME)?.value;
   const authenticated = isSessionAuthenticated(cookieValue);
+  const devAiBypass = allowDevAiTestBypass(pathname);
 
   if (AUTH_API_PATHS.has(pathname) || INTERNAL_API_PATHS.has(pathname) || isPublicPath(pathname)) {
     const hasNextParam = request.nextUrl.searchParams.has("next");
@@ -26,7 +35,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (authenticated) {
+  if (authenticated || devAiBypass) {
     return NextResponse.next();
   }
 

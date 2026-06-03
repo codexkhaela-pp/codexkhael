@@ -342,3 +342,43 @@
     max-width: 440px;
   }
 }
+
+@media (max-width: 768px) {
+  .planesContainer {
+    padding: 40px 16px;
+  }
+
+  .planesTitle {
+    font-size: clamp(30px, 9vw, 38px);
+  }
+
+  .planesSubtitle {
+    font-size: 16px;
+  }
+
+  .cardBody {
+    padding: 22px 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .planesContainer {
+    padding-inline: 12px;
+  }
+
+  .grid {
+    max-width: 100%;
+  }
+
+  .recommendedBadge,
+  .popularBadge {
+    right: -48px;
+    width: 170px;
+  }
+}
+
+@media (max-width: 390px) {
+  .planesContainer {
+    padding-inline: 10px;
+  }
+}

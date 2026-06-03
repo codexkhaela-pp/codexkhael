@@ -6210,3 +6210,324 @@ footer {
   padding: 24px;
   color: var(--muted);
 }
+
+/* ==========================================================================
+   Responsive Hardening
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  max-width: 100%;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+:where(main, section, article, aside, header, footer, div) {
+  min-width: 0;
+}
+
+:where(h1, h2, h3, h4, h5, h6, p, span, a, button, label, li, td, th) {
+  overflow-wrap: anywhere;
+}
+
+.app-shell,
+.page,
+.dashboard-preview-bg,
+.dashboard-grid,
+.reading-board,
+.reading-main,
+.reading-side,
+.draw-grid-wrapper,
+.manual-spread-setup--top,
+.manual-spread-board-dynamic,
+.journal-history,
+.journal-detail,
+.journal-detail-card,
+.journal-history-card,
+.journal-rereading-card,
+.card-selection-modal,
+.card-selection-modal--large {
+  width: 100%;
+  max-width: 100%;
+}
+
+.draw-grid-wrapper {
+  overflow-x: hidden;
+}
+
+.manual-board-cell,
+.draw-slot,
+.dashboard-card,
+.list-card,
+.stack-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.manual-board-cell__label,
+.manual-board-cell__orientation,
+.reading-summary p,
+.position-reading-card p,
+.modal-card-item__name {
+  overflow-wrap: anywhere;
+}
+
+.card-selection-modal {
+  max-height: min(90dvh, 100%);
+}
+
+.card-selection-modal__header,
+.card-selection-modal__footer {
+  gap: 12px;
+}
+
+.journal-detail-canvas {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.journal-history-header > div {
+  max-width: 100%;
+}
+
+@media (max-width: 1280px) {
+  .app-shell,
+  .page {
+    padding-inline: clamp(14px, 2.8vw, 28px);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .draw-grid-wrapper {
+    min-height: 500px;
+    height: min(62vh, 620px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-shell,
+  .page {
+    padding-inline: clamp(14px, 3vw, 22px);
+  }
+
+  .internal-nav {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .internal-nav > div:last-child {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reading-board {
+    grid-template-columns: 1fr;
+  }
+
+  .reading-side {
+    position: static;
+  }
+
+  .manual-spread-board-dynamic {
+    padding: 18px 14px;
+  }
+
+  .card-selection-modal__footer {
+    flex-wrap: wrap;
+  }
+
+  .card-selection-modal__actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: stretch;
+  }
+
+  .card-selection-modal__actions .btn,
+  .card-selection-modal__actions button {
+    flex: 1 1 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-shell,
+  .page {
+    padding-inline: 14px;
+  }
+
+  .app-header h1 {
+    font-size: clamp(30px, 10vw, 44px);
+  }
+
+  .app-header p {
+    font-size: 15px;
+  }
+
+  .dashboard-grid,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .internal-nav {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .internal-links {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .manual-setup-footer,
+  .bottomBarArea,
+  .journal-history-header,
+  .card-selection-modal__header,
+  .card-selection-modal__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .manual-setup-footer .btn,
+  .card-selection-modal__footer .btn,
+  .card-selection-modal__footer button,
+  .journal-history-header .btn {
+    width: 100%;
+  }
+
+  .card-selection-modal-overlay {
+    padding: 12px;
+  }
+
+  .card-selection-modal,
+  .card-selection-modal--large {
+    border-radius: 18px;
+  }
+
+  .card-selection-modal__header,
+  .card-selection-modal__body,
+  .card-selection-modal__footer {
+    padding-inline: 16px;
+  }
+
+  .modal-top-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 12px;
+  }
+
+  .draw-grid-wrapper {
+    min-height: 420px;
+    height: auto;
+    max-height: none;
+  }
+
+  .journal-history-header > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell,
+  .page {
+    padding-inline: 12px;
+  }
+
+  .app-header h1 {
+    font-size: clamp(28px, 11vw, 36px);
+  }
+
+  .app-header p,
+  .resultsText,
+  .section-intro {
+    font-size: 14px;
+  }
+
+  .internal-links,
+  .reading-spreads,
+  .modal-suit-filters {
+    gap: 6px;
+  }
+
+  .spread-chip,
+  .modal-filter-pill,
+  .btn,
+  .internal-nav-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modal-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reading-main,
+  .manual-spread-setup--top,
+  .card-selection-modal__body {
+    padding: 14px;
+  }
+
+  .manual-board-cell {
+    flex-basis: 100%;
+    max-width: 100%;
+    min-height: 240px;
+  }
+}
+
+@media (max-width: 390px) {
+  .app-shell,
+  .page {
+    padding-inline: 10px;
+  }
+
+  .app-header h1 {
+    font-size: 28px;
+  }
+
+  .reading-summary h2,
+  .dashboard-card h2,
+  .list-card h2,
+  .stack-card h2 {
+    font-size: 18px;
+  }
+
+  .modal-card-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}

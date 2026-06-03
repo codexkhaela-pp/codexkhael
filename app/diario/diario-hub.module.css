@@ -149,7 +149,7 @@
 
 .entryTop {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
 }
@@ -182,6 +182,7 @@
   color: #f3ecdf;
   font-size: 22px;
   line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .entryHeadText p {
@@ -214,6 +215,7 @@
 .entryFooter {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 14px;
   margin-top: auto;
 }
@@ -410,6 +412,14 @@
 }
 
 @media (max-width: 980px) {
+  .topActions {
+    justify-content: stretch;
+  }
+
+  .newEntryButton {
+    width: 100%;
+  }
+
   .statsGrid {
     grid-template-columns: 1fr;
   }
@@ -421,5 +431,66 @@
 
   .entriesGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .entryFooter {
+    align-items: stretch;
+  }
+
+  .readButton {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .sortWrap {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .sortSelect {
+    width: 100%;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .journalMain {
+    gap: 14px;
+  }
+
+  .statCard,
+  .entryCard,
+  .modalContent {
+    padding: 14px;
+  }
+
+  .statCard {
+    flex-wrap: wrap;
+  }
+
+  .statIcon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .entryTop {
+    grid-template-columns: 1fr;
+  }
+
+  .entryIconWrap {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 390px) {
+  .modalOverlay {
+    padding: 12px;
   }
 }

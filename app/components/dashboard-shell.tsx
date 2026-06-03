@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { DashboardSidebar } from "@/app/components/dashboard-sidebar";
 import { DashboardTopHeader } from "@/app/components/dashboard-top-header";
@@ -23,39 +23,69 @@ function resolveActiveKey(pathname: string): string {
 
 export function DashboardShell({ children }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const pathname = usePathname() ?? "/";
-  const sidebarWidth = sidebarCollapsed ? 86 : 260;
   const activeKey = resolveActiveKey(pathname);
   const lockContentScroll = pathname.startsWith("/dashboard-preview");
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 1024px)");
+    const syncViewport = () => {
+      const nextIsMobile = mediaQuery.matches;
+      setIsMobileViewport(nextIsMobile);
+      if (!nextIsMobile) {
+        setMobileSidebarOpen(false);
+      }
+    };
+
+    syncViewport();
+    mediaQuery.addEventListener("change", syncViewport);
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncViewport);
+    };
+  }, []);
+
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname]);
+
+  function handleToggleSidebar() {
+    if (isMobileViewport) {
+      setMobileSidebarOpen((prev) => !prev);
+      return;
+    }
+
+    setSidebarCollapsed((prev) => !prev);
+  }
+
   return (
-    <div
-      className={styles.shell}
-      style={{
-        display: "flex",
-        width: "100%",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
-      <DashboardSidebar activeKey={activeKey} collapsed={sidebarCollapsed} />
+    <div className={styles.shell}>
+      <DashboardSidebar
+        activeKey={activeKey}
+        collapsed={sidebarCollapsed}
+        mobileOpen={mobileSidebarOpen}
+      />
+      {mobileSidebarOpen ? (
+        <button
+          type="button"
+          className={styles.mobileBackdrop}
+          aria-label="Cerrar navegacion"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      ) : null}
       <div
-        className={`${styles.content} ${sidebarCollapsed ? styles.contentCollapsed : ""}`}
+        className={`${styles.content} ${sidebarCollapsed ? styles.contentCollapsed : ""} ${
+          lockContentScroll ? styles.contentLocked : ""
+        }`}
         style={{
-          flex: 1,
-          width: `calc(100% - ${sidebarWidth}px)`,
-          maxWidth: `calc(100% - ${sidebarWidth}px)`,
-          minWidth: 0,
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          overflowX: "hidden",
           overflowY: lockContentScroll ? "hidden" : "auto",
         }}
       >
         <DashboardTopHeader
           isSidebarCollapsed={sidebarCollapsed}
-          onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)}
+          onToggleSidebar={handleToggleSidebar}
         />
         {children}
       </div>

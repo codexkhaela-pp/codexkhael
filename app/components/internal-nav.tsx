@@ -20,7 +20,7 @@ export async function InternalNav() {
         <Link href="/diario">Diario</Link>
         <Link href="/bitacora">Bitácora</Link>
       </nav>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", maxWidth: "100%" }}>
         {user ? (
           <span style={{ fontSize: "0.72rem", color: "var(--muted)", opacity: 0.7 }}>
             Demo privada para {user.email}

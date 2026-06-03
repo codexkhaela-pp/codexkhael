@@ -23,6 +23,7 @@ type DashboardSidebarProps = {
   activeKey?: string;
   footerMessage?: string;
   collapsed?: boolean;
+  mobileOpen?: boolean;
 };
 
 export function DashboardSidebar({
@@ -30,12 +31,13 @@ export function DashboardSidebar({
   activeKey = "inicio",
   footerMessage,
   collapsed = false,
+  mobileOpen = false,
 }: DashboardSidebarProps) {
   const sidebarWidth = collapsed ? 86 : 260;
 
   return (
     <aside
-      className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}
+      className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""} ${mobileOpen ? styles.mobileOpen : ""}`}
       style={{
         width: `${sidebarWidth}px`,
         minWidth: `${sidebarWidth}px`,

@@ -1219,8 +1219,8 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
       {/* Modal de Lectura Guiada */}
       {interpretationResult && (
         <div className="card-modal-backdrop" style={{ zIndex: 90 }} onClick={() => setInterpretationResult(null)}>
-          <div className="card-modal" style={{ width: "min(680px, 95vw)", maxHeight: "85vh", display: "flex", flexDirection: "column", padding: "20px" }} onClick={(e) => e.stopPropagation()}>
-            <div className="card-modal-header" style={{ paddingBottom: "10px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div className="card-modal" style={{ width: "min(680px, 95vw)", maxWidth: "100%", maxHeight: "85vh", display: "flex", flexDirection: "column", padding: "20px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="card-modal-header" style={{ paddingBottom: "10px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
               <div>
                 <h3 style={{ fontSize: "22px", color: "#f0dcae" }}>✨ Lectura Guiada PRO</h3>
                 <p className="card-modal-subtitle" style={{ margin: "4px 0 0 0" }}>Interpretación automatizada local de tu tirada libre</p>
@@ -1261,12 +1261,12 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
                     const isReversed = c.orientation === "Invertida";
                     
                     return (
-                      <div key={i} style={{ display: "flex", gap: "14px", background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "12px" }}>
+                      <div key={i} style={{ display: "flex", gap: "14px", flexWrap: "wrap", background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "12px" }}>
                         <div style={{ width: "50px", flexShrink: 0, height: "86px", overflow: "hidden", borderRadius: "6px", border: "1px solid rgba(201, 166, 107, 0.3)" }}>
                           <img src={cardImg} alt={c.name} style={{ width: "100%", height: "100%", objectFit: "cover", transform: isReversed ? "rotate(180deg)" : "none" }} />
                         </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px", flexWrap: "wrap" }}>
                             <strong style={{ fontSize: "14px", color: "#f4ead3" }}>{i + 1}. {c.name}</strong>
                             <span style={{ 
                               fontSize: "11px", 
@@ -1330,7 +1330,7 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
       {/* Modal de Error */}
       {interpretationError && (
         <div className="card-modal-backdrop" style={{ zIndex: 100 }} onClick={() => setInterpretationError(null)}>
-          <div className="card-modal" style={{ width: "400px", padding: "20px", border: "1px solid rgba(239, 68, 68, 0.4)", background: "linear-gradient(180deg, #1f1115, #0f0709)" }} onClick={(e) => e.stopPropagation()}>
+          <div className="card-modal" style={{ width: "min(400px, 95vw)", maxWidth: "100%", padding: "20px", border: "1px solid rgba(239, 68, 68, 0.4)", background: "linear-gradient(180deg, #1f1115, #0f0709)" }} onClick={(e) => e.stopPropagation()}>
             <div className="card-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3 style={{ color: "#ef4444", fontSize: "20px", margin: 0 }}>⚠️ Error</h3>
               <button type="button" className="btn btn-secondary card-modal-close" onClick={() => setInterpretationError(null)} style={{ borderRadius: "50%", width: "30px", height: "30px", padding: 0, display: "grid", placeItems: "center" }}>✕</button>
@@ -1345,7 +1345,7 @@ export function BitacoraWorkbench({ onSaved, onBack }: BitacoraWorkbenchProps) {
       {/* Modal de Loading */}
       {isInterpreting && (
         <div className="card-modal-backdrop" style={{ zIndex: 100 }}>
-          <div className="card-modal" style={{ textAlign: "center", width: "320px", padding: "30px 20px" }}>
+          <div className="card-modal" style={{ textAlign: "center", width: "min(320px, 92vw)", maxWidth: "100%", padding: "30px 20px" }}>
             <style>{`
               @keyframes spin {
                 0% { transform: rotate(0deg); }

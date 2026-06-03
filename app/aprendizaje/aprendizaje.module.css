@@ -46,6 +46,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
   margin-bottom: 14px;
 }
 
@@ -107,7 +108,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 720px;
+  min-width: 0;
 }
 
 .table th,
@@ -127,6 +128,7 @@
 
 .table td {
   color: #e8ddc8;
+  overflow-wrap: anywhere;
 }
 
 .badge {
@@ -840,5 +842,53 @@
 @media (max-width: 1120px) {
   .topStats {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .customCardsPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .problemItem {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .problemWeight {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .learningTitle {
+    font-size: clamp(34px, 11vw, 44px);
+  }
+}
+
+@media (max-width: 480px) {
+  .surface,
+  .summaryCard,
+  .learningTitleBlock,
+  .problemPanel,
+  .failedCard {
+    padding: 14px;
+  }
+
+  .primaryButton,
+  .secondaryButton,
+  .ghostButton,
+  .backModuleButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .failedCardTop {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

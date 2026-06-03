@@ -27,6 +27,5 @@ export function PreviewShadowContent({ css, html }: PreviewShadowContentProps) {
     shadowRoot.innerHTML = `<style>${scopedCss}</style>${html}`;
   }, [html, scopedCss]);
 
-  return <div ref={hostRef} style={{ flex: 1, minHeight: 0 }} />;
+  return <div ref={hostRef} style={{ flex: 1, minHeight: 0, minWidth: 0, width: "100%", maxWidth: "100%" }} />;
 }
-

@@ -174,3 +174,35 @@
   display: inline-block;
   margin-top: 8px;
 }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 28px 16px;
+    gap: 22px;
+  }
+
+  .section {
+    padding: 22px 18px;
+  }
+
+  .input {
+    max-width: 100%;
+  }
+
+  .planCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-inline: 12px;
+  }
+
+  .button {
+    width: 100%;
+    max-width: 100%;
+  }
+}

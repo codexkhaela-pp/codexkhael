@@ -25,6 +25,7 @@
   justify-content: space-between;
   gap: 18px;
   align-items: flex-start;
+  flex-wrap: wrap;
   margin-bottom: 22px;
 }
 
@@ -55,6 +56,7 @@
   align-items: center;
   justify-content: center;
   min-width: 140px;
+  max-width: 100%;
   padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid rgba(201, 166, 107, 0.25);
@@ -131,6 +133,7 @@
   color: rgba(242, 236, 224, 0.9);
   line-height: 1.7;
   font-size: 16px;
+  overflow-wrap: anywhere;
 }
 
 .bodyGrid {
@@ -235,6 +238,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex: 1 1 140px;
   padding: 12px 16px;
   border-radius: 999px;
   border: 1px solid rgba(201, 166, 107, 0.16);
@@ -411,5 +415,41 @@
   .saveButton,
   .secondaryButton {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryCard,
+  .formCard,
+  .guideCard {
+    padding: 16px;
+  }
+
+  .cardTitle {
+    font-size: clamp(28px, 10vw, 34px);
+  }
+
+  .statusBadge {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cardFrame {
+    width: 140px;
+  }
+
+  .messagePanel {
+    padding: 16px;
+  }
+
+  .areaChip {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .cardFrame {
+    width: 128px;
   }
 }

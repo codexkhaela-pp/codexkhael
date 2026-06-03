@@ -184,3 +184,64 @@
   font-style: italic;
 }
 
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(86vw, 320px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+    height: 100dvh;
+    padding: 24px 18px;
+    transform: translateX(-105%);
+    transition: transform 0.24s ease, box-shadow 0.24s ease;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  }
+
+  .mobileOpen {
+    transform: translateX(0);
+  }
+
+  .collapsed {
+    width: min(86vw, 320px) !important;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .logoArea,
+  .collapsed .logoArea {
+    margin-bottom: 24px;
+    justify-content: flex-start;
+  }
+
+  .logoImage,
+  .collapsed .logoImage {
+    width: 156px;
+  }
+
+  .navLinks {
+    gap: 6px;
+  }
+
+  .navLink,
+  .collapsed .navLink {
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 12px 14px;
+  }
+
+  .navLabel,
+  .collapsed .navLabel {
+    width: auto;
+    opacity: 1;
+    overflow: visible;
+  }
+
+  .collapsed .navLink::after {
+    display: none;
+  }
+
+  .sidebarFooterCard {
+    margin-top: 20px;
+  }
+}
