@@ -59,7 +59,7 @@ export async function updateReadingInterpretation(readingId: string, text: strin
   try {
     await prisma.clientReading.update({
       where: { id: readingId },
-      data: { generalInterpretation: text }
+      data: { spreadDescription: text }
     });
     revalidatePath(`/admin/lecturas/${readingId}`);
     return { success: true };

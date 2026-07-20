@@ -66,11 +66,11 @@ export default async function MisLecturasDetail({
       
       <ClientReadingViewer cards={publicCards} availableCards={tarotCards} />
 
-      {reading.generalInterpretation && (
+      {reading.spreadDescription && (
         <div style={{ marginTop: "3rem", background: "rgba(10, 12, 18, 0.6)", border: "1px solid rgba(255, 255, 255, 0.08)", padding: "2rem", borderRadius: "16px" }}>
           <h2 style={{ color: "var(--landing-gold-1)", fontSize: "1.5rem", marginBottom: "1rem", fontFamily: "var(--font-cinzel)" }}>Interpretación de la Lectura</h2>
           <div style={{ color: "rgba(243, 235, 221, 0.9)", lineHeight: "1.7", fontSize: "1.05rem", whiteSpace: "pre-wrap" }}>
-            {reading.generalInterpretation}
+            {reading.spreadDescription}
           </div>
         </div>
       )}

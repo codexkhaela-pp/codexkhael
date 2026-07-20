@@ -19,7 +19,7 @@ type CardData = {
 
 export function ReadingEditor({ reading, availableCards }: { reading: any, availableCards: any[] }) {
   const [cards, setCards] = useState<CardData[]>(reading.cards);
-  const [generalInterpretation, setGeneralInterpretation] = useState(reading.generalInterpretation || "");
+  const [spreadDescription, setSpreadDescription] = useState(reading.spreadDescription || "");
   const [isSavingLayout, setIsSavingLayout] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -83,7 +83,7 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
     for (const card of cards) {
       await updateCardLayout(card.id, { x: card.x, y: card.y, rotation: card.rotation, zIndex: card.zIndex });
     }
-    await updateReadingInterpretation(reading.id, generalInterpretation);
+    await updateReadingInterpretation(reading.id, spreadDescription);
     setIsSavingLayout(false);
     alert("Layout e interpretación guardados");
   };
@@ -247,8 +247,8 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
             <h3 style={{ color: "var(--landing-gold-1)", fontSize: "1.1rem" }}>Interpretación General</h3>
             <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Esta síntesis será visible para el consultante en su portal.</p>
             <textarea 
-              value={generalInterpretation}
-              onChange={e => setGeneralInterpretation(e.target.value)}
+              value={spreadDescription}
+              onChange={e => setSpreadDescription(e.target.value)}
               rows={12} 
               style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", resize: "vertical", fontSize: "0.95rem", lineHeight: "1.5" }} 
               placeholder="Escribe la interpretación general de la lectura..."
