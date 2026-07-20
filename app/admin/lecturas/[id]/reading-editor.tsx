@@ -164,7 +164,7 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
           }}
         >
           {/* Background Grid Pattern */}
-          <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "40px 40px" }} pointerEvents="none" />
+          <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
           
           {cards.map(card => {
             const cardDef = availableCards.find(ac => ac.id === card.visualCardId);

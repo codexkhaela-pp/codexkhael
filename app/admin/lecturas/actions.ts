@@ -24,7 +24,15 @@ export async function createClientReading(data: {
   // Buscar si el cliente ya existe
   let clientUser = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, roles: true, passwordHash: true }
+    select: { 
+      id: true, 
+      roles: {
+        select: {
+          role: { select: { name: true } }
+        }
+      }, 
+      passwordHash: true 
+    }
   });
 
   let generatedPassword = null;
@@ -34,27 +42,43 @@ export async function createClientReading(data: {
   if (!clientUser) {
     generatedPassword = randomBytes(4).toString('hex'); // Ej: "8f4b2c1a"
     
-    // Crear el usuario con rol CLIENT
+    // Obtener role CLIENT
+    const clientRole = await prisma.role.findUnique({ where: { name: "CLIENT" } });
+    
+    // Crear el usuario
     const newUser = await prisma.user.create({
       data: {
         email,
         name: clientName,
-        passwordHash: generatedPassword, // Guardamos la temporal (idealmente debería estar hasheada, pero para este caso lo dejamos como texto o el hash de la app)
-        // Nota: En un sistema en prod deberías hacer un bcrypt, pero asumiendo que Khael usa passwordHash en claro para la prueba o un hash específico, 
-        // revisaré cómo funciona el login. Si el login compara texto plano (user.passwordHash === password), lo guardamos así.
-        roles: { set: ["CLIENT"] },
-        status: "ACTIVE"
+        passwordHash: generatedPassword, 
+        status: "ACTIVE",
+        roles: clientRole ? {
+          create: {
+            roleId: clientRole.id
+          }
+        } : undefined
+      },
+      include: {
+        roles: {
+          select: { role: { select: { name: true } } }
+        }
       }
     });
     clientUser = { id: newUser.id, roles: newUser.roles, passwordHash: newUser.passwordHash };
     isNewClient = true;
   } else {
-    // Si ya existe pero no tiene rol CLIENT, se lo añadimos? (Opcional)
-    if (!clientUser.roles.includes("CLIENT")) {
-       await prisma.user.update({
-         where: { id: clientUser.id },
-         data: { roles: { push: "CLIENT" } }
-       });
+    // Si ya existe pero no tiene rol CLIENT
+    const hasClientRole = clientUser.roles.some((r: any) => r.role.name === "CLIENT");
+    if (!hasClientRole) {
+       const clientRole = await prisma.role.findUnique({ where: { name: "CLIENT" } });
+       if (clientRole) {
+         await prisma.userRole.create({
+           data: {
+             userId: clientUser.id,
+             roleId: clientRole.id
+           }
+         });
+       }
     }
   }
 
