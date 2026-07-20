@@ -2,10 +2,18 @@ import { requireCurrentUser } from "@/lib/require-auth";
 import { DashboardPageHeader } from "@/app/components/dashboard-page-header";
 import { DailyJournalPageClient } from "@/app/diario/daily-journal-page-client";
 import { getTodayDailyJournalEntry } from "@/lib/daily-journal/service";
+import { normalizeTimezone } from "@/lib/carta-del-dia/service";
 
-export default async function DiarioPage() {
+type DiarioPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function DiarioPage({ searchParams }: DiarioPageProps) {
   const user = await requireCurrentUser("/diario");
-  const entry = await getTodayDailyJournalEntry(user.id);
+  const params = await searchParams;
+  const timezoneParam = typeof params.timezone === "string" ? params.timezone : null;
+  const timezone = normalizeTimezone(timezoneParam);
+  const entry = await getTodayDailyJournalEntry(user.id, timezone);
 
   return (
     <main className="app-shell dashboard-preview-bg">
@@ -15,7 +23,7 @@ export default async function DiarioPage() {
         description="Registra cómo se manifestó tu Carta del Día y conserva una sola entrada personal por jornada."
       />
 
-      <DailyJournalPageClient initialEntry={entry} />
+      <DailyJournalPageClient initialEntry={entry} timezone={timezone} />
     </main>
   );
 }

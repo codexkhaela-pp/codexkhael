@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthSession } from "@/lib/use-auth-session";
 import {
   getQuickInterpretation,
@@ -13,10 +12,18 @@ import {
 import { tarotCards, type TarotCard } from "@/src/data/tarotCards";
 import { tarotSpreads } from "@/src/data/tarotSpreads";
 import { SpreadLayout } from "@/app/tiradas/components/spread-layout";
-import type { DrawnCard, ReadingStatus, ManualBoardCard } from "@/app/tiradas/types";
 import { ManualSpreadBoard } from "@/app/tiradas/components/manual-spread-board";
 import { CardSelectionModal } from "@/app/tiradas/components/card-selection-modal";
-import { requestAiTarotReading, type AiTarotReadingResponse, type AiTarotReadingRequest } from "@/lib/ai-client";
+import { CardProtagonistModal } from "@/app/tiradas/components/card-protagonist-modal";
+import { ReadingExperienceShell } from "@/app/tiradas/components/reading-experience-shell";
+import { TarotCardModal } from "@/components/tarot/TarotCardModal";
+import type { DrawnCard, ManualBoardCard, ManualSpreadStatus, ReadingStatus } from "@/app/tiradas/types";
+import {
+  requestAiTarotReading,
+  type AiTarotReadingRequest,
+  type AiTarotReadingResponse,
+} from "@/lib/ai-client";
+import { createJournalEntryInApi, exportJournalEntryToPdf } from "@/app/diario/api-client";
 import {
   canUseManualSpreadCardCount,
   canUseSpread,
@@ -38,18 +45,20 @@ type ReadingResult = {
 const REVEAL_DELAY_MS = 420;
 const SHUFFLE_TIME_MS = 900;
 
-const interpretationToneOptions: Array<{ value: InterpretationTone; label: string }> = [
-  { value: "mystic", label: "Místico" },
-  { value: "psychological", label: "Psicológico" },
-  { value: "direct", label: "Directo" },
-];
-
 const MANUAL_SPREAD_META = {
   id: MANUAL_SPREAD_ID,
   name: "Libre",
   description:
-    "Define tu pregunta, nombra cada posición y elige manualmente cartas y orientación para obtener una lectura base sin IA.",
+    "Define tu pregunta, nombra cada posición y elige manualmente cartas y orientación para obtener una lectura base sin alterar la lógica actual.",
 };
+
+const MOJIBAKE_TEXT_CORRECTIONS: Array<[RegExp, string]> = [
+  [new RegExp("ayudar\\u00c3\\u0192\\u00c6\\u2019\\u00c3\\u201a\\u00c2\\u00a1", "gi"), "ayudará"],
+  [new RegExp("l\\u00c3\\u0192\\u00c6\\u2019mites", "gi"), "límites"],
+  [new RegExp("intuici\\u00c3\\u0192\\u00c6\\u2019\\u00c3\\u201a\\u00c2\\u00b3n", "gi"), "intuición"],
+  [new RegExp("coraz\\u00c3\\u0192\\u00c6\\u2019\\u00c3\\u201a\\u00c2\\u00b3n", "gi"), "corazón"],
+  [new RegExp("obst\\u00c3\\u0192\\u00c6\\u2019\\u00c3\\u201a\\u00c2\\u00a1culo", "gi"), "obstáculo"],
+];
 
 function pickUniqueRandomCards(cards: TarotCard[], count: number): TarotCard[] {
   const pool = [...cards];
@@ -126,28 +135,28 @@ function normalizeSpanish(text: string): string {
     result = result.replace(regex, corrections[key]);
   }
 
-  result = result
-    .replace(/ayudarÃƒÂ¡/gi, "ayudará")
-    .replace(/lÃƒmites/gi, "límites")
-    .replace(/intuiciÃƒÂ³n/gi, "intuición")
-    .replace(/corazÃƒÂ³n/gi, "corazón")
-    .replace(/obstÃƒÂ¡culo/gi, "obstáculo")
-    .replace(/\besta\b/gi, "está")
-    .replace(/\bmas\b/gi, "más");
+  for (const [pattern, replacement] of MOJIBAKE_TEXT_CORRECTIONS) {
+    result = result.replace(pattern, replacement);
+  }
 
-  return result;
+  return result.replace(/\besta\b/gi, "está").replace(/\bmas\b/gi, "más");
 }
 
 function renderText(text: string): string {
   return normalizeSpanish(fixEncoding(text));
 }
 
-function normalizeLookup(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
+function htmlToPlainText(text: string): string {
+  return renderText(
+    text
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>/gi, "\n")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+\n/g, "\n")
+      .replace(/\n\s+/g, "\n")
+      .replace(/\n{2,}/g, "\n\n")
+      .trim(),
+  );
 }
 
 function getRequiredPlanLabel(plan: string | null | undefined, spreadId: string): string {
@@ -158,8 +167,80 @@ function getRequiredPlanLabel(plan: string | null | undefined, spreadId: string)
   return "Pro";
 }
 
+function getPlanAccent(plan: string | null | undefined): string {
+  if (plan === "PRO") return "PRO";
+  if (plan === "BASIC") return "BÁSICO";
+  return "FREE";
+}
+
+function getUserInitial(email: string | null): string {
+  const source = email?.trim() ?? "";
+  if (!source) return "C";
+  return source.charAt(0).toUpperCase();
+}
+
+function getSpreadPresentation(spreadId: string, spreadName: string) {
+  const normalizedName = renderText(spreadName);
+
+  if (spreadId === "celtic-cross") {
+    return {
+      title: "Tirada Cruz Celta",
+      subtitle: "Profundidad • Guía • Claridad",
+      eyebrow: "Mesa de lectura",
+      legend: "Lectura clásica de 10 posiciones",
+    };
+  }
+
+  if (spreadId === "tree-of-life") {
+    return {
+      title: "Tirada Kabbalah",
+      subtitle: "Árbol de la Vida",
+      eyebrow: "Mesa de lectura",
+      legend: "Sabiduría • Conexión • Propósito",
+    };
+  }
+
+  if (spreadId === MANUAL_SPREAD_ID) {
+    return {
+      title: "Tirada Libre",
+      subtitle: "Diseña tu lectura",
+      eyebrow: "Mesa de lectura",
+      legend: "Configura posiciones, cartas y orientación",
+    };
+  }
+
+  return {
+    title: `Tirada ${normalizedName}`,
+    subtitle: "Consulta • Lectura • Integración",
+    eyebrow: "Mesa de lectura",
+    legend: `${normalizedName} • ${spreadId === "situation-blockage-advice" ? "Guía inmediata" : "Lectura dinámica"}`,
+  };
+}
+
+function buildShareableReadingText(params: {
+  spreadName: string;
+  question: string;
+  positions: Array<{ index: number; label: string; cardName: string; orientation: string }>;
+  interpretation: QuickInterpretationOutput | null;
+}) {
+  return [
+    params.spreadName,
+    params.question ? `Pregunta: ${params.question}` : "",
+    "",
+    ...params.positions.map(
+      (item) => `${item.index}. ${item.label}: ${item.cardName} (${item.orientation})`,
+    ),
+    "",
+    params.interpretation ? `Resumen: ${renderText(params.interpretation.summary)}` : "",
+    params.interpretation ? `Consejo: ${renderText(params.interpretation.finalAdvice)}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function SpreadReader() {
   const router = useRouter();
+  const authSession = useAuthSession();
   const riderWaiteDeck = useMemo(() => tarotCards.filter((card) => card.deck === "rider-waite"), []);
   const cardById = useMemo(() => new Map(riderWaiteDeck.map((card) => [card.id, card])), [riderWaiteDeck]);
 
@@ -169,26 +250,34 @@ export function SpreadReader() {
   const [visibleCards, setVisibleCards] = useState(0);
   const [activeRevealIndex, setActiveRevealIndex] = useState<number | null>(null);
   const [readingResult, setReadingResult] = useState<ReadingResult | null>(null);
-  const [interpretationTone, setInterpretationTone] = useState<InterpretationTone>("psychological");
+  const [interpretationTone] = useState<InterpretationTone>("psychological");
   const [aiDepthState, setAiDepthState] = useState<"idle" | "loading" | "ready">("idle");
   const [aiResponse, setAiResponse] = useState<AiTarotReadingResponse | null>(null);
   const [aiDepthError, setAiDepthError] = useState<string | null>(null);
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
+  const [readingQuestion, setReadingQuestion] = useState("");
   const [manualQuestion, setManualQuestion] = useState("");
   const [manualAllowRepeated, setManualAllowRepeated] = useState(false);
   const [manualCardCount, setManualCardCount] = useState(3);
   const [manualBoardCards, setManualBoardCards] = useState<ManualBoardCard[]>([]);
+  const [manualSpreadStatus, setManualSpreadStatus] = useState<ManualSpreadStatus>("building");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCell, setEditingCell] = useState<{ row: number; col: number; card?: ManualBoardCard } | null>(null);
   const [manualReadingCards, setManualReadingCards] = useState<SpreadInterpretationCard[]>([]);
   const [manualError, setManualError] = useState<string | null>(null);
   const [manualIsGenerating, setManualIsGenerating] = useState(false);
+  const [journalActionState, setJournalActionState] = useState<"idle" | "saving" | "exporting">("idle");
+  const [interpretationVisible, setInterpretationVisible] = useState(false);
+  const [interpretationTab, setInterpretationTab] = useState("summary");
+  const [mentorTabNew, setMentorTabNew] = useState(false);
+  const [protagonistCard, setProtagonistCard] = useState<{ entry: DrawnCard; index: number } | null>(null);
+  const [meaningCard, setMeaningCard] = useState<{ cardId: string; image: string } | null>(null);
 
-  const authSession = useAuthSession();
   const currentPlan = authSession.plan;
   const maxManualCards = getManualSpreadMaxCards(currentPlan);
   const timersRef = useRef<number[]>([]);
   const isManualSpread = spreadId === MANUAL_SPREAD_ID;
+  const isManualSpreadFinalized = isManualSpread && manualSpreadStatus === "sealed";
 
   const selectedSpread = useMemo(
     () => tarotSpreads.find((spread) => spread.id === spreadId) ?? null,
@@ -207,8 +296,9 @@ export function SpreadReader() {
       spreadId: selectedSpread.id,
       cards: drawnCards,
       tone: interpretationTone,
+      question: readingQuestion.trim() || null,
     });
-  }, [drawnCards, interpretationTone, selectedSpread, status]);
+  }, [drawnCards, interpretationTone, readingQuestion, selectedSpread, status]);
 
   const manualQuickInterpretation = useMemo(() => {
     if (manualReadingCards.length === 0) {
@@ -225,6 +315,116 @@ export function SpreadReader() {
   }, [interpretationTone, manualQuestion, manualReadingCards]);
 
   const activeInterpretation = isManualSpread ? manualQuickInterpretation : presetQuickInterpretation;
+  const activeQuestion = isManualSpread ? manualQuestion.trim() : readingQuestion.trim();
+  const activeSpreadName = isManualSpread ? MANUAL_SPREAD_META.name : selectedSpread?.name ?? "Tirada";
+  const spreadPresentation = getSpreadPresentation(spreadId, activeSpreadName);
+  const selectedSpreadDescription = isManualSpread
+    ? MANUAL_SPREAD_META.description
+    : renderText(selectedSpread?.description ?? "");
+
+  const revealedReadingItems = useMemo(() => {
+    if (isManualSpread) {
+      if (manualReadingCards.length === 0) {
+        return [...manualBoardCards]
+          .sort((a, b) => {
+            if (a.row !== b.row) return a.row - b.row;
+            return a.col - b.col;
+          })
+          .map((entry, index) => {
+            const card = cardById.get(entry.cardId);
+            return {
+              index: index + 1,
+              label: entry.label.trim() || `Posición ${index + 1}`,
+              subtitle: "",
+              cardName: card?.nameEs ?? "Carta seleccionada",
+              orientation: entry.reversed ? "Invertida" : "Derecho",
+            };
+          });
+      }
+
+      return [...manualReadingCards]
+        .sort((a, b) => {
+          const left = typeof a.position === "string" ? 0 : a.position.id ?? 0;
+          const right = typeof b.position === "string" ? 0 : b.position.id ?? 0;
+          return left - right;
+        })
+        .map((entry, index) => ({
+          index: index + 1,
+          label: typeof entry.position === "string" ? entry.position : entry.position.label,
+          subtitle: typeof entry.position === "string" ? "" : entry.position.subtitle ?? "",
+          cardName: entry.card.nameEs,
+          orientation: entry.reversed ? "Invertida" : "Derecho",
+        }));
+    }
+
+    return spreadPositions.map((position, index) => {
+      const entry = drawnCards[index];
+      const isRevealed = visibleCards > index && entry;
+
+      return {
+        index: index + 1,
+        label: position.label,
+        subtitle: position.subtitle ?? "",
+        cardName: isRevealed ? entry.card.nameEs : "Por revelar",
+        orientation: isRevealed ? (entry.reversed ? "Invertida" : "Derecho") : "Pendiente",
+      };
+    });
+  }, [cardById, drawnCards, isManualSpread, manualBoardCards, manualReadingCards, spreadPositions, visibleCards]);
+
+  const interpretationTabs = useMemo(() => {
+    const adviceLabel = spreadId === "celtic-cross" ? "Consejo final integrado" : "Consejo final";
+
+    const tabs: Array<{
+      id: string;
+      label: string;
+      shortLabel: string;
+      type: "summary" | "positions" | "relationships" | "advice" | "mentor";
+      isNew?: boolean;
+    }> = [
+      { id: "summary", label: "Resumen general", shortLabel: "Resumen", type: "summary" as const },
+      { id: "positions", label: "Lectura por posición", shortLabel: "Posiciones", type: "positions" as const },
+      { id: "relationships", label: "Relaciones entre cartas", shortLabel: "Relaciones", type: "relationships" as const },
+      { id: "advice", label: adviceLabel, shortLabel: "Consejo", type: "advice" as const },
+    ];
+
+    if (aiDepthState === "ready" && aiResponse) {
+      tabs.push({
+        id: "mentor",
+        label: "✨ Mentor",
+        shortLabel: "Mentor",
+        type: "mentor" as const,
+        isNew: mentorTabNew,
+      });
+    }
+
+    return tabs;
+  }, [aiDepthState, aiResponse, mentorTabNew, spreadId]);
+
+  const spreadOptions = useMemo(
+    () => [
+      ...tarotSpreads.map((spread) => ({
+        id: spread.id,
+        name: renderText(spread.name),
+        description: renderText(spread.description),
+        cardCount: spread.cardCount,
+        isLocked: currentPlan ? !canUseSpread(currentPlan, spread.id) : true,
+        requiredPlan: getRequiredPlanLabel(currentPlan, spread.id),
+      })),
+      {
+        id: MANUAL_SPREAD_ID,
+        name: MANUAL_SPREAD_META.name,
+        description: MANUAL_SPREAD_META.description,
+        cardCount: manualCardCount,
+        isLocked: false,
+        requiredPlan: null,
+      },
+    ],
+    [currentPlan, manualCardCount],
+  );
+
+  const canShowInterpretationCta =
+    (!isManualSpread && status === "completada" && drawnCards.length > 0) ||
+    (isManualSpread && manualReadingCards.length > 0);
 
   useEffect(() => {
     return () => {
@@ -238,6 +438,12 @@ export function SpreadReader() {
     setManualCardCount((previous) => Math.min(previous, maxManualCards));
   }, [maxManualCards]);
 
+  useEffect(() => {
+    if (status === "completada" && readingResult && process.env.NODE_ENV !== "production") {
+      console.debug("Resultado de tirada listo para persistencia:", readingResult);
+    }
+  }, [readingResult, status]);
+
   function clearTimers() {
     for (const timer of timersRef.current) {
       window.clearTimeout(timer);
@@ -249,6 +455,7 @@ export function SpreadReader() {
     setAiDepthState("idle");
     setAiResponse(null);
     setAiDepthError(null);
+    setMentorTabNew(false);
   }
 
   function clearManualInterpretation(options?: { keepError?: boolean }) {
@@ -257,6 +464,19 @@ export function SpreadReader() {
     if (!options?.keepError) {
       setManualError(null);
     }
+  }
+
+  function resetPresetReading() {
+    clearTimers();
+    resetAiDepth();
+    setStatus("inicial");
+    setDrawnCards([]);
+    setVisibleCards(0);
+    setActiveRevealIndex(null);
+    setReadingResult(null);
+    setFlippedCards(new Set());
+    setInterpretationVisible(false);
+    setInterpretationTab("summary");
   }
 
   function buildReadingResult(currentSpreadId: string, cards: DrawnCard[]): ReadingResult {
@@ -277,14 +497,8 @@ export function SpreadReader() {
       return;
     }
 
-    clearTimers();
-    resetAiDepth();
+    resetPresetReading();
     setStatus("barajando");
-    setDrawnCards([]);
-    setVisibleCards(0);
-    setActiveRevealIndex(null);
-    setReadingResult(null);
-    setFlippedCards(new Set());
 
     const selectedCards = pickUniqueRandomCards(riderWaiteDeck, spreadPositions.length);
     const resolvedCards: DrawnCard[] = spreadPositions.map((position, index) => ({
@@ -306,8 +520,11 @@ export function SpreadReader() {
             setStatus("completada");
             setActiveRevealIndex(null);
             setReadingResult(buildReadingResult(selectedSpread.id, resolvedCards));
+            setInterpretationVisible(true);
+            setInterpretationTab("summary");
           }
         }, REVEAL_DELAY_MS * (index + 1));
+
         timersRef.current.push(revealTimer);
       });
     }, SHUFFLE_TIME_MS);
@@ -359,13 +576,12 @@ export function SpreadReader() {
       const response = await requestAiTarotReading(payload);
       setAiResponse(response);
       setAiDepthState("ready");
+      setInterpretationVisible(true);
+      setMentorTabNew(true);
+      setInterpretationTab("mentor");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al conectar con la IA";
-      if (message === "LIMIT_REACHED") {
-        setAiDepthError("Has alcanzado el límite diario de consultas IA de tu plan.");
-      } else {
-        setAiDepthError(message);
-      }
+      setAiDepthError(message === "LIMIT_REACHED" ? "Has alcanzado el límite diario de consultas IA de tu plan." : message);
       setAiDepthState("idle");
     }
   }
@@ -375,8 +591,10 @@ export function SpreadReader() {
       return;
     }
 
+    setInterpretationVisible(true);
+    setInterpretationTab("summary");
     await requestDepthInterpretation({
-      question: null,
+      question: readingQuestion.trim() || null,
       spreadType: selectedSpread.id,
       quickInterpretation: presetQuickInterpretation,
       cards: drawnCards,
@@ -384,7 +602,6 @@ export function SpreadReader() {
   }
 
   function buildManualSpreadCards(cards: ManualBoardCard[]): SpreadInterpretationCard[] {
-    // Ordenar de arriba hacia abajo (row) y de izquierda a derecha (col)
     const sortedCards = [...cards].sort((a, b) => {
       if (a.row !== b.row) return a.row - b.row;
       return a.col - b.col;
@@ -398,16 +615,12 @@ export function SpreadReader() {
   }
 
   function validateManualSpread(cards: ManualBoardCard[]): string | null {
-    if (!manualQuestion.trim()) {
-      return "Escribe una pregunta antes de interpretar la tirada libre.";
-    }
-
     if (cards.length === 0) {
       return "Debes colocar al menos una carta en el tablero.";
     }
 
     if (cards.length > manualCardCount) {
-      return `Has colocado ${cards.length} cartas, pero seleccionaste un máximo de ${manualCardCount}. Por favor ajusta la cantidad o elimina cartas.`;
+      return `Has colocado ${cards.length} cartas, pero seleccionaste un máximo de ${manualCardCount}.`;
     }
 
     if (!canUseManualSpreadCardCount(currentPlan, cards.length)) {
@@ -433,12 +646,16 @@ export function SpreadReader() {
     setManualIsGenerating(true);
     setManualError(null);
     resetAiDepth();
+    setIsModalOpen(false);
 
     await new Promise<void>((resolve) => {
       window.requestAnimationFrame(() => resolve());
     });
 
+    setManualSpreadStatus("sealed");
     setManualReadingCards(buildManualSpreadCards(manualBoardCards));
+    setInterpretationVisible(true);
+    setInterpretationTab("summary");
     setManualIsGenerating(false);
   }
 
@@ -447,6 +664,8 @@ export function SpreadReader() {
       return;
     }
 
+    setInterpretationVisible(true);
+    setInterpretationTab("summary");
     await requestDepthInterpretation({
       question: manualQuestion.trim(),
       spreadType: MANUAL_SPREAD_ID,
@@ -455,16 +674,216 @@ export function SpreadReader() {
     });
   }
 
-  function toggleFlip(index: number) {
-    setFlippedCards((previous) => {
-      const next = new Set(previous);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
-      return next;
+  function openProtagonistCard(index: number) {
+    const entry = drawnCards[index];
+    if (!entry || visibleCards <= index) {
+      return;
+    }
+
+    setProtagonistCard({ entry, index });
+  }
+
+  function openMeaningFromProtagonist() {
+    if (!protagonistCard) {
+      return;
+    }
+
+    setMeaningCard({
+      cardId: protagonistCard.entry.card.id,
+      image: protagonistCard.entry.card.image,
     });
+    setProtagonistCard(null);
+  }
+
+  function buildJournalPayload() {
+    if (!activeInterpretation) {
+      return null;
+    }
+
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+    if (isManualSpread) {
+      const customPositions = manualReadingCards.map((entry, index) => ({
+        index: index + 1,
+        label: typeof entry.position === "string" ? entry.position : entry.position.label,
+      }));
+
+      return {
+        metadata: {
+          consultantName: "",
+          date,
+          time,
+          place: "",
+          emotionalState: "",
+          spreadType: "Tirada Libre",
+          question: manualQuestion.trim(),
+        },
+        reflection: {
+          personalInterpretation: htmlToPlainText(activeInterpretation.summary),
+          finalMessage: htmlToPlainText(activeInterpretation.relationships),
+          suggestedAction: htmlToPlainText(activeInterpretation.finalAdvice),
+        },
+        traditionalReading: {
+          summary: activeInterpretation.summary,
+          positionInterpretations: activeInterpretation.positionReadings.map((item) => ({
+            positionNumber: item.positionNumber,
+            positionName: item.positionName,
+            cardName: item.cardName,
+            orientation: item.orientation,
+            interpretation: item.interpretation,
+          })),
+          cardRelationships: activeInterpretation.relationships,
+          finalAdvice: activeInterpretation.finalAdvice,
+        },
+        mentorReading: aiResponse,
+        canvas: {
+          spreadType: "Tirada Libre",
+          spreadId: "free",
+          customPositions,
+          placements: manualReadingCards.map((entry, index) => ({
+            id: `free-${index + 1}`,
+            cardId: entry.card.id,
+            cardName: entry.card.nameEs,
+            image: entry.card.image,
+            isReversed: entry.reversed,
+            orientation: entry.reversed ? ("invertida" as const) : ("derecha" as const),
+            positionId: `free-${index + 1}`,
+            positionName: customPositions[index]?.label ?? `Posición ${index + 1}`,
+            x: index * 140,
+            y: 0,
+            order: index + 1,
+            rotation: entry.reversed ? 180 : 0,
+            meaningUsed: "",
+          })),
+        },
+        flipStats: [],
+        flipEvents: [],
+        notes: htmlToPlainText(activeInterpretation.summary),
+        createdAt: now.toISOString(),
+      };
+    }
+
+    if (!selectedSpread) {
+      return null;
+    }
+
+    return {
+      metadata: {
+        consultantName: "",
+        date,
+        time,
+        place: "",
+        emotionalState: "",
+        spreadType: renderText(selectedSpread.name),
+        question: readingQuestion.trim(),
+      },
+      reflection: {
+        personalInterpretation: htmlToPlainText(activeInterpretation.summary),
+        finalMessage: htmlToPlainText(activeInterpretation.relationships),
+        suggestedAction: htmlToPlainText(activeInterpretation.finalAdvice),
+      },
+      traditionalReading: {
+        summary: activeInterpretation.summary,
+        positionInterpretations: activeInterpretation.positionReadings.map((item) => ({
+          positionNumber: item.positionNumber,
+          positionName: item.positionName,
+          cardName: item.cardName,
+          orientation: item.orientation,
+          interpretation: item.interpretation,
+        })),
+        cardRelationships: activeInterpretation.relationships,
+        finalAdvice: activeInterpretation.finalAdvice,
+      },
+      mentorReading: aiResponse,
+      canvas: {
+        spreadType: renderText(selectedSpread.name),
+        spreadId: selectedSpread.id,
+        placements: drawnCards.map((entry, index) => ({
+          id: `${selectedSpread.id}-${entry.position.id}`,
+          cardId: entry.card.id,
+          cardName: entry.card.nameEs,
+          image: entry.card.image,
+          isReversed: entry.reversed,
+          orientation: entry.reversed ? ("invertida" as const) : ("derecha" as const),
+          positionId: String(entry.position.id),
+          positionName: entry.position.label,
+          x: entry.position.x * 140,
+          y: entry.position.y * 220,
+          order: index + 1,
+          rotation: entry.reversed ? 180 : 0,
+          meaningUsed: "",
+        })),
+      },
+      flipStats: [],
+      flipEvents: [],
+      notes: htmlToPlainText(activeInterpretation.summary),
+      createdAt: now.toISOString(),
+    };
+  }
+
+  async function persistActiveReading() {
+    const payload = buildJournalPayload();
+    if (!payload) {
+      throw new Error("La lectura todavía no está lista para guardarse.");
+    }
+    return createJournalEntryInApi(payload);
+  }
+
+  async function handleShareReading() {
+    const shareText = buildShareableReadingText({
+      spreadName: spreadPresentation.title,
+      question: activeQuestion,
+      positions: revealedReadingItems,
+      interpretation: activeInterpretation,
+    });
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: spreadPresentation.title, text: shareText });
+        return;
+      } catch {
+        // Fallback to clipboard below.
+      }
+    }
+
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareText);
+    }
+  }
+
+  async function handleExportPdf() {
+    if (journalActionState !== "idle") {
+      return;
+    }
+
+    setJournalActionState("exporting");
+    try {
+      const savedEntry = await persistActiveReading();
+      await exportJournalEntryToPdf(savedEntry.id);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "No se pudo exportar el PDF.");
+    } finally {
+      setJournalActionState("idle");
+    }
+  }
+
+  async function handleSaveReadingDraft() {
+    if (journalActionState !== "idle") {
+      return;
+    }
+
+    setJournalActionState("saving");
+    try {
+      const savedEntry = await persistActiveReading();
+      router.push(`/diario`);
+      return savedEntry;
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "No se pudo guardar en Bitácora.");
+    } finally {
+      setJournalActionState("idle");
+    }
   }
 
   function handleSpreadSelection(nextSpreadId: string) {
@@ -472,26 +891,36 @@ export function SpreadReader() {
       return;
     }
 
-    resetAiDepth();
+    resetPresetReading();
+    clearManualInterpretation();
+    setManualSpreadStatus("building");
     setSpreadId(nextSpreadId);
   }
 
   function handleManualQuestionChange(value: string) {
     setManualQuestion(value);
+    setManualSpreadStatus("building");
     clearManualInterpretation();
+    setInterpretationVisible(false);
   }
 
   function handleManualCardCountChange(value: number) {
     setManualCardCount(value);
+    setManualSpreadStatus("building");
     clearManualInterpretation();
+    setInterpretationVisible(false);
   }
 
   function handleManualAllowRepeatedChange(checked: boolean) {
     setManualAllowRepeated(checked);
+    setManualSpreadStatus("building");
     clearManualInterpretation({ keepError: checked });
   }
 
   function handleCellClick(row: number, col: number) {
+    if (isManualSpreadFinalized) {
+      return;
+    }
     if (manualBoardCards.length >= manualCardCount) {
       setManualError(`No puedes colocar más de ${manualCardCount} cartas.`);
       return;
@@ -501,6 +930,9 @@ export function SpreadReader() {
   }
 
   function handleCardClick(card: ManualBoardCard) {
+    if (isManualSpreadFinalized) {
+      return;
+    }
     setEditingCell({ row: card.row, col: card.col, card });
     setIsModalOpen(true);
   }
@@ -509,8 +941,8 @@ export function SpreadReader() {
     if (!editingCell) return;
 
     setManualBoardCards((prev) => {
-      const existingIndex = prev.findIndex((c) => c.row === editingCell.row && c.col === editingCell.col);
-      const newCard: ManualBoardCard = {
+      const existingIndex = prev.findIndex((card) => card.row === editingCell.row && card.col === editingCell.col);
+      const nextCard: ManualBoardCard = {
         id: `${editingCell.row}-${editingCell.col}`,
         row: editingCell.row,
         col: editingCell.col,
@@ -522,492 +954,174 @@ export function SpreadReader() {
 
       if (existingIndex >= 0) {
         const next = [...prev];
-        next[existingIndex] = newCard;
+        next[existingIndex] = nextCard;
         return next;
       }
 
-      return [...prev, newCard];
+      return [...prev, nextCard];
     });
 
+    setManualSpreadStatus("building");
     setManualError(null);
     clearManualInterpretation();
+    setInterpretationVisible(false);
   }
 
   function handleModalDelete() {
     if (!editingCell) return;
-    setManualBoardCards((prev) => prev.filter((c) => !(c.row === editingCell.row && c.col === editingCell.col)));
+    setManualBoardCards((prev) => prev.filter((card) => !(card.row === editingCell.row && card.col === editingCell.col)));
     setIsModalOpen(false);
+    setManualSpreadStatus("building");
     clearManualInterpretation();
+    setInterpretationVisible(false);
   }
 
   function resetManualSpread() {
-    const nextCount = Math.min(3, maxManualCards);
     setManualQuestion("");
     setManualAllowRepeated(false);
-    setManualCardCount(nextCount);
+    setManualCardCount(Math.min(3, maxManualCards));
     setManualBoardCards([]);
+    setManualSpreadStatus("building");
+    setIsModalOpen(false);
+    setEditingCell(null);
     setManualReadingCards([]);
     setManualError(null);
+    setJournalActionState("idle");
     resetAiDepth();
+    setInterpretationVisible(false);
+    setInterpretationTab("summary");
   }
 
-  useEffect(() => {
-    if (status === "completada" && readingResult && process.env.NODE_ENV !== "production") {
-      console.debug("Resultado de tirada listo para persistencia:", readingResult);
-    }
-  }, [readingResult, status]);
-
   return (
-    <section className="reading-tool" aria-label="Generador de tiradas">
-      <div className="reading-spreads" role="radiogroup" aria-label="Tipo de tirada">
-        {tarotSpreads.map((spread) => {
-          const isAllowed = currentPlan ? canUseSpread(currentPlan, spread.id) : false;
-          const requiredPlan = getRequiredPlanLabel(currentPlan, spread.id);
+    <>
+      <ReadingExperienceShell
+      authStatus={authSession.status}
+      authEmail={authSession.email}
+      currentPlan={currentPlan}
+      spreadId={spreadId}
+      spreadOptions={spreadOptions}
+      selectedSpread={selectedSpread}
+      selectedSpreadPositions={selectedSpread?.positions ?? []}
+      selectedSpreadDescription={selectedSpreadDescription}
+      spreadPresentation={spreadPresentation}
+      isManualSpread={isManualSpread}
+      isBusy={isBusy}
+      status={status}
+      readingQuestion={readingQuestion}
+      onReadingQuestionChange={setReadingQuestion}
+      manualQuestion={manualQuestion}
+      onManualQuestionChange={handleManualQuestionChange}
+      manualCardCount={manualCardCount}
+      manualPlacedCardCount={manualBoardCards.length}
+      manualIsFinalized={isManualSpreadFinalized}
+      maxManualCards={maxManualCards}
+      onManualCardCountChange={handleManualCardCountChange}
+      manualAllowRepeated={manualAllowRepeated}
+      onManualAllowRepeatedChange={handleManualAllowRepeatedChange}
+      manualError={manualError}
+      manualIsGenerating={manualIsGenerating}
+      aiDepthState={aiDepthState}
+      aiDepthError={aiDepthError}
+      interpretationVisible={interpretationVisible}
+      onInterpretationVisibilityChange={setInterpretationVisible}
+      interpretationTab={interpretationTab}
+      onInterpretationTabChange={(nextTab) => {
+        if (nextTab === "mentor") {
+          setMentorTabNew(false);
+        }
+        setInterpretationTab(nextTab);
+      }}
+      interpretationTabs={interpretationTabs}
+      mentorTabNew={mentorTabNew}
+      revealedReadingItems={revealedReadingItems}
+      activeQuestion={activeQuestion}
+      activeInterpretation={activeInterpretation}
+      aiResponse={aiResponse}
+      canShowInterpretationCta={canShowInterpretationCta}
+      onPrimaryInterpretationCta={isManualSpread ? handleManualDepthInterpretation : handlePresetDepthInterpretation}
+      onManualPrepare={handleManualInterpretation}
+      onStartReading={startReading}
+      onResetPresetReading={resetPresetReading}
+      onResetManualSpread={resetManualSpread}
+      onSpreadChange={(nextSpreadId) => {
+        if (nextSpreadId === MANUAL_SPREAD_ID) {
+          handleSpreadSelection(nextSpreadId);
+          return;
+        }
 
-          return (
-            <button
-              key={spread.id}
-              type="button"
-              role="radio"
-              aria-checked={spread.id === spreadId}
-              className={`spread-chip${spread.id === spreadId ? " spread-chip-active" : ""}${!isAllowed ? " spread-chip-locked" : ""}`}
-              onClick={() => {
-                if (!isAllowed) {
-                  router.push(`/planes?from=feature&feature=${spread.id}`);
-                  return;
-                }
-                handleSpreadSelection(spread.id);
-              }}
-              disabled={isBusy || authSession.status === "loading"}
-            >
-              {spread.name}
-              {!isAllowed ? <span className="spread-chip-badge">🔒 {requiredPlan}</span> : null}
-            </button>
-          );
-        })}
+        const nextSpread = tarotSpreads.find((spread) => spread.id === nextSpreadId);
+        if (!nextSpread) {
+          return;
+        }
 
-        <button
-          type="button"
-          role="radio"
-          aria-checked={isManualSpread}
-          className={`spread-chip${isManualSpread ? " spread-chip-active" : ""}`}
-          onClick={() => handleSpreadSelection(MANUAL_SPREAD_ID)}
-          disabled={isBusy || authSession.status === "loading"}
-        >
-          {MANUAL_SPREAD_META.name}
-        </button>
-      </div>
+        const isAllowed = currentPlan ? canUseSpread(currentPlan, nextSpread.id) : false;
+        if (!isAllowed) {
+          router.push(`/planes?from=feature&feature=${nextSpread.id}`);
+          return;
+        }
 
-      <div className="reading-board">
-        <aside className="reading-side" aria-label="Mazo y acciones">
-          <article className="reading-summary">
-            <h2>{isManualSpread ? MANUAL_SPREAD_META.name : selectedSpread?.name}</h2>
-            <p>{isManualSpread ? MANUAL_SPREAD_META.description : selectedSpread?.description}</p>
-          </article>
-
-          {isManualSpread ? null : (
-            <>
-              <div className="deck-stage">
-                <div
-                  className={`deck-stack${status === "barajando" ? " deck-stack-shuffling" : ""}${
-                    status === "revelando" ? " deck-stack-cut" : ""
-                  }`}
-                  aria-label="Mazo cerrado"
-                >
-                  <div className="deck-face" aria-hidden="true">
-                    <img src="/decks/rider-waite/back.png" alt="" className="deck-face-image" />
-                  </div>
-                  <span className="deck-layer deck-layer-one" aria-hidden="true" />
-                  <span className="deck-layer deck-layer-two" aria-hidden="true" />
-                  <span className="deck-layer deck-layer-three" aria-hidden="true" />
-                  <span className="deck-layer deck-layer-four" aria-hidden="true" />
-                  <span className="deck-layer deck-layer-five" aria-hidden="true" />
-                </div>
-                <p className="reading-status">
-                  {status === "inicial" && "Mazo listo"}
-                  {status === "barajando" && "Barajando..."}
-                  {status === "revelando" && "Revelando cartas..."}
-                  {status === "completada" && "La lectura ha sido revelada"}
-                </p>
-              </div>
-
-              <div className="reading-actions">
-                <button type="button" className="btn btn-primary" onClick={startReading} disabled={isBusy}>
-                  {status === "barajando" ? "Barajando..." : "Barajar y sacar cartas"}
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={startReading} disabled={isBusy}>
-                  Nueva tirada
-                </button>
-                <Link className="btn btn-secondary" href="/dashboard-preview">
-                  Volver al dashboard
-                </Link>
-              </div>
-            </>
-          )}
-
-          {isManualSpread ? (
-            <div className="reading-actions">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleManualInterpretation}
-                disabled={manualIsGenerating || aiDepthState === "loading" || authSession.status !== "authenticated"}
-              >
-                {manualIsGenerating ? "Interpretando..." : "Interpretar"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={resetManualSpread}
-                disabled={manualIsGenerating || aiDepthState === "loading"}
-              >
-                Reiniciar libre
-              </button>
-              <Link className="btn btn-secondary" href="/dashboard-preview">
-                Volver al dashboard
-              </Link>
+        handleSpreadSelection(nextSpread.id);
+      }}
+      onShareReading={handleShareReading}
+      onExportPdf={handleExportPdf}
+      onSaveReadingDraft={handleSaveReadingDraft}
+      getPlanAccent={getPlanAccent}
+      getUserInitial={getUserInitial}
+      boardContent={
+        isManualSpread ? (
+          <>
+            <ManualSpreadBoard
+              cards={manualBoardCards}
+              manualCardCount={manualCardCount}
+              isLocked={isManualSpreadFinalized}
+              onCellClick={handleCellClick}
+              onCardClick={handleCardClick}
+              getCardData={(cardId) => cardById.get(cardId)}
+            />
+            <CardSelectionModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onSave={handleModalSave}
+              onDelete={editingCell?.card ? handleModalDelete : undefined}
+              deck={riderWaiteDeck}
+              initialData={editingCell?.card}
+              allowRepeated={manualAllowRepeated}
+              usedCardIds={manualAllowRepeated ? [] : manualBoardCards.map((card) => card.cardId)}
+            />
+          </>
+        ) : (
+          <div className="reading-canvas-stage">
+            <div className="reading-canvas">
+              {selectedSpread ? (
+                <SpreadLayout
+                  spread={selectedSpread}
+                  drawnCards={drawnCards}
+                  visibleCards={visibleCards}
+                  status={status}
+                  activeRevealIndex={activeRevealIndex}
+                  flippedCards={flippedCards}
+                  onToggleFlip={openProtagonistCard}
+                />
+              ) : null}
             </div>
-          ) : null}
-
-          {manualError ? <p className="manual-error">{manualError}</p> : null}
-          {authSession.status === "loading" ? <p className="reading-status">Cargando sesión...</p> : null}
-        </aside>
-
-        <section
-          className={`reading-main${status === "completada" || manualQuickInterpretation ? " reading-main-complete" : ""}`}
-          aria-label="Resultado de tirada"
-        >
-          <p className="reading-guidance">
-            {!isManualSpread && status === "inicial" && "Elige una tirada y respira antes de comenzar."}
-            {!isManualSpread && status === "barajando" && "Preparando la lectura..."}
-            {!isManualSpread && status === "revelando" && "La lectura se está revelando carta por carta..."}
-            {!isManualSpread && status === "completada" && "Las cartas han hablado. Observa cómo dialogan entre sí."}
-            {isManualSpread && !manualQuickInterpretation && !manualIsGenerating
-              ? "Define tu pregunta, nombra cada posición y asigna las cartas antes de interpretar."
-              : null}
-            {isManualSpread && manualIsGenerating ? "Ordenando la lectura libre..." : null}
-            {isManualSpread && manualQuickInterpretation ? "Tu tirada libre ya tiene una lectura base lista para profundizar." : null}
-          </p>
-
-          <div className="reading-main-panel">
-            {isManualSpread ? (
-              <div className="manual-reading-panel">
-                <div className="manual-spread-setup manual-spread-setup--top">
-                  <div className="manual-config-grid">
-                    <label className="manual-field manual-field--full">
-                      <span>Pregunta / Tema</span>
-                      <textarea
-                        value={manualQuestion}
-                        onChange={(event) => handleManualQuestionChange(event.target.value)}
-                        className="manual-field-control manual-field-textarea"
-                        placeholder="Escribe la pregunta o tema central de esta tirada"
-                        rows={2}
-                      />
-                    </label>
-
-                    <div className="manual-field manual-field--full">
-                      <span>Cantidad de cartas</span>
-                      <div className="manual-card-count-pills">
-                        {Array.from({ length: maxManualCards }, (_, index) => index + 1).map((count) => (
-                          <button
-                            key={count}
-                            type="button"
-                            className={`manual-pill ${manualCardCount === count ? "manual-pill--active" : ""}`}
-                            onClick={() => handleManualCardCountChange(count)}
-                            disabled={manualIsGenerating || aiDepthState === "loading"}
-                          >
-                            {count}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <ManualSpreadBoard
-                  cards={manualBoardCards}
-                  manualCardCount={manualCardCount}
-                  onCellClick={handleCellClick}
-                  onCardClick={handleCardClick}
-                  getCardData={(cardId) => cardById.get(cardId)}
-                />
-                <CardSelectionModal
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
-                  onSave={handleModalSave}
-                  onDelete={editingCell?.card ? handleModalDelete : undefined}
-                  deck={riderWaiteDeck}
-                  initialData={editingCell?.card}
-                  allowRepeated={false}
-                  usedCardIds={manualBoardCards.map((c) => c.cardId)}
-                />
-              </div>
-            ) : (
-              <div className="reading-canvas">
-                {selectedSpread ? (
-                  <SpreadLayout
-                    spread={selectedSpread}
-                    drawnCards={drawnCards}
-                    visibleCards={visibleCards}
-                    status={status}
-                    activeRevealIndex={activeRevealIndex}
-                    flippedCards={flippedCards}
-                    onToggleFlip={toggleFlip}
-                  />
-                ) : null}
-              </div>
-            )}
-
-            {activeInterpretation ? (
-              <section className="interpretation-panel" aria-label="Interpretación de la lectura">
-                <header className="interpretation-header">
-                  <h3>Interpretación de tu lectura</h3>
-                  <p>{isManualSpread ? "Lectura base manual sin consumo de IA." : "Lectura rápida conectada de toda la tirada."}</p>
-                </header>
-
-                <div className="interpretation-tone-selector" role="radiogroup" aria-label="Tono de respuesta">
-                  {interpretationToneOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      role="radio"
-                      aria-checked={interpretationTone === option.value}
-                      className={`interpretation-tone-pill${
-                        interpretationTone === option.value ? " interpretation-tone-pill-active" : ""
-                      }`}
-                      onClick={() => setInterpretationTone(option.value)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="interpretation-copy">
-                  {isManualSpread && manualQuestion.trim() ? (
-                    <section className="reading-section">
-                      <h3>Pregunta</h3>
-                      <p>{manualQuestion.trim()}</p>
-                    </section>
-                  ) : null}
-
-                  <section className="reading-section">
-                    <h3>1. Síntesis general</h3>
-                    <p>{renderText(activeInterpretation.summary)}</p>
-                  </section>
-
-                  <section className="reading-section">
-                    <h3>2. Lectura por posición</h3>
-                    <div className="position-reading-list">
-                      {activeInterpretation.positionReadings.map((item) => (
-                        <article className="position-reading-card" key={item.positionNumber}>
-                          <header className="position-reading-card__header">
-                            <span>{item.positionNumber}</span>
-                            <div>
-                              <strong>{renderText(item.positionName)}</strong>
-                              {item.positionSubtitle ? <small>{renderText(item.positionSubtitle)}</small> : null}
-                            </div>
-                          </header>
-
-                          <p className="position-reading-card__card">
-                            {renderText(item.cardName)} · {renderText(item.orientation)}
-                          </p>
-
-                          <p>{renderText(item.interpretation)}</p>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-
-                  <section className="reading-section">
-                    <h3>3. Relaciones entre cartas</h3>
-                    <p>{renderText(activeInterpretation.relationships)}</p>
-                  </section>
-
-                  <section className="reading-section">
-                    <h3>4. Consejo final integrado</h3>
-                    <p>{renderText(activeInterpretation.finalAdvice)}</p>
-                  </section>
-                </div>
-
-                <div className="interpretation-ai">
-                  {aiDepthError ? (
-                    <div className="interpretation-ai-message" style={{ color: "#e05353" }}>
-                      {aiDepthError}
-                    </div>
-                  ) : null}
-
-                  {aiDepthState !== "ready" ? (
-                    <button
-                      type="button"
-                      className="btn btn-secondary interpretation-ai-btn"
-                      onClick={isManualSpread ? handleManualDepthInterpretation : handlePresetDepthInterpretation}
-                      disabled={aiDepthState === "loading"}
-                    >
-                      {aiDepthState === "loading" ? "Consultando a la IA..." : "Profundizar con IA"}
-                    </button>
-                  ) : null}
-
-                  {aiDepthState === "loading" ? (
-                    <p className="interpretation-ai-message">Preparando una interpretación más profunda, por favor espera...</p>
-                  ) : null}
-
-                  {aiDepthState === "ready" && aiResponse ? (
-                    <div className="interpretation-ai-panel">
-                      <header className="ai-panel-header">
-                        <span className="ai-panel-icon">✨</span>
-                        <h3>Profundización IA</h3>
-                      </header>
-
-                      <div className="ai-panel-content">
-                        <section className="ai-section-card ai-card-neutral">
-                          <h4 className="ai-section-title">
-                            <span className="ai-icon">✨</span> Visión profunda
-                          </h4>
-                          <div className="ai-text-content">
-                            {aiResponse.aiSummary
-                              .split("\n")
-                              .filter((paragraph) => paragraph.trim())
-                              .map((paragraph, index) => (
-                                <p key={index}>{paragraph}</p>
-                              ))}
-                          </div>
-                        </section>
-
-                        <section className="ai-section-card ai-card-structured">
-                          <h4 className="ai-section-title">
-                            <span className="ai-icon">🔍</span> Lectura detallada
-                          </h4>
-                          <div className="ai-text-content">
-                            {(() => {
-                              const stepLabels = ["Situación inicial", "Bloqueo o desarrollo", "Dirección o consejo"];
-                              const rawLines = aiResponse.deepInterpretation.split("\n").filter((paragraph) => paragraph.trim());
-                              let currentCard: { title: string; text: string[] } | null = null;
-                              const cards: Array<{ title: string; text: string[] }> = [];
-                              const intro: string[] = [];
-
-                              rawLines.forEach((line) => {
-                                if (line.includes(":") && line.length < 80) {
-                                  if (currentCard) {
-                                    cards.push(currentCard);
-                                  }
-                                  currentCard = { title: line, text: [] };
-                                  return;
-                                }
-
-                                if (currentCard) {
-                                  currentCard.text.push(line);
-                                } else {
-                                  intro.push(line);
-                                }
-                              });
-
-                              if (currentCard) {
-                                cards.push(currentCard);
-                              }
-
-                              if (cards.length === 0) {
-                                const fullText = aiResponse.deepInterpretation.trim();
-                                const sentences = fullText.match(/[^.!?]+[.!?]+/g) ?? [fullText];
-                                const chunkSize = Math.ceil(sentences.length / 3);
-
-                                for (let index = 0; index < 3; index += 1) {
-                                  const chunk = sentences.slice(index * chunkSize, (index + 1) * chunkSize).join(" ").trim();
-                                  if (chunk) {
-                                    cards.push({ title: stepLabels[index], text: [chunk] });
-                                  }
-                                }
-                              }
-
-                              const labeledCards = cards.map((card, index) => ({
-                                ...card,
-                                title: card.title.replace(/^(carta\s*\d+|step\s*\d+)/i, "").trim() || stepLabels[index] || card.title,
-                              }));
-
-                              return (
-                                <div className="ai-timeline-container">
-                                  {intro.length > 0 ? (
-                                    <div className="ai-timeline-intro">
-                                      {intro.map((paragraph, index) => (
-                                        <p key={`intro-${index}`}>{paragraph}</p>
-                                      ))}
-                                    </div>
-                                  ) : null}
-                                  <ul className="ai-timeline">
-                                    {labeledCards.map((card, index) => (
-                                      <li key={index} className="ai-timeline-item">
-                                        <div className="ai-timeline-marker">
-                                          <span className="ai-timeline-step">{index + 1}</span>
-                                        </div>
-                                        <div className="ai-timeline-content">
-                                          <h5 className="ai-timeline-title">{card.title}</h5>
-                                          {card.text.map((paragraph, paragraphIndex) => (
-                                            <p key={paragraphIndex}>{paragraph}</p>
-                                          ))}
-                                        </div>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        </section>
-
-                        <section className="ai-section-card ai-card-light">
-                          <h4 className="ai-section-title">
-                            <span className="ai-icon">🧩</span> Conexiones ocultas
-                          </h4>
-                          <div className="ai-text-content">
-                            {aiResponse.cardConnections
-                              .split("\n")
-                              .filter((paragraph) => paragraph.trim())
-                              .map((paragraph, index) => (
-                                <p key={index}>{paragraph}</p>
-                              ))}
-                          </div>
-                        </section>
-
-                        <section className="ai-section-card ai-section-highlight">
-                          <h4 className="ai-section-title">
-                            <span className="ai-icon">⚡</span> Consejo práctico
-                          </h4>
-                          <div className="ai-text-content">
-                            {aiResponse.practicalAdvice
-                              .split("\n")
-                              .filter((paragraph) => paragraph.trim())
-                              .map((paragraph, index) => (
-                                <p key={index}>{paragraph}</p>
-                              ))}
-                          </div>
-                        </section>
-
-                        <section className="ai-section-card ai-card-minimal">
-                          <h4 className="ai-section-title">
-                            <span className="ai-icon">❓</span> Preguntas de reflexión
-                          </h4>
-                          <ul className="ai-reflection-list">
-                            {aiResponse.reflectionQuestions.map((question, index) => (
-                              <li key={index}>
-                                <span>{question}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </section>
-
-                        <div className="ai-warning-box">
-                          <small>
-                            <em>{aiResponse.warning}</em>
-                          </small>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </section>
-            ) : null}
           </div>
-        </section>
-      </div>
-    </section>
+        )
+      }
+      />
+      <CardProtagonistModal
+        isOpen={Boolean(protagonistCard)}
+        entry={protagonistCard?.entry ?? null}
+        positionNumber={protagonistCard ? protagonistCard.index + 1 : null}
+        onClose={() => setProtagonistCard(null)}
+        onOpenMeaning={openMeaningFromProtagonist}
+      />
+      <TarotCardModal
+        isOpen={Boolean(meaningCard)}
+        onClose={() => setMeaningCard(null)}
+        cardId={meaningCard?.cardId ?? null}
+        imageUrl={meaningCard?.image}
+        simulatePlan={currentPlan ?? undefined}
+      />
+    </>
   );
 }

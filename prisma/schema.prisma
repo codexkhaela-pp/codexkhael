@@ -138,6 +138,7 @@ model User {
   status            UserStatus             @default(ACTIVE)
   createdAt         DateTime               @default(now())
   updatedAt         DateTime               @updatedAt
+  authSessions      AuthSession[]
   roles             UserRole[]
   bitacoraEntries   BitacoraEntry[]
   reReadings        BitacoraReReading[]
@@ -156,6 +157,25 @@ model User {
   dailyJournalEntries DailyJournalEntry[]
 
   @@index([email])
+}
+
+model AuthSession {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  sessionToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  lastSeenAt   DateTime?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, revokedAt])
+  @@index([sessionToken, revokedAt])
 }
 
 model UserProfile {

@@ -561,15 +561,84 @@ export default async function DashboardPreviewPage() {
   );
   const { mainInner } = extractSections(replacedBody);
 
-  const adjustedCss = css
-    .replace(
-      /background:\s*conic-gradient\(var\(--gold\)\s*0%\s*\d+%,\s*#18142c\s*\d+%\s*100%\);/i,
-      `background: conic-gradient(var(--gold) 0% ${progress.percent}%, #18142c ${progress.percent}% 100%);`,
-    )
-    .replace(/(\.horizontal-bar-fill\s*\{[\s\S]*?width:\s*)\d+%/i, `$1${progress.percent}%`) +
-    `
+  const premiumDashboardOverrides = String.raw`
+      :host {
+        --bg-base: #09090f;
+        --bg-surface: #111118;
+        --purple-dark: #111118;
+        --purple-card: #111118;
+        --purple-inner: #15131d;
+        --purple-accent: rgba(200, 165, 106, 0.14);
+        --gold: #c8a56a;
+        --gold-bright: #f3ebdd;
+        --gold-border: rgba(200, 165, 106, 0.22);
+        --gold-border-heavy: rgba(200, 165, 106, 0.34);
+        --gold-glow: rgba(200, 165, 106, 0.09);
+        --text-light: #f3ebdd;
+        --text-muted: #cfc8bb;
+        color-scheme: dark;
+        display: block;
+        height: 100%;
+        overflow: auto;
+        position: relative;
+        background-color: #09090f !important;
+        background-image:
+          radial-gradient(circle at 16% 14%, rgba(200, 165, 106, 0.08) 0%, transparent 24%),
+          radial-gradient(circle at 82% 11%, rgba(200, 165, 106, 0.05) 0%, transparent 22%),
+          radial-gradient(circle at 78% 78%, rgba(200, 165, 106, 0.04) 0%, transparent 20%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0) 18%),
+          #09090f;
+      }
+
+      :host::before,
+      :host::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      :host::before {
+        opacity: 0.06;
+        background-image:
+          radial-gradient(circle at 22% 36%, rgba(243, 235, 221, 0.85) 0 1px, transparent 1.4px),
+          radial-gradient(circle at 74% 28%, rgba(243, 235, 221, 0.78) 0 1px, transparent 1.4px),
+          radial-gradient(circle at 64% 70%, rgba(243, 235, 221, 0.6) 0 1px, transparent 1.6px),
+          radial-gradient(circle at 34% 80%, rgba(243, 235, 221, 0.55) 0 1px, transparent 1.4px);
+        background-size: 220px 220px, 280px 280px, 340px 340px, 300px 300px;
+        mix-blend-mode: screen;
+      }
+
+      :host::after {
+        background:
+          radial-gradient(circle at center, transparent 56%, rgba(0, 0, 0, 0.22) 100%),
+          linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.02) 26%, rgba(0, 0, 0, 0.28));
+      }
+
+      :host::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      :host::-webkit-scrollbar-thumb {
+        background: rgba(200, 165, 106, 0.26);
+        border-radius: 999px;
+        border: 2px solid rgba(9, 9, 15, 0.88);
+      }
+
       main {
-        padding: 10px 15px;
+        position: relative;
+        max-width: none;
+        margin: 0;
+        width: 100%;
+        padding: clamp(14px, 1.2vw, 20px);
+        display: flex;
+        flex-direction: column;
+        gap: clamp(18px, 2vw, 24px);
+      }
+
+      main > section,
+      main > footer {
+        width: 100%;
       }
 
       .logo-symbol-img {
@@ -605,6 +674,467 @@ export default async function DashboardPreviewPage() {
         border-radius: 50%;
       }
 
+      .welcome-banner {
+        position: relative;
+        isolation: isolate;
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) 110px minmax(240px, 0.8fr);
+        align-items: center;
+        gap: clamp(18px, 2vw, 28px);
+        padding: clamp(24px, 2.4vw, 34px);
+        overflow: hidden;
+        border-radius: 30px;
+        border: 1px solid rgba(200, 165, 106, 0.22);
+        background:
+          radial-gradient(circle at 14% 20%, rgba(200, 165, 106, 0.1), transparent 32%),
+          radial-gradient(circle at 76% 18%, rgba(243, 235, 221, 0.04), transparent 26%),
+          linear-gradient(135deg, rgba(17, 17, 24, 0.98), rgba(21, 19, 29, 0.92));
+        box-shadow:
+          0 26px 70px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.025);
+      }
+
+      .welcome-banner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(9, 9, 15, 0.04), rgba(243, 235, 221, 0.02), rgba(9, 9, 15, 0.04)),
+          radial-gradient(circle at 86% 18%, rgba(200, 165, 106, 0.11) 0%, transparent 28%);
+        opacity: 0.95;
+        pointer-events: none;
+      }
+
+      .welcome-banner::after {
+        content: "✦";
+        position: absolute;
+        right: 26px;
+        bottom: 18px;
+        color: rgba(200, 165, 106, 0.3);
+        font-size: 16px;
+        letter-spacing: 0.2em;
+      }
+
+      .user-profile,
+      .streak-card,
+      .mystic-moon-svg {
+        position: relative;
+        z-index: 1;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: clamp(18px, 2vw, 28px);
+        min-width: 0;
+      }
+
+      .avatar-container {
+        width: clamp(92px, 8vw, 112px);
+        height: clamp(92px, 8vw, 112px);
+      }
+
+      .avatar-img {
+        border: 1.5px solid rgba(200, 165, 106, 0.42);
+        background: linear-gradient(180deg, rgba(17, 17, 24, 0.96), rgba(21, 19, 29, 0.96));
+        box-shadow:
+          0 0 0 8px rgba(200, 165, 106, 0.05),
+          0 18px 34px rgba(0, 0, 0, 0.42);
+      }
+
+      .avatar-container::after {
+        content: "";
+        position: absolute;
+        inset: -12px;
+        border-radius: 50%;
+        border: 1px dashed rgba(200, 165, 106, 0.16);
+        pointer-events: none;
+      }
+
+      .level-badge {
+        bottom: -10px;
+        background: rgba(9, 9, 15, 0.9);
+        border: 1px solid rgba(200, 165, 106, 0.3);
+        color: #f3ebdd;
+        letter-spacing: 0.22em;
+        padding: 4px 14px;
+        border-radius: 999px;
+      }
+
+      .welcome-text {
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .welcome-text h2 {
+        color: rgba(207, 200, 187, 0.84);
+        font-size: 12px;
+        line-height: 1.2;
+        text-transform: uppercase;
+        letter-spacing: 0.28em;
+      }
+
+      .welcome-text h1 {
+        font-family: var(--font-serif);
+        font-size: clamp(2rem, 3vw, 3rem);
+        line-height: 0.98;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: #f3ebdd;
+      }
+
+      .welcome-text p {
+        max-width: 34ch;
+        color: #c8a56a;
+        font-family: var(--font-italic);
+        font-size: clamp(0.98rem, 1.35vw, 1.08rem);
+        line-height: 1.5;
+      }
+
+      .mystic-moon-svg {
+        width: 110px;
+        height: 110px;
+        justify-self: center;
+        opacity: 0.34;
+        filter: drop-shadow(0 0 18px rgba(200, 165, 106, 0.12));
+      }
+
+      .streak-card {
+        min-width: 0;
+        width: 100%;
+        max-width: 260px;
+        justify-self: end;
+        padding: 20px 22px 18px;
+        border-radius: 22px;
+        border: 1px solid rgba(200, 165, 106, 0.2);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+          rgba(9, 9, 15, 0.62);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
+      }
+
+      .streak-card span {
+        color: rgba(207, 200, 187, 0.72);
+        letter-spacing: 0.24em;
+        font-size: 10px;
+      }
+
+      .streak-number {
+        color: #f3ebdd;
+        margin: 10px 0 8px;
+      }
+
+      .streak-fire {
+        color: #c8a56a;
+        text-shadow: 0 0 12px rgba(200, 165, 106, 0.3);
+      }
+
+      .streak-progress-container {
+        height: 5px;
+        background: rgba(243, 235, 221, 0.06);
+      }
+
+      .streak-progress-bar {
+        background: linear-gradient(90deg, rgba(200, 165, 106, 0.45), #c8a56a, #f3ebdd);
+      }
+
+      .dashboard-grid,
+      .bottom-layout-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: clamp(18px, 1.8vw, 24px);
+      }
+
+      .card {
+        position: relative;
+        isolation: isolate;
+        min-width: 0;
+        padding: 24px;
+        border-radius: 22px;
+        border: 1px solid rgba(200, 165, 106, 0.22);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0)),
+          rgba(17, 17, 24, 0.86);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(16px);
+        transition:
+          transform 240ms ease,
+          border-color 240ms ease,
+          box-shadow 240ms ease,
+          background-color 240ms ease;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(circle at top right, rgba(200, 165, 106, 0.08), transparent 34%);
+        pointer-events: none;
+        opacity: 0.9;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(200, 165, 106, 0.32);
+        box-shadow: 0 28px 72px rgba(0, 0, 0, 0.42);
+      }
+
+      .card > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .card-title {
+        margin-bottom: 20px;
+        color: #c8a56a;
+        font-family: var(--font-sans);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+      }
+
+      .btn-action-trigger {
+        width: 100%;
+        margin-top: auto;
+        padding: 13px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(200, 165, 106, 0.3);
+        background: rgba(255, 255, 255, 0.02);
+        color: #f3ebdd;
+        font-family: var(--font-sans);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        box-shadow: none;
+      }
+
+      .btn-action-trigger:hover {
+        transform: translateY(-2px);
+        background: rgba(200, 165, 106, 0.08);
+        border-color: rgba(200, 165, 106, 0.44);
+        color: #f3ebdd;
+        box-shadow: 0 16px 28px rgba(0, 0, 0, 0.22);
+      }
+
+      .progress-content-wrapper {
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .progress-text-block h3,
+      .stat-node span,
+      .challenge-container-box span.sub,
+      .node-date {
+        color: rgba(207, 200, 187, 0.72);
+      }
+
+      .progress-text-block h3 {
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 10px;
+      }
+
+      .progress-text-block h2 {
+        font-size: clamp(1.3rem, 2vw, 1.7rem);
+        line-height: 1.08;
+        color: #f3ebdd;
+      }
+
+      .circle-progress-box {
+        width: 92px;
+        height: 92px;
+      }
+
+      .circle-visual-render {
+        background: conic-gradient(#c8a56a 0% 65%, rgba(243, 235, 221, 0.08) 65% 100%);
+        box-shadow:
+          inset 0 0 0 1px rgba(200, 165, 106, 0.12),
+          0 12px 24px rgba(0, 0, 0, 0.18);
+      }
+
+      .circle-inner-mask {
+        width: 74px;
+        height: 74px;
+        background: #0f0f15;
+        color: #f3ebdd;
+        font-size: 1rem;
+      }
+
+      .horizontal-bar-decor,
+      .challenge-bar-bg {
+        background: rgba(243, 235, 221, 0.06);
+        border-radius: 999px;
+      }
+
+      .horizontal-bar-decor {
+        height: 5px;
+        margin-bottom: 18px;
+      }
+
+      .horizontal-bar-fill,
+      .challenge-bar-fill {
+        background: linear-gradient(90deg, rgba(200, 165, 106, 0.35), #c8a56a, #f3ebdd);
+      }
+
+      .stats-strip {
+        gap: 10px;
+        margin-bottom: 18px;
+        padding: 14px 12px;
+        border-radius: 16px;
+        background: rgba(21, 19, 29, 0.92);
+        border: 1px solid rgba(200, 165, 106, 0.12);
+      }
+
+      .stat-node strong {
+        color: #f3ebdd;
+      }
+
+      .practice-items-stack {
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .practice-node {
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(21, 19, 29, 0.95);
+        border: 1px solid rgba(200, 165, 106, 0.12);
+        transition: transform 220ms ease, border-color 220ms ease, background-color 220ms ease;
+      }
+
+      .practice-node:hover {
+        transform: translateY(-2px);
+        border-color: rgba(200, 165, 106, 0.24);
+        background: rgba(24, 21, 33, 0.98);
+      }
+
+      .practice-left-group {
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .node-details {
+        min-width: 0;
+      }
+
+      .node-details h4 {
+        color: #f3ebdd;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .node-details p {
+        color: #cfc8bb;
+        opacity: 0.78;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .mini-tarot-card-render {
+        width: 38px;
+        height: 56px;
+        border-radius: 8px;
+        background: linear-gradient(180deg, rgba(17, 17, 24, 0.98), rgba(21, 19, 29, 0.98));
+        border-color: rgba(200, 165, 106, 0.24);
+      }
+
+      .mini-tarot-card-render::before {
+        border-color: rgba(200, 165, 106, 0.2);
+      }
+
+      .mini-tarot-art {
+        color: #c8a56a;
+      }
+
+      .card:has(.parchment-container) {
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)),
+          rgba(17, 17, 24, 0.88);
+      }
+
+      .parchment-container {
+        align-items: center;
+        gap: 16px;
+        min-height: 188px;
+        margin-bottom: 18px;
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(215, 192, 156, 0.8);
+        box-shadow:
+          0 16px 34px rgba(0, 0, 0, 0.28),
+          inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        background:
+          linear-gradient(180deg, rgba(255, 251, 242, 0.92), rgba(241, 231, 210, 0.98)),
+          radial-gradient(circle at top left, rgba(255, 255, 255, 0.58), transparent 36%);
+      }
+
+      .parchment-container::before {
+        inset: 7px;
+        border-color: rgba(130, 108, 80, 0.2);
+      }
+
+      .parchment-container::after {
+        inset: 10px;
+        border-color: rgba(130, 108, 80, 0.16);
+      }
+
+      .parchment-content span {
+        color: #7d6a50;
+        letter-spacing: 0.2em;
+      }
+
+      .parchment-content h3 {
+        margin-bottom: 8px;
+        color: #251c15;
+        font-size: 18px;
+      }
+
+      .parchment-content p {
+        color: #4b4033;
+        font-size: 13px;
+      }
+
+      .tarot-card-right-mock {
+        min-width: 82px !important;
+        width: 82px !important;
+        height: 126px !important;
+        border-radius: 10px !important;
+        border-color: rgba(130, 108, 80, 0.32) !important;
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22) !important;
+      }
+
+      .mini-cards-row-flex {
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .repaso-node-card {
+        width: 24%;
+        min-width: 0;
+        padding: 10px 8px;
+        border-radius: 16px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0)),
+          rgba(21, 19, 29, 0.95);
+        border: 1px solid rgba(200, 165, 106, 0.14);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+      }
+
+      .repaso-node-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(200, 165, 106, 0.28);
+        box-shadow: 0 18px 30px rgba(0, 0, 0, 0.24);
+      }
+
       .repaso-card-symbol {
         width: 100%;
         flex: 1;
@@ -617,23 +1147,46 @@ export default async function DashboardPreviewPage() {
       .repaso-card-image {
         width: 88%;
         aspect-ratio: 0.68;
-        border-radius: 7px;
+        border-radius: 9px;
         object-fit: cover;
-        border: 1px solid rgba(197, 168, 128, 0.3);
+        border: 1px solid rgba(197, 168, 128, 0.34);
+        box-shadow: 0 12px 22px rgba(0, 0, 0, 0.26);
       }
 
       .repaso-card-name {
-        margin: 6px 0 4px;
+        margin: 8px 0 6px;
         padding: 0 4px;
-        color: #d8d2e4;
+        color: #f3ebdd;
         font-size: 10px;
-        line-height: 1.2;
+        line-height: 1.25;
         text-align: center;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        min-height: 24px;
+        min-height: 26px;
+      }
+
+      .repaso-node-card span.status-indicator {
+        color: rgba(207, 200, 187, 0.8);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .dot-red {
+        background: #cf785f;
+        box-shadow: 0 0 6px rgba(207, 120, 95, 0.7);
+      }
+
+      .dot-orange {
+        background: #c8a56a;
+        box-shadow: 0 0 6px rgba(200, 165, 106, 0.68);
+      }
+
+      .dot-green {
+        background: #8db786;
+        box-shadow: 0 0 6px rgba(141, 183, 134, 0.68);
       }
 
       .quick-access-card {
@@ -658,7 +1211,257 @@ export default async function DashboardPreviewPage() {
         align-content: center;
         margin: 0;
       }
+
+      .quick-actions-quad {
+        gap: 12px;
+      }
+
+      .action-node {
+        position: relative;
+        min-height: 108px;
+        padding: 18px 16px 16px 54px;
+        border-radius: 18px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)),
+          rgba(21, 19, 29, 0.94);
+        border: 1px solid rgba(200, 165, 106, 0.14);
+        transition: transform 220ms ease, border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+      }
+
+      .action-node::before {
+        content: "✦";
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid rgba(200, 165, 106, 0.24);
+        display: grid;
+        place-items: center;
+        color: #c8a56a;
+        font-size: 11px;
+        background: rgba(200, 165, 106, 0.06);
+      }
+
+      .action-node:hover {
+        transform: translateY(-3px);
+        border-color: rgba(200, 165, 106, 0.28);
+        background: rgba(24, 21, 33, 0.98);
+        box-shadow: 0 18px 28px rgba(0, 0, 0, 0.2);
+      }
+
+      .action-node h4 {
+        color: #f3ebdd;
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+
+      .action-node p {
+        color: rgba(207, 200, 187, 0.8);
+        font-size: 11px;
+        line-height: 1.45;
+      }
+
+      .challenge-container-box {
+        margin-bottom: 18px;
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(200, 165, 106, 0.14);
+        background:
+          radial-gradient(circle at top center, rgba(200, 165, 106, 0.08), transparent 36%),
+          rgba(21, 19, 29, 0.95);
+      }
+
+      .challenge-container-box span.sub {
+        letter-spacing: 0.22em;
+        font-size: 10px;
+      }
+
+      .challenge-container-box h3 {
+        margin-bottom: 6px;
+        font-size: 18px;
+        color: #f3ebdd;
+      }
+
+      .challenge-container-box p.desc {
+        margin-bottom: 14px;
+        color: #cfc8bb;
+      }
+
+      .challenge-progress-meta {
+        color: #f3ebdd;
+      }
+
+      footer {
+        padding: 4px 0 8px;
+      }
+
+      .footer-banner-strip {
+        min-width: min(100%, 980px);
+        max-width: 100%;
+        padding: 16px 28px;
+        border-radius: 999px;
+        background:
+          linear-gradient(90deg, rgba(9, 9, 15, 0), rgba(21, 19, 29, 0.92) 14%, rgba(21, 19, 29, 0.92) 86%, rgba(9, 9, 15, 0)),
+          transparent;
+        border-top: 1px solid rgba(200, 165, 106, 0.18);
+        border-bottom: 1px solid rgba(200, 165, 106, 0.18);
+        box-shadow: none;
+      }
+
+      .footer-banner-strip p {
+        color: #c8a56a;
+        font-size: 14px;
+      }
+
+      footer span.decorative-star {
+        color: rgba(200, 165, 106, 0.72);
+      }
+
+      .welcome-banner,
+      .card,
+      .footer-banner-strip {
+        animation: panelFade 0.55s ease both;
+      }
+
+      .dashboard-grid > .card:nth-child(1) { animation-delay: 70ms; }
+      .dashboard-grid > .card:nth-child(2) { animation-delay: 120ms; }
+      .dashboard-grid > .card:nth-child(3) { animation-delay: 170ms; }
+      .bottom-layout-grid > .card:nth-child(1) { animation-delay: 220ms; }
+      .bottom-layout-grid > .card:nth-child(2) { animation-delay: 270ms; }
+      .bottom-layout-grid > .card:nth-child(3) { animation-delay: 320ms; }
+
+      @keyframes panelFade {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1320px) {
+        .welcome-banner {
+          grid-template-columns: minmax(0, 1fr) 88px minmax(210px, 0.76fr);
+        }
+      }
+
+      @media (max-width: 1180px) {
+        .dashboard-grid,
+        .bottom-layout-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .welcome-banner {
+          grid-template-columns: minmax(0, 1fr) minmax(220px, 0.72fr);
+        }
+
+        .mystic-moon-svg {
+          display: none;
+        }
+      }
+
+      @media (max-width: 860px) {
+        main {
+          padding: 16px 14px 24px;
+        }
+
+        .dashboard-grid,
+        .bottom-layout-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .welcome-banner {
+          grid-template-columns: 1fr;
+          align-items: flex-start;
+        }
+
+        .streak-card {
+          max-width: none;
+          justify-self: stretch;
+        }
+
+        .progress-content-wrapper,
+        .parchment-container,
+        .practice-node {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .tarot-card-right-mock {
+          align-self: center;
+        }
+
+        .mini-cards-row-flex {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .repaso-node-card {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .welcome-banner,
+        .card {
+          padding: 18px;
+          border-radius: 20px;
+        }
+
+        .user-profile {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .welcome-text h1 {
+          font-size: 2.2rem;
+        }
+
+        .stats-strip,
+        .quick-actions-quad {
+          grid-template-columns: 1fr;
+        }
+
+        .mini-cards-row-flex {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .action-node {
+          min-height: 92px;
+        }
+
+        .footer-banner-strip {
+          border-radius: 22px;
+          padding: 14px 18px;
+        }
+      }
+
+      @media (max-width: 390px) {
+        main {
+          padding-inline: 10px;
+        }
+
+        .welcome-text h1 {
+          font-size: 1.9rem;
+        }
+
+        .mini-cards-row-flex {
+          grid-template-columns: 1fr;
+        }
+      }
     `;
+
+  const adjustedCss = css
+    .replace(
+      /background:\s*conic-gradient\(var\(--gold\)\s*0%\s*\d+%,\s*#18142c\s*\d+%\s*100%\);/i,
+      `background: conic-gradient(var(--gold) 0% ${progress.percent}%, #18142c ${progress.percent}% 100%);`,
+    )
+    .replace(/(\.horizontal-bar-fill\s*\{[\s\S]*?width:\s*)\d+%/i, `$1${progress.percent}%`) + premiumDashboardOverrides;
 
   return (
     <>

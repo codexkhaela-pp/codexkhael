@@ -10,7 +10,7 @@ import {
 import { resetIfNeeded } from "@/lib/usage/reset";
 import { canCreateBitacoraEntry } from "@/lib/usage/limits";
 import { resolvePlanTier } from "@/lib/plans";
-import { canUseSpread } from "@/lib/features";
+import { canUseManualSpreadCardCount, canUseSpread, MANUAL_SPREAD_ID } from "@/lib/features";
 
 export const runtime = "nodejs";
 
@@ -67,17 +67,33 @@ export async function POST(request: Request) {
   }
 
   const spreadType = body.metadata?.spreadType?.trim() ?? "";
-  if (!spreadType) {
+  const spreadId = body.canvas?.spreadId?.trim() || spreadType;
+  if (!spreadType && !spreadId) {
     return NextResponse.json({ error: "spreadType es obligatorio" }, { status: 400 });
   }
 
   // Feature limit guard
-  if (!canUseSpread(freshProfile.userPlan, spreadType)) {
+  const manualPlacements = Array.isArray(body.canvas?.placements) ? body.canvas.placements.length : 0;
+  const isManualSpread = spreadId === "free" || spreadId === MANUAL_SPREAD_ID;
+
+  if (isManualSpread) {
+    if (!canUseManualSpreadCardCount(freshProfile.userPlan, manualPlacements)) {
+      return NextResponse.json(
+        {
+          error: "FEATURE_NOT_ALLOWED",
+          feature: "SPREAD",
+          spreadType: spreadId,
+          requiredPlan: "BASIC"
+        },
+        { status: 403 }
+      );
+    }
+  } else if (!canUseSpread(freshProfile.userPlan, spreadId)) {
     return NextResponse.json(
       {
         error: "FEATURE_NOT_ALLOWED",
         feature: "SPREAD",
-        spreadType,
+        spreadType: spreadId,
         requiredPlan: "BASIC" // This is generic, but meets the requirement.
       },
       { status: 403 }
@@ -93,7 +109,7 @@ export async function POST(request: Request) {
   const created = await prisma.bitacoraEntry.create({
     data: {
       userId: user.id,
-      spreadType,
+      spreadType: spreadId,
       question,
       readingDate,
       readingTime,

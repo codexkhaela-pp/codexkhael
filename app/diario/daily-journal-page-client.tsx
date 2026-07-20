@@ -12,6 +12,7 @@ import {
 
 type DailyJournalPageClientProps = {
   initialEntry: DailyJournalEntryPayload;
+  timezone: string;
 };
 
 const STATUS_COPY: Record<DailyJournalEntryPayload["status"], { label: string; tone: string }> = {
@@ -44,7 +45,7 @@ function formatDateLabel(date: string) {
   });
 }
 
-export function DailyJournalPageClient({ initialEntry }: DailyJournalPageClientProps) {
+export function DailyJournalPageClient({ initialEntry, timezone }: DailyJournalPageClientProps) {
   const [entry, setEntry] = useState(initialEntry);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null);
@@ -68,19 +69,22 @@ export function DailyJournalPageClient({ initialEntry }: DailyJournalPageClientP
     setFeedback(null);
 
     try {
-      const response = await fetch("/api/daily-journal/today", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `/api/daily-journal/today?timezone=${encodeURIComponent(timezone)}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            morningIntention: entry.morningIntention,
+            experience: entry.experience,
+            manifestedAreas: entry.manifestedAreas,
+            intensity: entry.intensity,
+            nightReflection: entry.nightReflection,
+          }),
         },
-        body: JSON.stringify({
-          morningIntention: entry.morningIntention,
-          experience: entry.experience,
-          manifestedAreas: entry.manifestedAreas,
-          intensity: entry.intensity,
-          nightReflection: entry.nightReflection,
-        }),
-      });
+      );
 
       const payload = (await response.json()) as { entry?: DailyJournalEntryPayload; error?: string };
 
@@ -110,7 +114,7 @@ export function DailyJournalPageClient({ initialEntry }: DailyJournalPageClientP
             <p className={styles.eyebrow}>Carta del día</p>
             <h2 className={styles.cardTitle}>{entry.card.name}</h2>
             <p className={styles.cardMeta}>
-              {formatDateLabel(entry.date)} · {entry.card.orientation === "REVERSED" ? "Invertida" : "Derecha"}
+              {formatDateLabel(entry.date)} · {entry.card.orientation === "REVERSED" ? "Invertida" : "Al derecho"}
             </p>
           </div>
 
@@ -176,11 +180,7 @@ export function DailyJournalPageClient({ initialEntry }: DailyJournalPageClientP
                   const checked = entry.manifestedAreas.includes(area);
                   return (
                     <label key={area} className={`${styles.areaChip} ${checked ? styles.areaChipChecked : ""}`}>
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleArea(area)}
-                      />
+                      <input type="checkbox" checked={checked} onChange={() => toggleArea(area)} />
                       <span>{AREA_LABELS[area]}</span>
                     </label>
                   );

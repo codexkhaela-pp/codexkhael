@@ -1,10 +1,15 @@
-﻿import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { AUTH_COOKIE_NAME, createSessionCookieValue } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import {
+  createAuthSession,
+  getRequestIpAddress,
+  revokeActiveUserSessions,
+  SESSION_MAX_AGE_SECONDS,
+} from "@/lib/auth-session-store";
 import { logAccess } from "@/lib/access-log";
-import { isPrismaConnectionError, isPrismaMissingColumnError } from "@/lib/prisma-errors";
+import { prisma } from "@/lib/prisma";
+import { isPrismaConnectionError } from "@/lib/prisma-errors";
 
 export const runtime = "nodejs";
 
@@ -18,7 +23,6 @@ function logAuthEvent(stage: string, details: Record<string, unknown>) {
     return;
   }
 
-  // Controlled temporary logs for production debugging (no password/hash output).
   console.info(`[auth/login] ${stage}`, details);
 }
 
@@ -30,6 +34,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  let createdSession: { id: string; userId: string; sessionToken: string } | null = null;
+
   try {
     let body: LoginBody;
     try {
@@ -70,56 +76,88 @@ export async function POST(request: Request) {
       passwordValid,
     });
 
+    if (userFound && !isActive && hasPasswordHash && passwordValid) {
+      return NextResponse.json(
+        { error: "Tu cuenta está creada, pero sigue pendiente de activación." },
+        { status: 403 },
+      );
+    }
+
     if (!userFound || !isActive || !hasPasswordHash || !passwordValid || !user) {
       return NextResponse.json({ error: "Usuario o contraseña inválidos." }, { status: 401 });
     }
 
     const sessionToken = randomUUID();
-    logAuthEvent("session_token_generated", { generated: Boolean(sessionToken) });
-
-    try {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { sessionToken },
-      });
-      logAuthEvent("session_token_persisted", { persisted: true, userId: user.id });
-    } catch (error) {
-      if (isPrismaMissingColumnError(error, "sessionToken")) {
-        logAuthEvent("session_token_persist_skipped", {
-          reason: "missing_sessiontoken_column",
-          userId: user.id,
-        });
-      } else {
-        throw error;
-      }
-    }
-
     const userAgent = request.headers.get("user-agent") ?? null;
+    const ipAddress = getRequestIpAddress(request);
+    const now = new Date();
+
+    createdSession = await prisma.$transaction(async (tx) => {
+      await revokeActiveUserSessions(tx, user.id, now);
+
+      const session = await createAuthSession(tx, {
+        userId: user.id,
+        sessionToken,
+        userAgent,
+        ipAddress,
+        now,
+      });
+
+      return {
+        id: session.id,
+        userId: session.userId,
+        sessionToken: session.sessionToken,
+      };
+    });
+
+    logAuthEvent("session_created", {
+      sessionId: createdSession.id,
+      userId: createdSession.userId,
+    });
+
     await logAccess({ userId: user.id, email: user.email, action: "login", userAgent });
 
-    const cookieStore = await cookies();
-    cookieStore.set(
+    const response = NextResponse.json({ ok: true, user: { id: user.id, email: user.email } });
+    response.cookies.set(
       AUTH_COOKIE_NAME,
-      createSessionCookieValue({ userId: user.id, email: user.email, sessionToken }),
+      createSessionCookieValue({
+        sessionId: createdSession.id,
+        userId: user.id,
+        email: user.email,
+        sessionToken: createdSession.sessionToken,
+      }),
       {
         httpOnly: true,
         sameSite: "lax",
         secure: process.env.NODE_ENV === "production",
         path: "/",
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: SESSION_MAX_AGE_SECONDS,
       },
     );
 
-    logAuthEvent("cookie_set", {
-      cookieName: AUTH_COOKIE_NAME,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAgeSeconds: 60 * 60 * 24 * 7,
-    });
-
-    return NextResponse.json({ ok: true, user: { id: user.id, email: user.email } });
+    return response;
   } catch (error) {
+    if (createdSession) {
+      try {
+        await prisma.authSession.updateMany({
+          where: {
+            id: createdSession.id,
+            userId: createdSession.userId,
+            sessionToken: createdSession.sessionToken,
+            revokedAt: null,
+          },
+          data: {
+            revokedAt: new Date(),
+          },
+        });
+      } catch (rollbackError) {
+        logAuthEvent("session_rollback_failed", {
+          sessionId: createdSession.id,
+          message: rollbackError instanceof Error ? rollbackError.message : "unknown_error",
+        });
+      }
+    }
+
     if (isPrismaConnectionError(error)) {
       logAuthEvent("database_unreachable", {
         message: error instanceof Error ? error.message : "database_connection_error",

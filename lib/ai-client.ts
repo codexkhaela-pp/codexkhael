@@ -30,11 +30,20 @@ export type AiTarotReadingRequest = {
 };
 
 export type AiTarotReadingResponse = {
-  aiSummary: string;
-  deepInterpretation: string;
-  cardConnections: string;
-  practicalAdvice: string;
-  reflectionQuestions: string[];
+  directAnswer: string;
+  blindSpot: string;
+  deepDynamic: string;
+  mainRisk: string;
+  realOpportunity: string;
+  mentorAdvice: string;
+  sevenDayAction: string;
+  reflectionQuestion: string;
+  preferredOption: string;
+  preferredOptionReason: string;
+  alternativeOption: string;
+  alternativeOptionRisk: string;
+  decisionSignal: string;
+  confidenceLevel: string;
   warning: string;
 };
 

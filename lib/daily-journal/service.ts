@@ -110,8 +110,8 @@ function buildPayload(args: {
   };
 }
 
-async function resolveDailyCardSnapshot(userId: string) {
-  const dailyCard = await getOrGenerateDailyCard(userId);
+async function resolveDailyCardSnapshot(userId: string, timezone?: string) {
+  const dailyCard = await getOrGenerateDailyCard(userId, timezone);
   const tarotCard = tarotCards.find((card) => card.id === dailyCard.cardId);
 
   if (!tarotCard) {
@@ -128,8 +128,8 @@ async function resolveDailyCardSnapshot(userId: string) {
   };
 }
 
-export async function getTodayDailyJournalEntry(userId: string): Promise<DailyJournalEntryPayload> {
-  const snapshot = await resolveDailyCardSnapshot(userId);
+export async function getTodayDailyJournalEntry(userId: string, timezone?: string): Promise<DailyJournalEntryPayload> {
+  const snapshot = await resolveDailyCardSnapshot(userId, timezone);
 
   const existingEntry = await prisma.dailyJournalEntry.findUnique({
     where: {
@@ -175,8 +175,9 @@ export async function getTodayDailyJournalEntry(userId: string): Promise<DailyJo
 export async function saveTodayDailyJournalEntry(
   userId: string,
   input: DailyJournalSaveInput,
+  timezone?: string,
 ): Promise<DailyJournalEntryPayload> {
-  const snapshot = await resolveDailyCardSnapshot(userId);
+  const snapshot = await resolveDailyCardSnapshot(userId, timezone);
 
   const normalized = {
     morningIntention: normalizeText(input.morningIntention),

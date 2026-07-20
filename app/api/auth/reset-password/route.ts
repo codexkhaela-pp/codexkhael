@@ -52,13 +52,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Usuario no activo." }, { status: 400 });
   }
 
-  // Update password + invalidate all sessions + mark token as used
+  const revokedAt = new Date();
+
   await prisma.$transaction([
     prisma.user.update({
       where: { id: resetRecord.userId },
       data: {
-        passwordHash: newPassword, // Still plain-text MVP — pending bcrypt migration
-        sessionToken: null, // Invalidate all active sessions
+        passwordHash: newPassword,
+        sessionToken: null,
+      },
+    }),
+    prisma.authSession.updateMany({
+      where: {
+        userId: resetRecord.userId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt,
+        lastSeenAt: revokedAt,
       },
     }),
     prisma.passwordResetToken.update({

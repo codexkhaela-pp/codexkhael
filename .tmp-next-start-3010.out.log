@@ -1,0 +1,63 @@
+
+> codexkhael@0.1.0 start
+> next start --hostname 127.0.0.1 --port 3010
+
+▲ Next.js 16.2.6
+- Local:         http://127.0.0.1:3010
+- Network:       http://127.0.0.1:3010
+✓ Ready in 208ms
+[auth/login] request_received { hasUsername: true, passwordLength: 13, hasAtSymbol: true }
+[auth/login] user_lookup {
+  userFound: true,
+  isActive: true,
+  hasPasswordHash: true,
+  passwordValid: true
+}
+[auth/login] session_created {
+  sessionId: 'c720a768-6b62-4250-979c-622dfdb1dd24',
+  userId: '899d5547-7992-49ae-ad96-2898df857e93'
+}
+[auth/login] request_received { hasUsername: true, passwordLength: 13, hasAtSymbol: true }
+[auth/login] user_lookup {
+  userFound: true,
+  isActive: true,
+  hasPasswordHash: true,
+  passwordValid: true
+}
+[auth/login] session_created {
+  sessionId: '18cc1e0c-353a-4e71-9452-ec6c899beea6',
+  userId: '899d5547-7992-49ae-ad96-2898df857e93'
+}
+[auth/login] request_received { hasUsername: true, passwordLength: 13, hasAtSymbol: true }
+[auth/login] user_lookup {
+  userFound: true,
+  isActive: true,
+  hasPasswordHash: true,
+  passwordValid: true
+}
+[auth/login] session_created {
+  sessionId: 'dba3b4ed-444e-4195-a21f-f7302a020448',
+  userId: '899d5547-7992-49ae-ad96-2898df857e93'
+}
+[auth/login] request_received { hasUsername: true, passwordLength: 13, hasAtSymbol: true }
+[auth/login] user_lookup {
+  userFound: true,
+  isActive: true,
+  hasPasswordHash: true,
+  passwordValid: true
+}
+[auth/login] session_created {
+  sessionId: '94e5718d-0427-49b1-ba7f-9edc4155b7f8',
+  userId: '899d5547-7992-49ae-ad96-2898df857e93'
+}
+[auth/login] request_received { hasUsername: true, passwordLength: 13, hasAtSymbol: true }
+[auth/login] user_lookup {
+  userFound: true,
+  isActive: true,
+  hasPasswordHash: true,
+  passwordValid: true
+}
+[auth/login] session_created {
+  sessionId: '0bc63076-5a15-4695-92cc-f1c02e6441e6',
+  userId: '899d5547-7992-49ae-ad96-2898df857e93'
+}

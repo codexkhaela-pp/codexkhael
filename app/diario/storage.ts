@@ -13,6 +13,8 @@ function normalizeEntry(entry: any): JournalEntry {
       ...entry,
       rereadings: Array.isArray(entry.rereadings) ? entry.rereadings : [],
       flipStats: Array.isArray(entry.flipStats) ? entry.flipStats : [],
+      traditionalReading: entry.traditionalReading ?? null,
+      mentorReading: entry.mentorReading ?? null,
     } as JournalEntry;
   }
 
@@ -42,6 +44,8 @@ function normalizeEntry(entry: any): JournalEntry {
       finalMessage: entry.reflection?.finalMessage ?? "",
       suggestedAction: entry.reflection?.suggestedAction ?? "",
     },
+    traditionalReading: entry.traditionalReading ?? null,
+    mentorReading: entry.mentorReading ?? null,
     flipStats: Array.isArray(entry.flipStats) ? entry.flipStats : [],
     rereadings: [],
     flipEvents: Array.isArray(entry.flipEvents) ? entry.flipEvents : [],

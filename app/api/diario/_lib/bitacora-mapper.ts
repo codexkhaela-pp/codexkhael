@@ -18,11 +18,17 @@ export type ApiCreateBitacoraBody = {
     finalMessage?: string;
     suggestedAction?: string;
   };
+  traditionalReading?: JournalEntry["traditionalReading"];
+  mentorReading?: JournalEntry["mentorReading"];
   canvas?: {
     spreadType?: string;
     spreadId?: string;
     canvasWidth?: number;
     canvasHeight?: number;
+    customPositions?: Array<{
+      index?: number;
+      label?: string;
+    }>;
     placements?: Array<{
       id?: string;
       cardId?: string;
@@ -96,6 +102,12 @@ export function buildCardsJsonFromBody(body: ApiCreateBitacoraBody) {
       spreadId: body.canvas?.spreadId,
       canvasWidth: typeof body.canvas?.canvasWidth === "number" ? body.canvas.canvasWidth : undefined,
       canvasHeight: typeof body.canvas?.canvasHeight === "number" ? body.canvas.canvasHeight : undefined,
+      customPositions: Array.isArray(body.canvas?.customPositions)
+        ? body.canvas.customPositions.map((item, index) => ({
+            index: typeof item?.index === "number" ? item.index : index + 1,
+            label: item?.label ?? `Posición ${index + 1}`,
+          }))
+        : undefined,
       placements: placements.map((item, index) => {
         const isReversed = Boolean(item?.isReversed);
         return {
@@ -115,6 +127,8 @@ export function buildCardsJsonFromBody(body: ApiCreateBitacoraBody) {
         };
       }),
     },
+    traditionalReading: body.traditionalReading ? JSON.parse(JSON.stringify(body.traditionalReading)) : null,
+    mentorReading: body.mentorReading ? JSON.parse(JSON.stringify(body.mentorReading)) : null,
     flipStats: body.flipStats ?? [],
     flipEvents: body.flipEvents ?? [],
   };
@@ -135,6 +149,8 @@ function parseCardsJson(value: unknown) {
     reflection,
     canvas,
     placements,
+    traditionalReading: isRecord(value.traditionalReading) ? value.traditionalReading : null,
+    mentorReading: isRecord(value.mentorReading) ? value.mentorReading : null,
     flipStats: Array.isArray(value.flipStats) ? value.flipStats : [],
     flipEvents: Array.isArray(value.flipEvents) ? value.flipEvents : [],
   };
@@ -219,6 +235,15 @@ export function mapBitacoraEntryToJournalEntry(
       spreadId: typeof canvasFromJson.spreadId === "string" ? canvasFromJson.spreadId : undefined,
       canvasWidth: typeof canvasFromJson.canvasWidth === "number" ? canvasFromJson.canvasWidth : undefined,
       canvasHeight: typeof canvasFromJson.canvasHeight === "number" ? canvasFromJson.canvasHeight : undefined,
+      customPositions: Array.isArray(canvasFromJson.customPositions)
+        ? canvasFromJson.customPositions.map((item, index) => {
+            const record = isRecord(item) ? item : {};
+            return {
+              index: typeof record.index === "number" ? record.index : index + 1,
+              label: String(record.label ?? `Posición ${index + 1}`),
+            };
+          })
+        : undefined,
       placements: placementsFromJson.map((placement, index) => {
         const record = isRecord(placement) ? placement : {};
         return {
@@ -240,6 +265,8 @@ export function mapBitacoraEntryToJournalEntry(
       finalMessage: String(reflectionFromJson.finalMessage ?? ""),
       suggestedAction: String(reflectionFromJson.suggestedAction ?? ""),
     },
+    traditionalReading: (parsed?.traditionalReading as JournalEntry["traditionalReading"]) ?? null,
+    mentorReading: (parsed?.mentorReading as JournalEntry["mentorReading"]) ?? null,
     flipStats: parsed?.flipStats as JournalEntry["flipStats"],
     rereadings: mapRereadings(entry.reReadings ?? []),
     flipEvents: parsed?.flipEvents as JournalEntry["flipEvents"],

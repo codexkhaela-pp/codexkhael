@@ -4,6 +4,7 @@ import type { TarotCard } from "@/src/data/tarotCards";
 type ManualSpreadBoardProps = {
   cards: ManualBoardCard[];
   manualCardCount: number;
+  isLocked?: boolean;
   onCellClick: (row: number, col: number) => void;
   onCardClick: (card: ManualBoardCard) => void;
   getCardData: (cardId: string) => TarotCard | undefined;
@@ -12,6 +13,7 @@ type ManualSpreadBoardProps = {
 export function ManualSpreadBoard({
   cards,
   manualCardCount,
+  isLocked = false,
   onCellClick,
   onCardClick,
   getCardData,
@@ -33,7 +35,10 @@ export function ManualSpreadBoard({
               key={`cell-${row}-${col}`}
               className="manual-board-cell manual-board-cell--filled"
               type="button"
-              onClick={() => onCardClick(cellCard)}
+              onClick={() => {
+                if (!isLocked) onCardClick(cellCard);
+              }}
+              disabled={isLocked}
               aria-label={`Editar posición ${cellCard.label}`}
             >
               <span className="manual-board-cell__label">{cellCard.label}</span>
@@ -50,9 +55,6 @@ export function ManualSpreadBoard({
                   <div className="manual-board-cell__image-placeholder" />
                 )}
               </div>
-              <span className="manual-board-cell__orientation">
-                {cellCard.reversed ? "Invertida" : "Derecho"}
-              </span>
             </button>
           );
         }
@@ -62,7 +64,10 @@ export function ManualSpreadBoard({
             key={`cell-${row}-${col}`}
             className="manual-board-cell manual-board-cell--empty"
             type="button"
-            onClick={() => onCellClick(row, col)}
+            onClick={() => {
+              if (!isLocked) onCellClick(row, col);
+            }}
+            disabled={isLocked}
             aria-label={`Colocar carta en la posición ${col}`}
           >
             <span className="manual-board-cell__add-icon">+</span>

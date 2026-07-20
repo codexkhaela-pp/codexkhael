@@ -1,8 +1,10 @@
 .sidebar {
   width: 260px;
   height: 100vh;
-  background-color: #0b0a13;
-  border-right: 1px solid rgba(197, 168, 128, 0.22);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(200, 165, 106, 0.08) 0%, transparent 24%),
+    linear-gradient(180deg, rgba(17, 17, 24, 0.98), rgba(9, 9, 15, 0.98));
+  border-right: 1px solid rgba(200, 165, 106, 0.16);
   padding: 35px 20px;
   display: flex;
   flex-direction: column;
@@ -15,6 +17,8 @@
   overflow: hidden;
   transition: width 0.22s ease, padding 0.22s ease;
   z-index: 9999;
+  box-shadow: inset -1px 0 0 rgba(243, 235, 221, 0.02);
+  backdrop-filter: blur(14px);
 }
 
 .sidebar::-webkit-scrollbar {
@@ -52,6 +56,7 @@
   margin-bottom: 35px;
   display: flex;
   justify-content: center;
+  position: relative;
 }
 
 .collapsed .logoArea {
@@ -61,12 +66,13 @@
 }
 
 .logoImage {
-  width: 180px;
+  width: 100px;
   max-width: 100%;
   height: auto;
   display: block;
   object-fit: contain;
   transition: width 0.22s ease;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3));
 }
 
 .collapsed .logoImage {
@@ -87,22 +93,30 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  color: #787596;
+  color: rgba(207, 200, 187, 0.72);
   text-decoration: none;
-  padding: 11px 14px;
-  border-radius: 8px;
-  font-size: 13.5px;
-  font-weight: 400;
-  transition: all 0.2s ease;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   position: relative;
 }
 
 .navIcon {
-  width: 16px;
+  width: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: #c8a56a;
+  opacity: 0.88;
 }
 
 .navLabel {
@@ -111,15 +125,22 @@
 }
 
 .active .navLink {
-  background-color: #2e2454;
-  color: #e2e1e9;
-  font-weight: 500;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background:
+    linear-gradient(180deg, rgba(243, 235, 221, 0.06), rgba(200, 165, 106, 0.08)),
+    rgba(255, 255, 255, 0.01);
+  color: #f3ebdd;
+  border-color: rgba(200, 165, 106, 0.26);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 12px 28px rgba(0, 0, 0, 0.2);
+  transform: none;
 }
 
 .navLink:hover {
-  color: #e2e1e9;
-  background-color: rgba(255, 255, 255, 0.02);
+  color: #f3ebdd;
+  background-color: rgba(200, 165, 106, 0.05);
+  border-color: rgba(200, 165, 106, 0.18);
+  transform: none;
 }
 
 .collapsed .navLink {
@@ -141,18 +162,18 @@
   left: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
-  background: #141126;
-  border: 1px solid rgba(197, 168, 128, 0.32);
-  color: #e9dec4;
+  background: #111118;
+  border: 1px solid rgba(200, 165, 106, 0.26);
+  color: #f3ebdd;
   font-size: 12px;
   line-height: 1;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
 }
 
 .collapsed .navLink:hover::after {
@@ -163,12 +184,14 @@
 .sidebarFooterCard {
   margin-top: auto;
   flex-shrink: 0;
-  background: #0d0c16;
-  border: 1px solid rgba(197, 168, 128, 0.22);
-  padding: 22px 18px;
-  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)),
+    rgba(17, 17, 24, 0.9);
+  border: 1px solid rgba(200, 165, 106, 0.18);
+  padding: 20px 18px;
+  border-radius: 18px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
 }
 
 .collapsed .sidebarFooterCard {
@@ -178,9 +201,9 @@
 .sidebarFooterCard p {
   margin: 0;
   font-family: "Playfair Display", serif;
-  font-size: 12.5px;
-  color: #c5a880;
-  line-height: 1.6;
+  font-size: 12px;
+  color: #cfc8bb;
+  line-height: 1.7;
   font-style: italic;
 }
 

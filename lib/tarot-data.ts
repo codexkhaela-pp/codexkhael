@@ -41,6 +41,17 @@ const RANKS_ES_EN: Record<string, string> = {
 
 export function normalizeCardId(identifier: string): string {
   let norm = identifier.toLowerCase().replace(/_/g, '-').trim();
+
+  const visualCard = rawTarotCards.find((card) => {
+    const visualId = card.id.toLowerCase().replace(/_/g, "-");
+    const visualSlug = card.slug.toLowerCase().replace(/_/g, "-");
+
+    return visualId === norm || visualSlug === norm;
+  });
+
+  if (visualCard) {
+    return visualCard.slug.toLowerCase().replace(/_/g, "-");
+  }
   
   if (ALL_CARDS.some(c => c.id === norm)) return norm;
 

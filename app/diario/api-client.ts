@@ -25,6 +25,8 @@ type RereadingResponse = {
 type CreatePayload = {
   metadata: JournalEntry["metadata"];
   reflection: JournalEntry["reflection"];
+  traditionalReading?: JournalEntry["traditionalReading"];
+  mentorReading?: JournalEntry["mentorReading"];
   canvas: Omit<JournalEntry["canvas"], "placements"> & {
     placements: Array<
       JournalEntry["canvas"]["placements"][number] & {

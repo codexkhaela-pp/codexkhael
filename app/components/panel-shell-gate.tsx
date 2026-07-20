@@ -3,9 +3,11 @@
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { DashboardShell } from "@/app/components/dashboard-shell";
+import { StudentMaintenanceModal } from "@/app/components/student-maintenance-modal";
 
 type PanelShellGateProps = {
   children: ReactNode;
+  isStudent?: boolean;
 };
 
 function isPanelRoute(pathname: string): boolean {
@@ -22,11 +24,15 @@ function isPanelRoute(pathname: string): boolean {
   );
 }
 
-export function PanelShellGate({ children }: PanelShellGateProps) {
+export function PanelShellGate({ children, isStudent }: PanelShellGateProps) {
   const pathname = usePathname() ?? "/";
 
   if (!isPanelRoute(pathname)) {
     return <>{children}</>;
+  }
+
+  if (isStudent) {
+    return <StudentMaintenanceModal />;
   }
 
   return <DashboardShell>{children}</DashboardShell>;

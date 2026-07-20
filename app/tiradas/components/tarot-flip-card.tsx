@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 type TarotFlipCardProps = {
   image: string;
@@ -7,6 +8,8 @@ type TarotFlipCardProps = {
   isFlipped: boolean;
   keywords: string;
   onToggle: () => void;
+  bareMode?: boolean;
+  style?: CSSProperties;
 };
 
 export function TarotFlipCard({
@@ -16,10 +19,21 @@ export function TarotFlipCard({
   isFlipped,
   keywords,
   onToggle,
+  bareMode = false,
+  style,
 }: TarotFlipCardProps) {
+  const cardStyle: CSSProperties | undefined = bareMode
+    ? {
+        filter: "none",
+        boxShadow: "none",
+        ...style,
+      }
+    : style;
+
   return (
     <div
       className="tarot-flip-card"
+      style={cardStyle}
       role="button"
       tabIndex={0}
       aria-pressed={isFlipped}
@@ -46,7 +60,7 @@ export function TarotFlipCard({
         <div className="tarot-flip-card__face tarot-flip-card__back">
           <div className="tarot-flip-card__back-content">
             <strong>{name}</strong>
-            <span>{isReversed ? "Invertida" : "Derecha"}</span>
+            <span>{isReversed ? "Invertida" : "Derecho"}</span>
             <span>{keywords}</span>
           </div>
         </div>

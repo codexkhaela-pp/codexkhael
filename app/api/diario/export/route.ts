@@ -93,7 +93,11 @@ function buildHtmlForPdf(entry: any): string {
   const formattedDate = isNaN(dateObj.getTime()) ? entry.metadata.date : dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
   
   const time = entry.metadata.time || "----";
-  const spread = entry.metadata.spreadType || "Libre";
+  const rawSpread = entry.metadata.spreadType || entry.canvas.spreadId || "Libre";
+  const spread =
+    entry.canvas.spreadId === "free" || entry.canvas.spreadId === "manual-free" || rawSpread === "free"
+      ? "Tirada Libre"
+      : rawSpread;
   const emotional = entry.metadata.emotionalState || "----";
   const place = entry.metadata.place || "----";
   const question = entry.metadata.question || "Sin pregunta específica registrada.";

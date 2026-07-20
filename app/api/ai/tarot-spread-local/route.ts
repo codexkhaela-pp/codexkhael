@@ -113,7 +113,7 @@ const PLAN_CONSTRAINTS: Record<
     riskWordMin: 45,
     adviceWordLimit: 90,
     adviceWordMin: 50,
-    numPredict: 900,
+    numPredict: 500,
     scopeMaxChars: 650,
     scopeMinChars: 450,
     generalMaxChars: 150,
@@ -180,11 +180,35 @@ type TarotLearningCardKey = {
   aporte: string;
 };
 
+type TarotLearningBlock = {
+  cartas_clave: TarotLearningCardKey[];
+  interaccion_simbolica: string;
+  leccion_tarotista: string;
+};
+
+type TopicVocabulary = {
+  preferredWords: string[];
+  preferredConcepts: string[];
+  avoidWords: string[];
+};
+
+type NarrativeTone =
+  | "decisivo"
+  | "sereno"
+  | "expansivo"
+  | "emocional"
+  | "practico"
+  | "transformador";
+
+type ReversedWeight = "low" | "medium" | "high";
+
 type TarotStructuredInterpretation = {
   tema: string;
   carta_dominante: string;
   eje_central: string;
   nivel_transformacion: "bajo" | "medio" | "alto";
+  narrativeTone?: NarrativeTone;
+  reversedWeight?: ReversedWeight;
   conflicto_principal: string;
   tension_central: string;
   deseo_visible: string;
@@ -197,6 +221,73 @@ type TarotStructuredInterpretation = {
   direccion_recomendada: string;
   tono_emocional: string;
   evidencia_simbolica?: Record<string, string>;
+};
+
+const TOPIC_VOCABULARY: Record<TarotLocalScope, TopicVocabulary> = {
+  trabajo: {
+    preferredWords: [
+      "proyecto",
+      "responsabilidad",
+      "liderazgo",
+      "equipo",
+      "posición",
+      "decisión",
+      "avance",
+      "objetivo",
+      "desarrollo",
+    ],
+    preferredConcepts: [
+      "crecimiento profesional",
+      "autoridad",
+      "negociación",
+      "rendimiento",
+      "oportunidades",
+    ],
+    avoidWords: ["alma gemela", "destino romántico", "sanación emocional"],
+  },
+  amor: {
+    preferredWords: [
+      "vínculo",
+      "afecto",
+      "intimidad",
+      "confianza",
+      "cercanía",
+      "relación",
+      "emociones",
+    ],
+    preferredConcepts: [
+      "conexión emocional",
+      "reciprocidad afectiva",
+      "compromiso",
+      "apertura emocional",
+    ],
+    avoidWords: ["ascenso", "liderazgo corporativo", "rendimiento laboral"],
+  },
+  dinero: {
+    preferredWords: ["recursos", "ingresos", "gastos", "estabilidad", "ahorro", "inversión"],
+    preferredConcepts: ["seguridad económica", "administración", "riesgo financiero"],
+    avoidWords: ["romance", "alma gemela"],
+  },
+  salud: {
+    preferredWords: ["cuerpo", "descanso", "energía", "recuperación", "equilibrio físico", "hábitos"],
+    preferredConcepts: ["bienestar", "cuidado personal", "ritmo saludable"],
+    avoidWords: ["ascenso", "negocio", "rentabilidad"],
+  },
+  viajes: {
+    preferredWords: ["destino", "trayecto", "experiencia", "descanso", "planificación", "comodidad", "aventura"],
+    preferredConcepts: ["exploración", "movimiento", "descubrimiento", "celebración"],
+    avoidWords: ["ascenso", "jerarquía", "cargo"],
+  },
+  espiritual: {
+    preferredWords: ["propósito", "aprendizaje", "conciencia", "crecimiento interior", "integración"],
+    preferredConcepts: ["evolución personal", "comprensión profunda", "desarrollo espiritual"],
+    avoidWords: ["rentabilidad", "cargo", "promoción"],
+  },
+  general: {
+    preferredWords: ["situación", "decisión", "proceso", "cambio", "elección", "camino"],
+    preferredConcepts: ["comprensión práctica", "lectura integral", "maduración del proceso"],
+    avoidWords: [],
+  },
 };
 
 function isSpreadType(value: unknown): value is SpreadType {
@@ -277,6 +368,246 @@ function lowerSentenceStart(value: string): string {
 
 function orientationText(orientation: TarotCardOrientation): string {
   return orientation === "upright" ? "derecha" : "invertida";
+}
+
+function isCupCard(cardName: string): boolean {
+  return /Copas/i.test(cardName);
+}
+
+function getNarrativeTone(
+  cards: CompactCardContext[],
+  dominantCard: CompactCardContext,
+  scope: TarotLocalScope,
+  transformationLevel: "bajo" | "medio" | "alto",
+): NarrativeTone {
+  if (
+    transformationLevel === "alto" ||
+    ["La Torre", "La Muerte", "Diez de Espadas"].includes(dominantCard.cardName)
+  ) {
+    return "transformador";
+  }
+
+  if (["El Emperador", "Rey de Bastos", "La Justicia"].includes(dominantCard.cardName)) {
+    return "decisivo";
+  }
+
+  if (["Reina de Oros", "Cuatro de Bastos", "La Templanza"].includes(dominantCard.cardName)) {
+    return "sereno";
+  }
+
+  if (["Ocho de Bastos", "La Rueda de la Fortuna", "Tres de Bastos"].includes(dominantCard.cardName)) {
+    return "expansivo";
+  }
+
+  if (["Dos de Espadas", "Caballero de Oros", "Ocho de Oros"].includes(dominantCard.cardName)) {
+    return "practico";
+  }
+
+  if (scope === "amor" || cards.filter((card) => isCupCard(card.cardName)).length >= Math.ceil(cards.length / 2)) {
+    return "emocional";
+  }
+
+  return "sereno";
+}
+
+function getReversedWeight(cards: CompactCardContext[], dominantCard: CompactCardContext): ReversedWeight {
+  const reversedCards = cards.filter((card) => card.orientation === "reversed");
+  if (reversedCards.length === 0) {
+    return "low";
+  }
+
+  if (dominantCard.orientation === "reversed") {
+    return "high";
+  }
+
+  if (
+    reversedCards.some((card) =>
+      /bloqueo|obst[aá]culo|sombra|riesgo|miedo|desaf[ií]o/i.test(card.position),
+    )
+  ) {
+    return "high";
+  }
+
+  if (reversedCards.some((card) => /consejo|gu[ií]a|direcci[oó]n|salida/i.test(card.position))) {
+    return "medium";
+  }
+
+  return reversedCards.length > 1 ? "medium" : "low";
+}
+
+function stripTemplateArtifacts(value: string): string {
+  return compactWhitespace(value)
+    .replace(/Y la manera en que eso reorganiza consejo\.?/gi, "")
+    .replace(/\by la manera en que eso reorganiza consejo\.?/gi, "")
+    .replace(/\ben (viajes|amor|trabajo|dinero|salud|espiritual|general),?\s*esta carta activa\b/gi, "")
+    .replace(/\blas dem[aá]s cartas deben leerse desde en\b/gi, "las demás cartas deben leerse desde")
+    .replace(/\bmuestra el recurso que acompa[ñn]a el eje\b/gi, "")
+    .replace(/\bintroduce la tensi[oó]n que obliga\b/gi, "")
+    .replace(/\ba[ñn]ade un matiz secundario\b/gi, "")
+    .replace(/\s+\./g, ".")
+    .replace(/\.\s*\./g, ".")
+    .trim();
+}
+
+function buildFallbackCentralAxis(
+  dominantCard: CompactCardContext,
+  supportCard: CompactCardContext,
+  scope: TarotLocalScope,
+): string {
+  if (dominantCard.cardName === "Dos de Espadas") {
+    return scope === "viajes"
+      ? "pausar antes de decidir si el viaje responde a una necesidad real o a una reacción momentánea"
+      : "pausar antes de decidir para distinguir entre una reacción inmediata y una elección realmente consciente";
+  }
+
+  const dominantAction = lowerSentenceStart(firstSentence(dominantCard.scopeMeaning, 130));
+  const supportPosition = supportCard.position.toLowerCase();
+  return truncateText(stripTemplateArtifacts(`${dominantAction} frente a lo que plantea ${supportPosition}`), 170);
+}
+
+function resolvePrimaryScope(cards: CompactCardContext[]): TarotLocalScope {
+  const counts = new Map<TarotLocalScope, number>();
+  for (const card of cards) {
+    counts.set(card.scope, (counts.get(card.scope) ?? 0) + 1);
+  }
+
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "general";
+}
+
+function getTopicVocabulary(scope: TarotLocalScope): TopicVocabulary {
+  return TOPIC_VOCABULARY[scope] ?? TOPIC_VOCABULARY.general;
+}
+
+function formatTopicVocabularyForPrompt(scope: TarotLocalScope, vocabulary: TopicVocabulary): string {
+  return JSON.stringify({
+    tema: scope,
+    preferredWords: vocabulary.preferredWords,
+    preferredConcepts: vocabulary.preferredConcepts,
+    avoidWords: vocabulary.avoidWords,
+  });
+}
+
+function applyTopicVocabularyToText(value: string, scope: TarotLocalScope): string {
+  if (scope === "trabajo" || scope === "general") {
+    return value;
+  }
+
+  const replacements: Partial<Record<TarotLocalScope, Array<[RegExp, string]>>> = {
+    amor: [
+      [/\bascenso\b/gi, "acercamiento"],
+      [/\bautoridad\b/gi, "confianza"],
+      [/\bposición\b/gi, "lugar emocional"],
+      [/\bresponsabilidad\b/gi, "compromiso"],
+      [/\brendimiento\b/gi, "respuesta afectiva"],
+    ],
+    dinero: [
+      [/\bascenso\b/gi, "mejora económica"],
+      [/\bautoridad\b/gi, "control de recursos"],
+      [/\bposición\b/gi, "base financiera"],
+      [/\breconocimiento\b/gi, "resultado económico"],
+    ],
+    salud: [
+      [/\bascenso\b/gi, "mejora gradual"],
+      [/\bautoridad\b/gi, "cuidado del cuerpo"],
+      [/\bposición\b/gi, "estado físico"],
+      [/\bresponsabilidad\b/gi, "hábito de cuidado"],
+      [/\breconocimiento\b/gi, "señal del cuerpo"],
+    ],
+    viajes: [
+      [/\bascenso\b/gi, "movimiento"],
+      [/\bautoridad\b/gi, "autonomía"],
+      [/\bposición\b/gi, "destino"],
+      [/\bresponsabilidad\b/gi, "planificación"],
+      [/\breconocimiento\b/gi, "confirmación del trayecto"],
+      [/\bproyecto\b/gi, "viaje"],
+      [/\bequipo\b/gi, "compañía"],
+    ],
+    espiritual: [
+      [/\bascenso\b/gi, "avance interior"],
+      [/\bautoridad\b/gi, "centro interno"],
+      [/\bposición\b/gi, "lugar de conciencia"],
+      [/\bresponsabilidad\b/gi, "integración"],
+      [/\brendimiento\b/gi, "maduración interior"],
+    ],
+  };
+
+  return (replacements[scope] ?? []).reduce(
+    (text, [pattern, replacement]) => text.replace(pattern, replacement),
+    value,
+  );
+}
+
+function applyTopicVocabularyToStructured(
+  structured: TarotStructuredInterpretation,
+  scope: TarotLocalScope,
+): TarotStructuredInterpretation {
+  return {
+    ...structured,
+    conflicto_principal: applyTopicVocabularyToText(structured.conflicto_principal, scope),
+    tension_central: applyTopicVocabularyToText(structured.tension_central, scope),
+    deseo_visible: applyTopicVocabularyToText(structured.deseo_visible, scope),
+    miedo_oculto: applyTopicVocabularyToText(structured.miedo_oculto, scope),
+    patron_repetido: applyTopicVocabularyToText(structured.patron_repetido, scope),
+    bloqueo_actual: applyTopicVocabularyToText(structured.bloqueo_actual, scope),
+    recurso_disponible: applyTopicVocabularyToText(structured.recurso_disponible, scope),
+    oportunidad_real: applyTopicVocabularyToText(structured.oportunidad_real, scope),
+    riesgo_real: applyTopicVocabularyToText(structured.riesgo_real, scope),
+    direccion_recomendada: applyTopicVocabularyToText(structured.direccion_recomendada, scope),
+  };
+}
+
+function buildReversedMeaning(card: CompactCardContext): string {
+  if (card.cardName === "Caballero de Copas") {
+    return "idealización, promesas poco consistentes y seducción emocional que todavía no se traduce en actos claros";
+  }
+
+  if (card.cardName === "Diez de Oros") {
+    return "una expectativa de estabilidad heredada que no termina de sentirse disponible o compartida";
+  }
+
+  if (card.cardName === "Dos de Espadas") {
+    return "evitación, demora interna y dificultad para mirar de frente la información que falta";
+  }
+
+  if (card.cardName === "Siete de Copas") {
+    return "confusión entre deseo real, fantasía atractiva y opciones que prometen más de lo que sostienen";
+  }
+
+  return lowerSentenceStart(firstSentence(card.scopeMeaning, 160));
+}
+
+function applyReversedWeightToStructured(
+  structured: TarotStructuredInterpretation,
+  cards: CompactCardContext[],
+): TarotStructuredInterpretation {
+  const dominantCard = cards.find((card) => card.cardName === structured.carta_dominante) ?? cards[0];
+  const reversedWeight = getReversedWeight(cards, dominantCard);
+  const keyReversed =
+    cards.find((card) => card.orientation === "reversed" && card.cardName === dominantCard.cardName) ??
+    cards.find((card) => card.orientation === "reversed" && /bloqueo|sombra|riesgo|obst[aá]culo/i.test(card.position)) ??
+    cards.find((card) => card.orientation === "reversed");
+
+  if (!keyReversed) {
+    return {
+      ...structured,
+      reversedWeight,
+    };
+  }
+
+  const reversedMeaning = buildReversedMeaning(keyReversed);
+  const patch =
+    reversedWeight === "high"
+      ? `La inversión de ${keyReversed.cardName} pesa con fuerza: introduce ${reversedMeaning}.`
+      : `La inversión de ${keyReversed.cardName} añade un matiz de ${reversedMeaning}.`;
+
+  return {
+    ...structured,
+    reversedWeight,
+    conflicto_principal: truncateText(`${structured.conflicto_principal} ${patch}`, 420),
+    bloqueo_actual: truncateText(`${structured.bloqueo_actual} ${patch}`, 360),
+    riesgo_real: truncateText(`${structured.riesgo_real} Si no se atiende, ese matiz puede distorsionar la lectura de la situación.`, 320),
+    direccion_recomendada: truncateText(`${structured.direccion_recomendada} Conviene responder a esa inversión con hechos observables, no solo con impulso o expectativa.`, 340),
+  };
 }
 
 function findCardByPosition(
@@ -408,11 +739,32 @@ function buildCentralAxis(
   if (dominantName === "Reina de Espadas" || dominantName === "La Reina de Espadas") {
     return `necesidad de mirar ${question.toLowerCase()} con lucidez, criterio y menos concesiones sentimentales`;
   }
+  if (dominantName === "Siete de Bastos") {
+    return "defender una posicion ganada ante una oferta que puede traer autoridad, presion y nuevas exigencias";
+  }
+  if (dominantName === "Rey de Bastos") {
+    return "sostener liderazgo y vision sin convertir el ascenso en una carga que robe autoridad";
+  }
+  if (dominantName === "Siete de Copas") {
+    return "separar posibilidades reales de promesas atractivas antes de comprometer prestigio, tiempo o energia";
+  }
 
-  return truncateText(
-    `${lowerSentenceStart(firstSentence(dominantCard.scopeMeaning, 160))} y la manera en que eso reorganiza ${supportCard.position.toLowerCase()}.`,
-    180,
-  );
+  return buildFallbackCentralAxis(dominantCard, supportCard, dominantCard.scope);
+}
+
+function buildDominantVocabularyHint(structured: TarotStructuredInterpretation): string {
+  switch (structured.carta_dominante) {
+    case "Siete de Bastos":
+      return "Prioriza defender, posicion ganada, presion, limite, sostener postura, autoridad, exigencia, resistencia, negociacion y ascenso. No dejes que reciprocidad, apoyo, intercambio, equilibrio o sobreentrega gobiernen la lectura.";
+    case "La Torre":
+      return "Prioriza ruptura de estructuras obsoletas, verdad incomoda, decision aplazada, falsa seguridad y reconstruccion honesta.";
+    case "Rey de Bastos":
+      return "Prioriza liderazgo, vision, autoridad, decision y capacidad de dirigir con madurez.";
+    case "Siete de Copas":
+      return "Prioriza discernimiento, seleccion, dispersion, seduccion de alternativas y criterio para elegir.";
+    default:
+      return "Haz que la carta dominante gobierne el tono, las imagenes y la conclusion.";
+  }
 }
 
 function buildStructuredInterpretation(
@@ -813,6 +1165,89 @@ function buildStructuredInterpretationProV2(
   };
 }
 
+function buildStructuredInterpretationProCompact(
+  question: string,
+  cards: Array<{ compactContext: CompactCardContext }>,
+): TarotStructuredInterpretation {
+  const compactCards = cards.map(({ compactContext }) => compactContext);
+  const primaryScope = resolvePrimaryScope(compactCards);
+  const rawBase = buildStructuredInterpretationProV2(question, cards);
+  const dominantCard = compactCards.find((card) => card.cardName === rawBase.carta_dominante) ?? compactCards[0];
+  const narrativeTone = getNarrativeTone(
+    compactCards,
+    dominantCard,
+    primaryScope,
+    rawBase.nivel_transformacion,
+  );
+  const base = applyReversedWeightToStructured(
+    {
+      ...rawBase,
+      narrativeTone,
+    },
+    compactCards,
+  );
+  const hasKingOfWands = compactCards.some((card) => card.cardName === "Rey de Bastos");
+  const hasSevenOfCups = compactCards.some((card) => card.cardName === "Siete de Copas");
+
+  if (base.carta_dominante === "Siete de Bastos") {
+    return applyTopicVocabularyToStructured({
+      ...base,
+      eje_central: hasKingOfWands && hasSevenOfCups
+        ? "defender una posicion ganada ante una oferta que puede traer autoridad, presion y nuevas exigencias"
+        : "defender una posicion ganada sin convertir la presion externa en un desgaste constante",
+      conflicto_principal: truncateText(
+        hasKingOfWands && hasSevenOfCups
+          ? `La tirada muestra que ${question.toLowerCase()} entra en una etapa donde sostener autoridad pesa tanto como aceptar una expansion nueva. Ya hay una posicion ganada, pero alrededor aparecen opciones y exigencias que obligan a decidir que crecimiento vale el costo.`
+          : `La tirada muestra que ${question.toLowerCase()} ya pide sostener una posicion concreta frente a presiones, reclamos o nuevas demandas que no pueden aceptarse de forma ingenua.`,
+        340,
+      ),
+      tension_central: truncateText(
+        hasKingOfWands && hasSevenOfCups
+          ? `La presion no viene de empezar desde cero, sino de defender lo ya alcanzado mientras se evalua si la siguiente propuesta fortalece el liderazgo o dispersa la energia. El mecanismo oculto consiste en distinguir una posibilidad real de una carga que llega con brillo, pero tambien con mas demanda y menos margen.`
+          : `La tension central aparece cuando lo ganado exige firmeza, pero el entorno trae mas demanda de la que parece a primera vista. El punto no es solo resistir, sino elegir que vale la pena negociar y que conviene rechazar a tiempo.`,
+        360,
+      ),
+      deseo_visible: truncateText(
+        `Quiere confirmar si el ascenso, la visibilidad o la nueva responsabilidad realmente expanden su autoridad en lugar de convertirla en una defensa permanente.`,
+        260,
+      ),
+      miedo_oculto: truncateText(
+        `Aceptar una opcion que pida mas presencia, mas defensa y mas negociacion de la que parecia al principio, hasta vaciar el liderazgo que hoy intenta consolidar.`,
+        300,
+      ),
+      patron_repetido: truncateText(
+        `Confundir amplitud de opciones con conveniencia real y medir el siguiente paso por promesa o prestigio antes que por estructura, limite y margen de maniobra.`,
+        240,
+      ),
+      bloqueo_actual: truncateText(
+        `La dificultad actual no esta en la falta de impulso, sino en no saber que propuesta merece ser defendida y cual solo traeria mas presion sobre una posicion ya exigente.`,
+        300,
+      ),
+      recurso_disponible: truncateText(
+        `El recurso disponible esta en combinar vision de mando, lectura estrategica de opciones y capacidad de sostener limites sin ceder terreno por cansancio o deslumbramiento.`,
+        280,
+      ),
+      oportunidad_real: truncateText(
+        `Elegir una sola via con autoridad, negociar mejor las condiciones del ascenso y convertir la presion externa en prueba de madurez, no en desgaste innecesario.`,
+        320,
+      ),
+      riesgo_real: truncateText(
+        `Aceptar mas de lo que conviene, dispersar autoridad entre demasiadas opciones o terminar defendiendo una carga que parece ascenso, pero reduce margen y criterio.`,
+        260,
+      ),
+      direccion_recomendada: truncateText(
+        `Pedir condiciones claras, filtrar promesas seductoras y sostener solo la opcion que respete tu autoridad, tus limites y la posicion que ya te costo construir.`,
+        260,
+      ),
+      tono_emocional: "firme, exigente y estrategico",
+      narrativeTone,
+      reversedWeight: base.reversedWeight,
+    }, primaryScope);
+  }
+
+  return applyTopicVocabularyToStructured(base, primaryScope);
+}
+
 function buildProSpreadPrompt(
   question: string,
   spreadType: SpreadType,
@@ -890,6 +1325,72 @@ Reglas absolutas:
 
 Estructura exacta:
 {"mensaje_central":"","historia_profunda":"","dinamica_oculta":"","sombra":"","oportunidad":"","riesgo":"","consejo":"","accion_concreta":"","pregunta_reflexiva":"","aprendizaje_tarot":{"cartas_clave":[{"carta":"","aporte":""}],"interaccion_simbolica":"","leccion_tarotista":""},"mentor_khael":"","sintesis_final":""}`;
+}
+
+function buildProSpreadCompactPrompt(
+  question: string,
+  spreadType: SpreadType,
+  cards: CompactCardContext[],
+  structured: TarotStructuredInterpretation,
+): string {
+  const cardsBlock = cards
+    .map((card, index) => `${index + 1}. ${card.position} | ${card.cardName} | ${orientationText(card.orientation)} | ${truncateText(firstSentence(card.scopeMeaning, 140), 140)}`)
+    .join("\n");
+  const structuredPayload = JSON.stringify({
+    tema: structured.tema,
+    carta_dominante: structured.carta_dominante,
+    eje_central: structured.eje_central,
+    nivel_transformacion: structured.nivel_transformacion,
+    conflicto_principal: structured.conflicto_principal,
+    tension_central: structured.tension_central,
+    deseo_visible: structured.deseo_visible,
+    miedo_oculto: structured.miedo_oculto,
+    patron_repetido: structured.patron_repetido,
+    bloqueo_actual: structured.bloqueo_actual,
+    recurso_disponible: structured.recurso_disponible,
+    oportunidad_real: structured.oportunidad_real,
+    riesgo_real: structured.riesgo_real,
+    direccion_recomendada: structured.direccion_recomendada,
+    tono_emocional: structured.tono_emocional,
+    narrativeTone: structured.narrativeTone,
+    reversedWeight: structured.reversedWeight,
+  });
+  const dominantHint = buildDominantVocabularyHint(structured);
+  const topicScope = resolvePrimaryScope(cards);
+  const topicVocabulary = formatTopicVocabularyForPrompt(
+    topicScope,
+    getTopicVocabulary(topicScope),
+  );
+
+  return `Eres Khael Tarotista. Convierte esta interpretacion ya resuelta en una lectura PRO compacta y humana.
+Pregunta: ${question}
+Tirada: ${spreadType}
+Modo: proMode=compact
+Cartas:
+${cardsBlock}
+Base:
+${structuredPayload}
+Vocabulario por tema:
+${topicVocabulary}
+Reglas:
+- Usa solo la base recibida.
+- No expliques tarot ni nombres las cartas dentro de la lectura.
+- No agregues conflictos nuevos ni intensifiques la sombra.
+- ${dominantHint}
+- Utiliza lenguaje natural propio del tema consultado.
+- El tema modifica el vocabulario utilizado, no el significado simbolico.
+- Prioridad: 1 carta dominante, 2 eje central, 3 tema.
+- Respeta narrativeTone y reversedWeight; si reversedWeight es high, la inversion debe afectar sombra, riesgo y consejo.
+- Cada campo cumple una funcion distinta.
+- mensaje_central: 1 oracion memorable.
+- historia_profunda: 2 oraciones.
+- dinamica_oculta: 1 o 2 oraciones.
+- sombra, oportunidad, riesgo, consejo, mentor_khael y sintesis_final: 1 oracion cada uno.
+- accion_concreta: 1 oracion practica para menos de 48 horas.
+- pregunta_reflexiva: 1 pregunta simple y honesta.
+- Devuelve solo JSON valido. Sin markdown. Sin texto fuera del JSON. Sin comentarios. Sin comillas sueltas.
+JSON exacto:
+{"mensaje_central":"","historia_profunda":"","dinamica_oculta":"","sombra":"","oportunidad":"","riesgo":"","consejo":"","accion_concreta":"","pregunta_reflexiva":"","mentor_khael":"","sintesis_final":""}`;
 }
 
 function buildSpreadPrompt(
@@ -1128,16 +1629,9 @@ function buildCartaClaveFallback(
   context: CompactCardContext,
   structuredInterpretation: TarotStructuredInterpretation,
 ): TarotLearningCardKey {
-  const symbolicEvidence = structuredInterpretation.evidencia_simbolica?.[context.cardName];
-  const aporteBase = symbolicEvidence || firstSentence(context.scopeMeaning, 160);
-  const aporte =
-    context.cardName === structuredInterpretation.carta_dominante
-      ? truncateText(`${aporteBase} Marca el eje simbolico que gobierna la tirada.`, 170)
-      : truncateText(aporteBase, 160);
-
   return {
     carta: context.cardName,
-    aporte,
+    aporte: "",
   };
 }
 
@@ -1167,16 +1661,583 @@ function normalizeCartasClave(
       aporte:
         aporte && !looksCorruptText(aporte)
           ? truncateText(aporte, 180)
-          : buildCartaClaveFallback(context, structuredInterpretation).aporte,
+          : buildCleanCartaClave(context, structuredInterpretation).aporte,
     });
   }
 
   const orderedCards = inputCards.map((context) => {
     const key = normalizeCardNameKey(context.cardName);
-    return selected.get(key) ?? buildCartaClaveFallback(context, structuredInterpretation);
+    return selected.get(key) ?? buildCleanCartaClave(context, structuredInterpretation);
   });
 
   return orderedCards;
+}
+
+function stripTrailingDots(value: string): string {
+  return value.replace(/\.\.+$/g, "").replace(/\.+$/g, "").trim();
+}
+
+function ensurePeriod(value: string): string {
+  const trimmed = stripTrailingDots(compactWhitespace(value));
+  if (!trimmed) {
+    return "";
+  }
+
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
+function capitalizeFirstLetter(value: string): string {
+  const trimmed = compactWhitespace(value);
+  if (!trimmed) {
+    return "";
+  }
+
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
+function applyBackendAccentFixes(value: string): string {
+  return value
+    .replace(/\bsimbolico\b/gi, "simbólico")
+    .replace(/\bposicion\b/gi, "posición")
+    .replace(/\bpresion\b/gi, "presión")
+    .replace(/\bdireccion\b/gi, "dirección")
+    .replace(/\bvision\b/gi, "visión")
+    .replace(/\bleccion\b/gi, "lección")
+    .replace(/\binteraccion\b/gi, "interacción")
+    .replace(/\bademas\b/gi, "además")
+    .replace(/\bproximas\b/gi, "próximas")
+    .replace(/\bpractico\b/gi, "práctico")
+    .replace(/\bsolo\b/gi, "solo")
+    .replace(/\bposicion ganada\b/gi, "posición ganada")
+    .replace(/\beje simbolico\b/gi, "eje simbólico");
+}
+
+function applyBackendAccentFixesClean(value: string): string {
+  return value
+    .replace(/simbÃ³lico/gi, "simbólico")
+    .replace(/posiciÃ³n/gi, "posición")
+    .replace(/presiÃ³n/gi, "presión")
+    .replace(/direcciÃ³n/gi, "dirección")
+    .replace(/visiÃ³n/gi, "visión")
+    .replace(/lecciÃ³n/gi, "lección")
+    .replace(/interacciÃ³n/gi, "interacción")
+    .replace(/demÃ¡s/gi, "demás")
+    .replace(/ademÃ¡s/gi, "además")
+    .replace(/combinaciÃ³n/gi, "combinación")
+    .replace(/relaciÃ³n/gi, "relación")
+    .replace(/\bsimbolico\b/gi, "simbólico")
+    .replace(/\bposicion\b/gi, "posición")
+    .replace(/\bpresion\b/gi, "presión")
+    .replace(/\bdireccion\b/gi, "dirección")
+    .replace(/\bvision\b/gi, "visión")
+    .replace(/\bleccion\b/gi, "lección")
+    .replace(/\binteraccion\b/gi, "interacción")
+    .replace(/\bdemas\b/gi, "demás")
+    .replace(/\bademas\b/gi, "además")
+    .replace(/\bcombinacion\b/gi, "combinación")
+    .replace(/\brelacion\b/gi, "relación")
+    .replace(/\bposicion ganada\b/gi, "posición ganada")
+    .replace(/\beje simbolico\b/gi, "eje simbólico");
+}
+
+function cleanBackendSentence(value: string): string {
+  return ensurePeriod(
+    capitalizeFirstLetter(
+      applyBackendAccentFixesClean(
+        compactWhitespace(value)
+          .replace(/\.\./g, ".")
+          .replace(/\s+,/g, ",")
+          .replace(/\s+\./g, ".")
+          .replace(/\.\s*\./g, ".")
+          .replace(/\s{2,}/g, " ")
+          .trim(),
+      ),
+    ),
+  );
+}
+
+function getThemeLabel(scope: TarotLocalScope): string {
+  switch (scope) {
+    case "amor":
+      return "en el ámbito afectivo";
+    case "trabajo":
+      return "en el ámbito laboral";
+    case "dinero":
+      return "en el ámbito económico";
+    case "salud":
+      return "en el ámbito de la salud";
+    case "viajes":
+      return "en el ámbito de los viajes";
+    case "espiritual":
+      return "en el ámbito espiritual";
+    default:
+      return "en el tema consultado";
+  }
+}
+
+function removeLearningPrefixes(value: string, context: CompactCardContext): string {
+  const cardPattern = escapeRegExp(context.cardName);
+  const cleaned = compactWhitespace(value)
+    .replace(new RegExp(`^En\\s+${escapeRegExp(context.scope)}\\s*,?\\s*`, "i"), "")
+    .replace(new RegExp(`^${cardPattern}\\s+(aporta|activa)\\s+`, "i"), "")
+    .replace(new RegExp(`^En\\s+[^,]+,\\s*${cardPattern}\\s+(aporta|activa)\\s+`, "i"), "")
+    .replace(new RegExp(`^${cardPattern}\\s+`, "i"), "")
+    .replace(/^(derecho|derecha|invertido|invertida)\s+(activa|aporta|muestra|introduce)\s+/i, "")
+    .replace(/^(aporta|activa)\s+/i, "")
+    .replace(/\baporta en\b/gi, "")
+    .replace(/\bactiva en\b/gi, "")
+    .replace(/\bEn trabajo,\s*Rey de Bastos aporta en trabajo\b/gi, "")
+    .trim();
+
+  return cleaned;
+}
+
+function sanitizeLearningText(value: string, context?: CompactCardContext): string {
+  const normalized = context ? removeLearningPrefixes(value, context) : value;
+  return cleanBackendSentence(
+    normalized
+      .replace(/\.{3,}/g, ".")
+      .replace(/\baporta en\b/gi, "")
+      .replace(/\bactiva en\b/gi, "")
+      .replace(/\beje simbolico\b/gi, "eje simbólico")
+      .replace(/\bposicion ganada\b/gi, "posición ganada")
+      .replace(/\bpresion\b/gi, "presión"),
+  );
+}
+
+function hasInvalidLearningText(value: string): boolean {
+  const normalized = compactWhitespace(value);
+  return (
+    !normalized ||
+    normalized.includes("...") ||
+    normalized.includes("..") ||
+    /aporta en/i.test(normalized) ||
+    /activa en/i.test(normalized) ||
+    /^(derecho|derecha|invertido|invertida)\s+(activa|aporta|muestra|introduce)/i.test(normalized) ||
+    /^En\s+(trabajo|amor|dinero|salud|viajes|espiritual|general),?/i.test(normalized) ||
+    /\bmarca el eje simbolico\b/i.test(normalized) ||
+    /\baporta dirigir\b/i.test(normalized) ||
+    /En trabajo,\s*Rey de Bastos aporta en trabajo/i.test(normalized) ||
+    /eje simbolico/i.test(normalized) ||
+    /posicion ganada/i.test(normalized) ||
+    /\bpresion\b/.test(normalized)
+  );
+}
+
+function cardDisplayName(cardName: string): string {
+  if (/^(El|La|Los|Las)\s/i.test(cardName)) {
+    return cardName;
+  }
+
+  if (/^Reina\b/i.test(cardName)) {
+    return `La ${cardName}`;
+  }
+
+  return `El ${cardName}`;
+}
+
+function getKnownLearningAporte(cardName: string): string | null {
+  switch (cardName) {
+    case "Rey de Bastos":
+      return "Liderazgo, visión y capacidad de dirigir con madurez.";
+    case "Siete de Copas":
+      return "Posibilidades abiertas, deseos múltiples y necesidad de distinguir fantasía de opción real.";
+    case "Siete de Bastos":
+      return "Defensa de una posición ganada, límites firmes y presión externa.";
+    case "Reina de Espadas":
+      return "Discernimiento, límites claros y honestidad madura para enfrentar la verdad.";
+    case "Dos de Bastos":
+      return "Visión futura, planificación y elección consciente de rumbo.";
+    case "La Torre":
+      return "Ruptura necesaria de estructuras que ya no funcionan.";
+    case "Tres de Bastos":
+      return "Expansión en proceso, mirada de futuro y avance que empieza a tomar forma.";
+    case "Seis de Oros":
+      return "Intercambio, proporción y revisión de lo que se da y se recibe.";
+    case "La Estrella":
+      return "Confianza gradual, recuperación de sentido y orientación esperanzadora.";
+    default:
+      return null;
+  }
+}
+
+function extractCleanSymbolicAporte(
+  context: CompactCardContext,
+  structuredInterpretation: TarotStructuredInterpretation,
+): string {
+  const knownAporte = getKnownLearningAporte(context.cardName);
+  if (knownAporte) {
+    return cleanBackendSentence(knownAporte);
+  }
+
+  const symbolicEvidence = structuredInterpretation.evidencia_simbolica?.[context.cardName];
+  const source = symbolicEvidence || firstSentence(context.scopeMeaning, 150);
+  const cleaned = sanitizeLearningText(source, context);
+
+  if (!cleaned) {
+    return cleanBackendSentence(firstSentence(context.scopeMeaning, 150));
+  }
+
+  return cleaned;
+}
+
+function buildCleanCartaClave(
+  context: CompactCardContext,
+  structuredInterpretation: TarotStructuredInterpretation,
+): TarotLearningCardKey {
+  return {
+    carta: context.cardName,
+    aporte: extractCleanSymbolicAporte(context, structuredInterpretation),
+  };
+}
+
+function buildCleanInteraccionSimbolica(
+  inputCards: CompactCardContext[],
+  structuredInterpretation: TarotStructuredInterpretation,
+): string {
+  const dominant =
+    inputCards.find((card) => card.cardName === structuredInterpretation.carta_dominante) ?? inputCards[0];
+  const secondaryCards = inputCards.filter((card) => card.cardName !== dominant.cardName);
+  const cardNames = new Set(inputCards.map((card) => card.cardName));
+
+  if (
+    dominant.cardName === "Siete de Bastos" &&
+    cardNames.has("Rey de Bastos") &&
+    cardNames.has("Siete de Copas")
+  ) {
+    return cleanBackendSentence(
+      "El Siete de Bastos muestra que hay una posición que proteger antes de aceptar nuevas exigencias. El Rey de Bastos aporta autoridad y liderazgo, mientras que el Siete de Copas advierte que no toda posibilidad atractiva fortalece el camino.",
+    );
+  }
+
+  const dominantSentence = `${cardDisplayName(dominant.cardName)} concentra la combinación en ${stripTrailingDots(applyBackendAccentFixesClean(structuredInterpretation.eje_central))}.`;
+
+  if (secondaryCards.length === 0) {
+    return cleanBackendSentence(dominantSentence);
+  }
+
+  if (secondaryCards.length === 1) {
+    const secondary = secondaryCards[0];
+    return cleanBackendSentence(
+      `${dominantSentence} ${cardDisplayName(secondary.cardName)} muestra que condición debe cuidarse para que ese eje no se vuelva una respuesta automática.`
+    );
+  }
+
+  const [firstSecondary, secondSecondary, ...rest] = secondaryCards;
+  const secondaryParts = [
+    `${cardDisplayName(firstSecondary.cardName)} señala qué recurso está disponible`,
+    `mientras que ${cardDisplayName(secondSecondary.cardName).toLowerCase()} muestra qué condición puede confundir la decisión`,
+    ...rest.map((card) => `${cardDisplayName(card.cardName)} completa la escena con una condición adicional`),
+  ];
+
+  return cleanBackendSentence(`${dominantSentence} ${secondaryParts.join(", ")}.`);
+}
+
+function buildCleanLeccionTarotista(
+  inputCards: CompactCardContext[],
+  structuredInterpretation: TarotStructuredInterpretation,
+): string {
+  const dominant =
+    inputCards.find((card) => card.cardName === structuredInterpretation.carta_dominante) ?? inputCards[0];
+
+  if (dominant.cardName === "Siete de Bastos") {
+    return cleanBackendSentence(
+      "Cuando el Siete de Bastos domina una tirada, las demás cartas deben leerse desde la defensa de límites, la presión externa y la necesidad de proteger una posición ya ganada.",
+    );
+  }
+
+  return cleanBackendSentence(
+    `Cuando ${cardDisplayName(dominant.cardName).toLowerCase()} domina una tirada, las demás cartas deben leerse desde ${lowerSentenceStart(stripTrailingDots(applyBackendAccentFixesClean(structuredInterpretation.eje_central)))}.`
+  );
+}
+
+function buildTeacherInteraccionSimbolica(
+  inputCards: CompactCardContext[],
+  structuredInterpretation: TarotStructuredInterpretation,
+): string {
+  const dominant =
+    inputCards.find((card) => card.cardName === structuredInterpretation.carta_dominante) ?? inputCards[0];
+  const secondaryCards = inputCards.filter((card) => card.cardName !== dominant.cardName);
+  const cardNames = new Set(inputCards.map((card) => card.cardName));
+
+  if (
+    dominant.cardName === "Siete de Bastos" &&
+    cardNames.has("Rey de Bastos") &&
+    cardNames.has("Siete de Copas")
+  ) {
+    return cleanBackendSentence(
+      "El Siete de Bastos muestra que hay una posición que proteger antes de aceptar nuevas exigencias. El Rey de Bastos aporta autoridad y liderazgo, mientras que el Siete de Copas advierte que no toda posibilidad atractiva fortalece el camino.",
+    );
+  }
+
+  if (
+    dominant.cardName === "La Justicia" &&
+    cardNames.has("Nueve de Bastos") &&
+    cardNames.has("Siete de Espadas")
+  ) {
+    return cleanBackendSentence(
+      "La Justicia obliga a mirar la situación con honestidad, pero el Nueve de Bastos muestra cansancio y necesidad de proteger lo construido. El Siete de Espadas sugiere que parte del conflicto nace de estrategias defensivas o conversaciones poco transparentes.",
+    );
+  }
+
+  if (
+    dominant.cardName === "El Loco" &&
+    cardNames.has("Reina de Espadas") &&
+    cardNames.has("Caballero de Copas")
+  ) {
+    return cleanBackendSentence(
+      "El Loco impulsa un nuevo comienzo, pero la Reina de Espadas exige claridad antes de dar el paso. El Caballero de Copas invertido advierte que la ilusión puede avanzar más rápido que los hechos.",
+    );
+  }
+
+  const dominantAporte = lowerSentenceStart(stripTrailingDots(extractCleanSymbolicAporte(dominant, structuredInterpretation)));
+
+  if (secondaryCards.length === 0) {
+    return cleanBackendSentence(`${cardDisplayName(dominant.cardName)} concentra la combinación en ${dominantAporte}.`);
+  }
+
+  if (secondaryCards.length === 1) {
+    const secondary = secondaryCards[0];
+    const secondaryAporte = lowerSentenceStart(stripTrailingDots(extractCleanSymbolicAporte(secondary, structuredInterpretation)));
+    return cleanBackendSentence(
+      `${cardDisplayName(dominant.cardName)} pone en primer plano ${dominantAporte}. ${cardDisplayName(secondary.cardName)} cambia la lectura porque suma ${secondaryAporte}.`,
+    );
+  }
+
+  const [firstSecondary, secondSecondary] = secondaryCards;
+  return cleanBackendSentence(
+    `${cardDisplayName(dominant.cardName)} pone en primer plano ${dominantAporte}. ${cardDisplayName(firstSecondary.cardName)} aporta ${lowerSentenceStart(stripTrailingDots(extractCleanSymbolicAporte(firstSecondary, structuredInterpretation)))}, mientras que ${cardDisplayName(secondSecondary.cardName).toLowerCase()} muestra ${lowerSentenceStart(stripTrailingDots(extractCleanSymbolicAporte(secondSecondary, structuredInterpretation)))}.`,
+  );
+}
+
+function buildTeacherLeccionTarotista(
+  inputCards: CompactCardContext[],
+  structuredInterpretation: TarotStructuredInterpretation,
+): string {
+  const dominant =
+    inputCards.find((card) => card.cardName === structuredInterpretation.carta_dominante) ?? inputCards[0];
+
+  if (dominant.cardName === "Siete de Bastos") {
+    return cleanBackendSentence(
+      "Cuando el Siete de Bastos domina una tirada, el aprendizaje no es resistir por orgullo, sino distinguir qué vale la pena proteger y qué exigencia solo aumenta la presión.",
+    );
+  }
+
+  if (dominant.cardName === "La Justicia") {
+    return cleanBackendSentence(
+      "Cuando La Justicia aparece junto a cartas de desgaste o defensa, suele señalar que el problema no está solo afuera, sino en la dificultad para evaluar con objetividad qué es realmente justo para uno mismo.",
+    );
+  }
+
+  if (dominant.cardName === "El Loco") {
+    return cleanBackendSentence(
+      "Cuando El Loco aparece junto a cartas de discernimiento, la lección no es lanzarse sin pensar, sino aprender a diferenciar confianza de impulsividad.",
+    );
+  }
+
+  if (dominant.cardName === "La Muerte") {
+    return cleanBackendSentence(
+      "Cuando La Muerte domina una tirada, el aprendizaje no suele estar en el cambio mismo, sino en reconocer qué parte del proceso ya terminó antes de que el consultante lo admita.",
+    );
+  }
+
+  return cleanBackendSentence(
+    `Cuando ${cardDisplayName(dominant.cardName).toLowerCase()} domina una combinación, el estudiante debe observar si las otras cartas confirman su impulso, lo frenan o revelan una consecuencia que no era evidente al inicio.`,
+  );
+}
+
+function buildAprendizajeTarot(
+  inputCards: CompactCardContext[],
+  structuredInterpretation: TarotStructuredInterpretation,
+): TarotLearningBlock {
+  const fallbackCartasClave = inputCards.map((context) => buildCleanCartaClave(context, structuredInterpretation));
+  const cartas_clave = fallbackCartasClave.map((item, index) => {
+    const sanitized = {
+      carta: item.carta,
+      aporte: sanitizeLearningText(item.aporte, inputCards[index]),
+    };
+
+    return hasInvalidLearningText(sanitized.aporte) ? fallbackCartasClave[index] : sanitized;
+  });
+
+  const fallbackInteraccion = buildTeacherInteraccionSimbolica(inputCards, structuredInterpretation);
+  const interaccion_simbolica = hasInvalidLearningText(fallbackInteraccion) || containsStrictTeachingArtifact(fallbackInteraccion)
+    ? cleanBackendSentence(
+        `${cardDisplayName(inputCards[0]?.cardName ?? structuredInterpretation.carta_dominante)} se combina con las otras cartas para mostrar que la pregunta no depende de un solo significado, sino del contraste entre impulso, freno y consecuencia.`,
+      )
+    : fallbackInteraccion;
+
+  const fallbackLeccion = buildTeacherLeccionTarotista(inputCards, structuredInterpretation);
+  const leccion_tarotista = hasInvalidLearningText(fallbackLeccion) || containsStrictTeachingArtifact(fallbackLeccion)
+    ? cleanBackendSentence(
+        `Cuando ${cardDisplayName(structuredInterpretation.carta_dominante).toLowerCase()} domina una combinación, el estudiante debe observar si las otras cartas confirman su impulso, lo frenan o revelan una consecuencia que no era evidente al inicio.`,
+      )
+    : fallbackLeccion;
+
+  return {
+    cartas_clave,
+    interaccion_simbolica,
+    leccion_tarotista,
+  };
+}
+
+function containsTemplateArtifact(value: string): boolean {
+  return /Y la manera en que eso reorganiza consejo|las dem[aá]s cartas deben leerse desde en|esta carta activa|muestra el recurso que acompa[ñn]a el eje|introduce la tensi[oó]n que obliga|a[ñn]ade un matiz secundario/i.test(value);
+}
+
+function containsTeachingArtifact(value: string): boolean {
+  return /Y la manera en que eso reorganiza consejo|las dem[aáÃ¡]s cartas deben leerse desde en|esta carta activa|muestra el recurso que acompa[ñnÃ±]a|matiz secundario|secuencia|estructura de la tirada|marca el eje|introduce la tensi[oóÃ³]n|condici[oóÃ³]n adicional|\beje\b/i.test(value);
+}
+
+function containsStrictTeachingArtifact(value: string): boolean {
+  return containsTeachingArtifact(value) || /\brecurso\b|\beje\b|\bsecuencia\b|\bmatiz\b|\bestructura\b/i.test(value);
+}
+
+function buildMentorKhaelFallback(structured: TarotStructuredInterpretation): string {
+  if (structured.reversedWeight === "high") {
+    return "Cuando una inversión pesa tanto, no conviene decidir por lo que promete la superficie, sino por lo que los hechos ya vienen mostrando.";
+  }
+
+  if (structured.carta_dominante === "Siete de Bastos") {
+    return "No toda oportunidad que exige más de ti representa un avance; algunas solo cambian el lugar desde el que cargas el peso.";
+  }
+
+  if (structured.carta_dominante === "Dos de Espadas") {
+    return "A veces el problema no es la decisión, sino el precio emocional que pagas por seguir posponiéndola.";
+  }
+
+  if (structured.narrativeTone === "expansivo") {
+    return "Cuando una puerta se abre demasiado rápido, también conviene mirar qué parte de ti quiere cruzarla sin revisar el costo.";
+  }
+
+  if (structured.narrativeTone === "emocional") {
+    return "Lo que parece intensidad solo se vuelve confiable cuando puede sostener gestos concretos y no solo promesas.";
+  }
+
+  return "Una buena lectura no busca empujarte: te ayuda a ver qué parte de la situación ya estaba hablando antes de preguntar.";
+}
+
+function buildProFallbackReading(
+  structured: TarotStructuredInterpretation,
+): Omit<TarotSpreadProReading, "aprendizaje_tarot"> {
+  return {
+    mensaje_central: truncateText(structured.conflicto_principal, 180),
+    historia_profunda: truncateText(
+      `${structured.conflicto_principal} ${structured.deseo_visible}`,
+      320,
+    ),
+    dinamica_oculta: truncateText(structured.tension_central, 220),
+    sombra: truncateText(structured.bloqueo_actual, 190),
+    oportunidad: truncateText(structured.oportunidad_real, 190),
+    riesgo: truncateText(structured.riesgo_real, 190),
+    consejo: truncateText(structured.direccion_recomendada, 190),
+    accion_concreta: truncateText(
+      `En las proximas 48 horas, define una accion concreta alineada con esto: ${lowerSentenceStart(firstSentence(structured.direccion_recomendada, 120))}`,
+      180,
+    ),
+    pregunta_reflexiva: truncateText(
+      `Que parte de ${structured.eje_central} ya estas viendo y aun no quieres nombrar del todo?`,
+      160,
+    ),
+    mentor_khael: buildMentorKhaelFallback(structured),
+    sintesis_final: buildDistinctSintesisFinal(structured),
+  };
+}
+
+function sanitizeProField(value: string): string {
+  return cleanBackendSentence(stripTemplateArtifacts(value));
+}
+
+function sanitizeProReadingFinal(
+  reading: TarotSpreadProReading,
+  structured: TarotStructuredInterpretation,
+): TarotSpreadProReading {
+  const sanitized: TarotSpreadProReading = {
+    ...reading,
+    mensaje_central: sanitizeProField(reading.mensaje_central),
+    historia_profunda: sanitizeProField(reading.historia_profunda),
+    dinamica_oculta: sanitizeProField(reading.dinamica_oculta),
+    sombra: sanitizeProField(reading.sombra),
+    oportunidad: sanitizeProField(reading.oportunidad),
+    riesgo: sanitizeProField(reading.riesgo),
+    consejo: sanitizeProField(reading.consejo),
+    accion_concreta: sanitizeProField(reading.accion_concreta),
+    pregunta_reflexiva: sanitizeProField(reading.pregunta_reflexiva),
+    mentor_khael: sanitizeProField(reading.mentor_khael),
+    sintesis_final: sanitizeProField(reading.sintesis_final),
+    aprendizaje_tarot: {
+      cartas_clave: reading.aprendizaje_tarot.cartas_clave.map((item) => ({
+        carta: item.carta,
+        aporte: sanitizeProField(item.aporte),
+      })),
+      interaccion_simbolica: sanitizeProField(reading.aprendizaje_tarot.interaccion_simbolica),
+      leccion_tarotista: sanitizeProField(reading.aprendizaje_tarot.leccion_tarotista),
+    },
+  };
+
+  if (
+    containsTemplateArtifact(sanitized.mentor_khael) ||
+    areTextsTooSimilar(sanitized.mentor_khael, sanitized.mensaje_central) ||
+    areTextsTooSimilar(sanitized.mentor_khael, sanitized.sintesis_final)
+  ) {
+    sanitized.mentor_khael = buildMentorKhaelFallback(structured);
+  }
+
+  if (containsTemplateArtifact(sanitized.aprendizaje_tarot.interaccion_simbolica)) {
+    sanitized.aprendizaje_tarot.interaccion_simbolica = cleanBackendSentence(
+      `${structured.carta_dominante} organiza la lectura alrededor de ${stripTrailingDots(structured.eje_central)}, mientras las cartas secundarias muestran qué recurso, tensión o condición acompaña ese movimiento.`
+    );
+  }
+
+  if (containsTemplateArtifact(sanitized.aprendizaje_tarot.leccion_tarotista)) {
+    sanitized.aprendizaje_tarot.leccion_tarotista = cleanBackendSentence(
+      `Cuando ${structured.carta_dominante} domina una tirada, la clave es leer las demas cartas desde el eje que esa carta impone, no como significados separados.`,
+    );
+  }
+
+  if (containsStrictTeachingArtifact(sanitized.aprendizaje_tarot.interaccion_simbolica)) {
+    sanitized.aprendizaje_tarot.interaccion_simbolica = cleanBackendSentence(
+      `${structured.carta_dominante} se combina con las otras cartas para mostrar que la pregunta no depende de un solo significado, sino del contraste entre impulso, freno y consecuencia.`,
+    );
+  }
+
+  if (containsStrictTeachingArtifact(sanitized.aprendizaje_tarot.leccion_tarotista)) {
+    sanitized.aprendizaje_tarot.leccion_tarotista = cleanBackendSentence(
+      `Cuando ${cardDisplayName(structured.carta_dominante).toLowerCase()} domina una combinación, el estudiante debe observar si las otras cartas confirman su impulso, lo frenan o revelan una consecuencia que no era evidente al inicio.`,
+    );
+  }
+
+  return sanitized;
+}
+
+function finalizeProReading(
+  partial: TarotSpreadProReading,
+  structured: TarotStructuredInterpretation,
+  inputCards: CompactCardContext[],
+): TarotSpreadProReading {
+  const fallback = buildProFallbackReading(structured);
+  const backendLearning = buildAprendizajeTarot(inputCards, structured);
+
+  const merged: TarotSpreadProReading = {
+    mensaje_central: partial.mensaje_central || fallback.mensaje_central,
+    historia_profunda: partial.historia_profunda || fallback.historia_profunda,
+    dinamica_oculta: partial.dinamica_oculta || fallback.dinamica_oculta,
+    sombra: partial.sombra || fallback.sombra,
+    oportunidad: partial.oportunidad || fallback.oportunidad,
+    riesgo: partial.riesgo || fallback.riesgo,
+    consejo: partial.consejo || fallback.consejo,
+    accion_concreta: partial.accion_concreta || fallback.accion_concreta,
+    pregunta_reflexiva: partial.pregunta_reflexiva || fallback.pregunta_reflexiva,
+    aprendizaje_tarot: backendLearning,
+    mentor_khael: partial.mentor_khael || fallback.mentor_khael,
+    sintesis_final: partial.sintesis_final || fallback.sintesis_final,
+  };
+
+  if (areTextsTooSimilar(merged.mensaje_central, merged.sintesis_final)) {
+    merged.sintesis_final = buildDistinctSintesisFinal(structured);
+  }
+
+  return sanitizeProReadingFinal(merged, structured);
 }
 
 function normalizeComparableText(value: string): string {
@@ -1325,6 +2386,60 @@ function normalizeProSpreadReading(value: unknown): TarotSpreadProReading | null
   };
 }
 
+function normalizeCompactProSpreadReading(value: unknown): TarotSpreadProReading | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const raw = value as Record<string, unknown>;
+  const mensaje_central = getFirstString(raw, ["mensaje_central", "mensaje central", "central_message", "mensaje"]);
+  const historia_profunda = getFirstString(raw, ["historia_profunda", "historia profunda", "historia"]);
+  const dinamica_oculta = getFirstString(raw, ["dinamica_oculta", "dinámica_oculta", "dinamica oculta", "dinamica"]);
+  const sombra = getFirstString(raw, ["sombra", "shadow"]);
+  const oportunidad = getFirstString(raw, ["oportunidad", "opportunity"]);
+  const riesgo = getFirstString(raw, ["riesgo", "risk"]);
+  const consejo = getFirstString(raw, ["consejo", "advice"]);
+  const accion_concreta = getFirstString(raw, ["accion_concreta", "acción_concreta", "accion concreta", "action"]);
+  const pregunta_reflexiva = getFirstString(raw, ["pregunta_reflexiva", "pregunta reflexiva", "reflection_question", "pregunta"]);
+  const mentor_khael = getFirstString(raw, ["mentor_khael", "mentor khael", "mentor"]);
+  const sintesis_final = getFirstString(raw, ["sintesis_final", "síntesis_final", "sintesis final", "cierre"]);
+
+  if (
+    !mensaje_central &&
+    !historia_profunda &&
+    !dinamica_oculta &&
+    !sombra &&
+    !oportunidad &&
+    !riesgo &&
+    !consejo &&
+    !accion_concreta &&
+    !pregunta_reflexiva &&
+    !mentor_khael &&
+    !sintesis_final
+  ) {
+    return null;
+  }
+
+  return {
+    mensaje_central,
+    historia_profunda,
+    dinamica_oculta,
+    sombra,
+    oportunidad,
+    riesgo,
+    consejo,
+    accion_concreta,
+    pregunta_reflexiva,
+    aprendizaje_tarot: {
+      cartas_clave: [],
+      interaccion_simbolica: "",
+      leccion_tarotista: "",
+    },
+    mentor_khael,
+    sintesis_final,
+  };
+}
+
 function validateSpreadReading(value: unknown): TarotSpreadReading | null {
   const normalized = normalizeSpreadReading(value);
   if (!normalized) {
@@ -1336,6 +2451,15 @@ function validateSpreadReading(value: unknown): TarotSpreadReading | null {
 
 function validateProSpreadReading(value: unknown): TarotSpreadProReading | null {
   const normalized = normalizeProSpreadReading(value);
+  if (!normalized) {
+    return null;
+  }
+
+  return normalized;
+}
+
+function validateCompactProSpreadReading(value: unknown): TarotSpreadProReading | null {
+  const normalized = normalizeCompactProSpreadReading(value);
   if (!normalized) {
     return null;
   }
@@ -1499,6 +2623,56 @@ function extractLooseProSpreadReading(raw: string): TarotSpreadProReading | null
   };
 }
 
+function extractLooseCompactProSpreadReading(raw: string): TarotSpreadProReading | null {
+  const normalized = normalizeModelJson(raw);
+  const mensaje_central = extractQuotedFieldFromText(normalized, ["mensaje_central", "mensaje central", "central_message", "mensaje"]);
+  const historia_profunda = extractQuotedFieldFromText(normalized, ["historia_profunda", "historia profunda", "historia"]);
+  const dinamica_oculta = extractQuotedFieldFromText(normalized, ["dinamica_oculta", "dinámica_oculta", "dinamica oculta", "dinamica"]);
+  const sombra = extractQuotedFieldFromText(normalized, ["sombra", "shadow"]);
+  const oportunidad = extractQuotedFieldFromText(normalized, ["oportunidad", "opportunity"]);
+  const riesgo = extractQuotedFieldFromText(normalized, ["riesgo", "risk"]);
+  const consejo = extractQuotedFieldFromText(normalized, ["consejo", "advice"]);
+  const accion_concreta = extractQuotedFieldFromText(normalized, ["accion_concreta", "acción_concreta", "accion concreta", "action"]);
+  const pregunta_reflexiva = extractQuotedFieldFromText(normalized, ["pregunta_reflexiva", "pregunta reflexiva", "reflection_question", "pregunta"]);
+  const mentor_khael = extractQuotedFieldFromText(normalized, ["mentor_khael", "mentor khael", "mentor"]);
+  const sintesis_final = extractQuotedFieldFromText(normalized, ["sintesis_final", "síntesis_final", "sintesis final", "cierre"]);
+
+  if (
+    !mensaje_central &&
+    !historia_profunda &&
+    !dinamica_oculta &&
+    !sombra &&
+    !oportunidad &&
+    !riesgo &&
+    !consejo &&
+    !accion_concreta &&
+    !pregunta_reflexiva &&
+    !mentor_khael &&
+    !sintesis_final
+  ) {
+    return null;
+  }
+
+  return {
+    mensaje_central,
+    historia_profunda,
+    dinamica_oculta,
+    sombra,
+    oportunidad,
+    riesgo,
+    consejo,
+    accion_concreta,
+    pregunta_reflexiva,
+    aprendizaje_tarot: {
+      cartas_clave: [],
+      interaccion_simbolica: "",
+      leccion_tarotista: "",
+    },
+    mentor_khael,
+    sintesis_final,
+  };
+}
+
 async function getResolvedPlan(userId: string, requestPlan: PlanTier | null): Promise<PlanTier> {
   const profile = await prisma.userProfile.findUnique({
     where: { userId },
@@ -1515,9 +2689,11 @@ export async function POST(req: Request) {
   let promptLength = 0;
   let ollamaCallMs = 0;
   let generatedTokens: number | null = null;
+  let numPredictUsed: number | null = null;
   let outcome = "success";
   let jsonRepairApplied = false;
-  let parseStage: "direct" | "repaired" | "loose" | "failed" = "failed";
+  let parseStage: "direct" | "repaired-simple" | "loose" | "failed" = "failed";
+  let proMode: "compact" | "standard" | null = null;
 
   try {
     const user = await getCurrentUser();
@@ -1641,11 +2817,12 @@ export async function POST(req: Request) {
 
     const isProReading = plan === "PRO";
     const structuredInterpretation = isProReading
-      ? buildStructuredInterpretationProV2(
+      ? buildStructuredInterpretationProCompact(
           question,
           resolvedCards as Array<{ compactContext: CompactCardContext }>,
         )
       : null;
+    proMode = isProReading ? "compact" : null;
 
     if (IS_DEV && structuredInterpretation) {
       console.info(
@@ -1661,13 +2838,14 @@ export async function POST(req: Request) {
       : spreadType === "three_cards"
         ? 500
         : constraints.numPredict;
+    numPredictUsed = numPredict;
 
     const promptBuildStartedAt = Date.now();
     const compactContexts = (resolvedCards as Array<{ compactContext: CompactCardContext }>).map(
       (item) => item.compactContext,
     );
     const prompt = isProReading && structuredInterpretation
-      ? buildProSpreadPrompt(question, spreadType, compactContexts, structuredInterpretation)
+      ? buildProSpreadCompactPrompt(question, spreadType, compactContexts, structuredInterpretation)
       : buildSpreadPrompt(question, spreadType, plan, compactContexts);
     promptBuildMs = Date.now() - promptBuildStartedAt;
 
@@ -1684,7 +2862,7 @@ export async function POST(req: Request) {
 
     const directParsed = normalizeModelJson(result.answer);
     let reading: TarotSpreadReading | TarotSpreadProReading | null = isProReading
-      ? validateProSpreadReading(tryParseJson<TarotSpreadProReading>(directParsed))
+      ? validateCompactProSpreadReading(tryParseJson<TarotSpreadProReading>(directParsed))
       : validateSpreadReading(tryParseJson<TarotSpreadReading>(directParsed));
     if (reading) {
       parseStage = "direct";
@@ -1694,11 +2872,11 @@ export async function POST(req: Request) {
       const repaired = repairModelJson(result.answer);
       if (repaired) {
         reading = isProReading
-          ? validateProSpreadReading(tryParseJson<TarotSpreadProReading>(repaired))
+          ? validateCompactProSpreadReading(tryParseJson<TarotSpreadProReading>(repaired))
           : validateSpreadReading(tryParseJson<TarotSpreadReading>(repaired));
         if (reading) {
           jsonRepairApplied = true;
-          parseStage = "repaired";
+          parseStage = "repaired-simple";
           console.warn("[AI WARN][tarot-spread-local] Se reparo JSON invalido devuelto por Ollama.");
         }
       }
@@ -1706,7 +2884,7 @@ export async function POST(req: Request) {
 
     if (!reading) {
       const looseReading = isProReading
-        ? extractLooseProSpreadReading(result.answer)
+        ? extractLooseCompactProSpreadReading(result.answer)
         : extractLooseSpreadReading(result.answer);
       if (looseReading) {
         reading = looseReading;
@@ -1732,23 +2910,14 @@ export async function POST(req: Request) {
       );
     }
 
-    reading = isProReading
-      ? normalizeProSpreadReadingOutput(reading as TarotSpreadProReading)
-      : normalizeSpreadReadingOutput(reading as TarotSpreadReading);
-
     if (isProReading && structuredInterpretation) {
-      const proReading = reading as TarotSpreadProReading;
-      proReading.aprendizaje_tarot.cartas_clave = normalizeCartasClave(
-        proReading.aprendizaje_tarot.cartas_clave,
-        compactContexts,
+      reading = normalizeProSpreadReadingOutput(finalizeProReading(
+        reading as TarotSpreadProReading,
         structuredInterpretation,
-      );
-
-      if (areTextsTooSimilar(proReading.mensaje_central, proReading.sintesis_final)) {
-        proReading.sintesis_final = buildDistinctSintesisFinal(structuredInterpretation);
-      }
-
-      reading = proReading;
+        compactContexts,
+      ));
+    } else {
+      reading = normalizeSpreadReadingOutput(reading as TarotSpreadReading);
     }
 
     const config = getOllamaRuntimeConfig();
@@ -1777,10 +2946,12 @@ export async function POST(req: Request) {
   } finally {
     if (IS_DEV) {
       console.info("[AI PERF][tarot-spread-local]", {
+        proMode,
         outcome,
         cardLookupMs,
         promptBuildMs,
         promptLength,
+        num_predict: numPredictUsed,
         ollamaCallMs,
         generatedTokens,
         jsonRepairApplied,

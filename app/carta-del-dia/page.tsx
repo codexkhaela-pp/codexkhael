@@ -1,243 +1,350 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState, type ReactNode } from "react";
 
-type CartaDelDiaResponse = {
-  id: string;
-  cardId: string;
-  orientation: "UPRIGHT" | "REVERSED";
-  isRevealed: boolean;
-  mensajeDia: string;
-  preguntaReflexion: string;
-  cardImage: string;
+type DailyCardOrientation = "UPRIGHT" | "REVERSED";
+
+type HistoryItem = {
+  label: string;
+  fecha: string;
   cardName: string;
-  hasReflection: boolean;
+  orientation: DailyCardOrientation;
 };
 
+type CartaDelDiaDTO = {
+  id: string;
+  cardId: string;
+  orientation: DailyCardOrientation;
+  isRevealed: boolean;
+  hasReflection: boolean;
+  timezone: string;
+  HeroMensaje: string;
+  NombreCarta: string;
+  ImagenCarta: string;
+  MensajePrincipal: string;
+  Amor: string;
+  Dinero: string;
+  Trabajo: string;
+  CrecimientoPersonal: string;
+  AccionRecomendada: string;
+  PreguntaReflexion: string;
+  Sombra: string;
+  Fecha: string;
+  historialEnergetico: HistoryItem[];
+};
+
+const footerSun = "/assets/landing/sol.png?v=3";
+const defaultTimezone = "America/Lima";
+
+const manifestationAreas = [
+  { key: "Amor", icon: "♥", title: "Amor" },
+  { key: "Dinero", icon: "◇", title: "Dinero" },
+  { key: "Trabajo", icon: "✦", title: "Trabajo" },
+  { key: "CrecimientoPersonal", icon: "✧", title: "Crecimiento personal" },
+] as const;
+
+function getOrientationLabel(orientation: DailyCardOrientation): string {
+  return orientation === "REVERSED" ? "Invertida" : "Al derecho";
+}
+
+function PublicHeader() {
+  return (
+    <header className="landing-header">
+      <Link className="landing-brand" href="/" aria-label="Khael Tarotista">
+        <span className="landing-brand__seal" aria-hidden="true">
+          ✦
+        </span>
+        <span className="landing-brand__text">
+          <strong>Khael</strong>
+          <span>Tarotista</span>
+        </span>
+      </Link>
+
+      <nav className="landing-nav" aria-label="Navegación principal">
+        <Link href="/">Inicio</Link>
+        <Link href="/lecturas">Lecturas</Link>
+        <Link className="is-active" href="/carta-del-dia">
+          Carta del Día
+        </Link>
+        <Link href="/codex-khael">
+          Codex Khael
+        </Link>
+        {/* <Link href="/#tienda">Tienda</Link> */}
+        <Link href="/acerca-de-mi">Sobre mí</Link>
+        {/* <Link href="/#contacto">Contacto</Link> */}
+      </nav>
+
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <Link className="landing-access" href="/mis-lecturas/login" prefetch={false} style={{ background: 'transparent', borderColor: 'rgba(215, 173, 105, 0.4)' }}>
+          Mis Lecturas <span>+</span>
+        </Link>
+        <Link className="landing-access" href="/login" prefetch={false}>
+          Acceso a Codex <span>+</span>
+        </Link>
+      </div>
+    </header>
+  );
+}
+
+function PublicFooter() {
+  return (
+    <footer className="landing-footer">
+      <div className="landing-footer__brand">
+        <Link className="landing-brand" href="/" aria-label="Khael Tarotista">
+          <span className="landing-brand__seal" aria-hidden="true">
+            ✦
+          </span>
+          <span className="landing-brand__text">
+            <strong>Khael</strong>
+            <span>Tarotista</span>
+          </span>
+        </Link>
+        <p>Tarot · Estudio · Simbolismo</p>
+        <small>© 2026 Khael Tarotista. Todos los derechos reservados.</small>
+      </div>
+
+      <div className="landing-footer__links">
+        <h3>Enlaces</h3>
+        <Link href="/lecturas">Lecturas</Link>
+        <Link href="/carta-del-dia">Carta del Día</Link>
+        <Link href="/codex-khael">
+          Codex Khael
+        </Link>
+        <Link href="/mis-lecturas/login">MIS LECTURAS</Link>
+        {/* <Link href="/#tienda">Tienda</Link> */}
+        <Link href="/acerca-de-mi">Sobre mí</Link>
+        {/* <Link href="/#contacto">Contacto</Link> */}
+      </div>
+
+      <div className="landing-footer__newsletter">
+        <h3>Sígueme</h3>
+        <div className="landing-socials" aria-label="Redes sociales">
+          <a href="mailto:hola@codexkhael.com">◍</a>
+          <a href="mailto:hola@codexkhael.com">♪</a>
+          <a href="mailto:hola@codexkhael.com">▶</a>
+          <a href="mailto:hola@codexkhael.com">✉</a>
+        </div>
+        <label htmlFor="daily-email">Recibe inspiración semanal</label>
+        <div className="landing-email">
+          <input id="daily-email" type="email" placeholder="Tu correo electrónico" />
+          <button type="button" aria-label="Enviar correo">
+            →
+          </button>
+        </div>
+      </div>
+
+      <div className="landing-footer__sun">
+        <Image src={footerSun} alt="" fill unoptimized sizes="280px" />
+      </div>
+    </footer>
+  );
+}
+
+function PublicLayout({ children }: { children: ReactNode }) {
+  return (
+    <div className="landing-page readings-page daily-public-page">
+      <PublicHeader />
+      {children}
+      <PublicFooter />
+    </div>
+  );
+}
+
+function DailyCardSkeleton() {
+  return (
+    <PublicLayout>
+      <main className="daily-card-page">
+        <section className="daily-card-skeleton" aria-label="Cargando carta del día">
+          <div className="daily-skeleton-line daily-skeleton-date" />
+          <div className="daily-skeleton-title" />
+          <div className="daily-skeleton-card" />
+          <div className="daily-skeleton-line daily-skeleton-copy" />
+        </section>
+      </main>
+    </PublicLayout>
+  );
+}
+
 export default function CartaDelDiaPage() {
-  const router = useRouter();
-  const [carta, setCarta] = useState<CartaDelDiaResponse | null>(null);
+  const [carta, setCarta] = useState<CartaDelDiaDTO | null>(null);
   const [loading, setLoading] = useState(true);
-  const [revealing, setRevealing] = useState(false);
-  const [reflectionText, setReflectionText] = useState("");
-  const [sintioEnergia, setSintioEnergia] = useState("MUCHO");
-  const [aprendizaje, setAprendizaje] = useState("");
-  const [moodLevel, setMoodLevel] = useState(3);
-  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // We will create a GET endpoint to fetch current daily card
-    fetch("/api/carta-del-dia")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load");
-        return res.json();
-      })
-      .then((data) => {
-        setCarta(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+    let cancelled = false;
+
+    async function loadDailyCard() {
+      try {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || defaultTimezone;
+        const response = await fetch(`/api/carta-del-dia?timezone=${encodeURIComponent(timezone)}`, {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("No se pudo cargar la carta del día.");
+        }
+
+        const data = (await response.json()) as CartaDelDiaDTO;
+        if (!cancelled) {
+          setCarta({ ...data, isRevealed: true });
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : "Error inesperado.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadDailyCard();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const handleReveal = async () => {
-    if (!carta || carta.isRevealed || revealing) return;
-    setRevealing(true);
-    try {
-      const res = await fetch("/api/carta-del-dia/reveal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cartaId: carta.id }),
-      });
-      if (res.ok) {
-        setCarta({ ...carta, isRevealed: true });
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setRevealing(false);
-    }
-  };
-
-  const handleSaveReflection = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!carta || saving) return;
-    setSaving(true);
-    try {
-      const res = await fetch("/api/carta-del-dia/reflection", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cartaId: carta.id,
-          sintioEnergia,
-          textoReflexion: reflectionText,
-          aprendizaje,
-          moodLevel,
-        }),
-      });
-      if (res.ok) {
-        setCarta({ ...carta, hasReflection: true });
-      } else {
-        alert("Ocurrió un error al guardar la reflexión");
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (loading) {
+    return <DailyCardSkeleton />;
+  }
+
+  if (error || !carta) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-[var(--gold)]">
-        Conectando con el oráculo...
-      </div>
+      <PublicLayout>
+        <main className="daily-card-page">
+          <section className="daily-error-card">
+            <p className="daily-kicker">Carta del Día</p>
+            <h1>No se pudo abrir el oráculo diario.</h1>
+            <p>{error || "Inténtalo nuevamente en unos minutos."}</p>
+          </section>
+        </main>
+      </PublicLayout>
     );
   }
 
-  if (!carta) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-red-500">
-        Error al cargar la carta del día.
-      </div>
-    );
-  }
+  const paragraphs = carta.MensajePrincipal.split(/\n+/).filter(Boolean).slice(0, 4);
 
   return (
-    <div className="max-w-3xl mx-auto p-6 min-h-screen">
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-serif text-[var(--gold-bright)] mb-2">Carta del Día</h1>
-        <p className="text-sm text-[var(--text-muted)] tracking-wider uppercase">Tu Guía Diaria</p>
-      </header>
+    <PublicLayout>
+      <main className="daily-card-page">
+        <section className="daily-hero daily-hero--landing" aria-labelledby="daily-card-title">
+          <Image
+            src="/assets/carta_dia/carta1.png"
+            alt=""
+            fill
+            priority
+            unoptimized
+            sizes="(max-width: 768px) 100vw, 70vw"
+            className="daily-hero-bg"
+          />
+          <div className="daily-hero-copy">
+            <p className="landing-kicker">Carta del Día</p>
+            <h1 id="daily-card-title">Tu guía para hoy</h1>
+            <div className="daily-date-line">
+              <span />
+              <p className="daily-date">{carta.Fecha}</p>
+              <span />
+            </div>
 
-      <div className="flex flex-col items-center gap-10">
-        {/* Card Section */}
-        <div 
-          className="relative w-[45vw] max-w-[160px] h-[280px] perspective-1000 cursor-pointer"
-          onClick={handleReveal}
-        >
-          <div className={`w-full h-full transition-transform duration-700 transform-style-3d ${carta.isRevealed ? 'rotate-y-180' : ''}`}>
-            {/* Back */}
-            <div className="absolute w-full h-full backface-hidden rounded-xl border border-[rgba(201,166,107,0.3)] shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden" style={{ background: "linear-gradient(135deg, #18142c 0%, #0e0d19 100%)" }}>
-              <div className="absolute inset-2 border border-dashed border-[rgba(201,166,107,0.2)] rounded-lg flex items-center justify-center">
-                <span className="text-5xl opacity-40">🔮</span>
+            <div className="daily-arcane-name">
+              <h2>{carta.NombreCarta}</h2>
+              <span>{getOrientationLabel(carta.orientation)}</span>
+            </div>
+
+            <p className="daily-hero-message">{carta.HeroMensaje}</p>
+          </div>
+
+          <div className="daily-hero-stage" aria-hidden="true">
+            <div className="daily-card-visual is-revealed">
+              <Image
+                src={carta.ImagenCarta}
+                alt={carta.NombreCarta}
+                width={340}
+                height={560}
+                priority
+                className={carta.orientation === "REVERSED" ? "is-reversed" : undefined}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="daily-content-grid">
+          <section className="daily-reading-pair" aria-label="Mensaje y acción del día">
+            <article className="daily-premium-card daily-message-card">
+              <div className="daily-card-heading">
+                <span>✦</span>
+                <h2>Mensaje para hoy</h2>
               </div>
-            </div>
+              <div className="daily-message-copy">
+                {paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </article>
 
-            {/* Front */}
-            <div className="absolute w-full h-full backface-hidden rotate-y-180 rounded-xl overflow-hidden shadow-[0_0_30px_rgba(197,168,128,0.15)] bg-transparent">
-              {carta.isRevealed && (
+            <article className="daily-premium-card daily-action-card">
+              <div className="daily-action-illustration" aria-hidden="true">
                 <Image
-                  src={carta.cardImage}
-                  alt={carta.cardName}
+                  src="/assets/carta_dia/carta2.png"
+                  alt=""
                   fill
-                  className={`object-contain drop-shadow-xl ${carta.orientation === "REVERSED" ? "rotate-180" : ""}`}
+                  unoptimized
+                  sizes="(max-width: 768px) 90vw, 520px"
                 />
-              )}
+              </div>
+              <div className="daily-card-heading">
+                <span>◇</span>
+                <h2>Acción para hoy</h2>
+              </div>
+              <p>{carta.AccionRecomendada}</p>
+            </article>
+          </section>
+
+          <section className="daily-manifestation" aria-labelledby="manifestation-title">
+            <div className="landing-section-title daily-section-title">
+              <span />
+              <h2 id="manifestation-title">Áreas de manifestación</h2>
+              <span />
             </div>
-          </div>
-        </div>
-
-        {/* Message Section */}
-        {carta.isRevealed && (
-          <div className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(201,166,107,0.2)] rounded-xl p-6 text-center animate-fade-in">
-            <h2 className="text-xl font-serif text-[var(--gold)] mb-4">{carta.cardName} {carta.orientation === "REVERSED" ? "(Invertida)" : ""}</h2>
-            <p className="text-[#e0d9cd] leading-relaxed mb-6">{carta.mensajeDia}</p>
-            
-            <div className="bg-[#110f1f] p-5 rounded-lg border-l-2 border-[var(--gold)] text-left">
-              <span className="block text-xs uppercase tracking-wider text-[var(--text-muted)] mb-2">Para reflexionar hoy:</span>
-              <p className="text-[var(--text-light)] italic">"{carta.preguntaReflexion}"</p>
+            <div className="daily-area-grid">
+              {manifestationAreas.map((area) => (
+                <article className="daily-area-card" key={area.key}>
+                  <span className="daily-area-icon" aria-hidden="true">
+                    {area.icon}
+                  </span>
+                  <h3>{area.title}</h3>
+                  <p>{carta[area.key]}</p>
+                </article>
+              ))}
             </div>
-          </div>
-        )}
+          </section>
 
-        {/* Reflection Form */}
-        {carta.isRevealed && !carta.hasReflection && (
-          <div className="w-full mt-4 animate-fade-in-up">
-            <div className="parchment-container !block text-[#332a21]">
-              <h3 className="font-serif text-xl font-bold text-[#211912] mb-4 text-center">Reflexión Nocturna</h3>
-              <form onSubmit={handleSaveReflection} className="flex flex-col gap-5 relative z-10">
-                
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#7d6f5e] mb-2">¿Cómo sentiste la energía de la carta hoy?</label>
-                  <select 
-                    value={sintioEnergia} 
-                    onChange={e => setSintioEnergia(e.target.value)}
-                    className="w-full p-2 bg-[#fdfaf2] border border-[#eadebe] rounded-md text-[#332a21] outline-none focus:border-[#c5a880]"
-                  >
-                    <option value="MUCHO">Muy presente</option>
-                    <option value="POCO">Algo sutil</option>
-                    <option value="NADA">No la percibí</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#7d6f5e] mb-2">Tu Diario (Responde a la pregunta de reflexión)</label>
-                  <textarea 
-                    value={reflectionText}
-                    onChange={e => setReflectionText(e.target.value)}
-                    required
-                    rows={4}
-                    className="w-full p-3 bg-[#fdfaf2] border border-[#eadebe] rounded-md text-[#332a21] outline-none focus:border-[#c5a880] resize-none"
-                    placeholder="Escribe aquí tus pensamientos..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#7d6f5e] mb-2">Mayor aprendizaje del día</label>
-                  <input 
-                    type="text"
-                    value={aprendizaje}
-                    onChange={e => setAprendizaje(e.target.value)}
-                    required
-                    className="w-full p-2 bg-[#fdfaf2] border border-[#eadebe] rounded-md text-[#332a21] outline-none focus:border-[#c5a880]"
-                    placeholder="En una frase..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#7d6f5e] mb-2">Nivel de ánimo (1-5)</label>
-                  <input 
-                    type="range" 
-                    min="1" max="5" 
-                    value={moodLevel} 
-                    onChange={e => setMoodLevel(Number(e.target.value))}
-                    className="w-full accent-[#8c7350]"
-                  />
-                  <div className="flex justify-between text-[10px] text-[#7d6f5e] font-bold mt-1">
-                    <span>1 (Bajo)</span>
-                    <span>3 (Neutral)</span>
-                    <span>5 (Alto)</span>
-                  </div>
-                </div>
-
-                <button 
-                  type="submit"
-                  disabled={saving}
-                  className="mt-2 bg-[#211912] text-[#f7f1df] py-3 rounded-md font-serif tracking-wider uppercase text-sm hover:bg-[#332a21] transition-colors disabled:opacity-50"
-                >
-                  {saving ? "Guardando..." : "Sellar Reflexión en la Bitácora"}
-                </button>
-              </form>
+          <article className="daily-premium-card daily-reflection-card">
+            <div>
+              <div className="daily-card-heading">
+                <span>☽</span>
+                <h2>Pregunta para reflexionar</h2>
+              </div>
+              <p>"{carta.PreguntaReflexion}"</p>
             </div>
-          </div>
-        )}
+          </article>
 
-        {carta.hasReflection && (
-          <div className="w-full text-center mt-4 bg-[rgba(255,255,255,0.03)] border border-green-900/30 rounded-xl p-6">
-            <span className="text-3xl mb-3 block">✨</span>
-            <h3 className="text-xl font-serif text-[var(--gold)] mb-2">Reflexión Guardada</h3>
-            <p className="text-[var(--text-muted)] text-sm">Has completado tu registro de hoy. Puedes revisar estas reflexiones históricas o continuar con tu diario energético actual.</p>
-            <button onClick={() => router.push("/reflexiones-carta-dia")} className="mt-4 px-6 py-2 bg-[rgba(201,166,107,0.1)] border border-[rgba(201,166,107,0.3)] rounded-lg text-sm text-[var(--gold-bright)] hover:bg-[rgba(201,166,107,0.2)] transition-colors">
-              Ver historial energético
-            </button>
+          <details className="daily-premium-card daily-shadow-card open">
+            <summary>Ver aprendizaje de la sombra</summary>
+            <p>{carta.Sombra}</p>
+          </details>
+
+          <div className="daily-cta-row">
+            <Link href="/codex-khael" className="landing-access">
+              ¿Quieres aprender más? Inscríbete en Codex Khael <span>+</span>
+            </Link>
           </div>
-        )}
-      </div>
-    </div>
+        </section>
+      </main>
+    </PublicLayout>
   );
 }

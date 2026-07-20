@@ -81,16 +81,16 @@ export const tarotSpreads: TarotSpread[] = [
     cardCount: 10,
     layout: "celtic-cross",
     positions: [
-      { id: 1, label: "Situación actual", x: 1, y: 1 },
-      { id: 2, label: "Cruce o reto", x: 1, y: 2 },
-      { id: 3, label: "Raíz", x: 1, y: 3 },
-      { id: 4, label: "Pasado reciente", x: 0, y: 1 },
-      { id: 5, label: "Meta consciente", x: 1, y: 0 },
-      { id: 6, label: "Futuro próximo", x: 2, y: 1 },
-      { id: 7, label: "Actitud", x: 4, y: 1 },
-      { id: 8, label: "Entorno", x: 4, y: 2 },
-      { id: 9, label: "Esperanzas y miedos", x: 4, y: 3 },
-      { id: 10, label: "Resultado", x: 4, y: 4 },
+      { id: 1, label: "De dónde vengo", x: 0, y: 1 },
+      { id: 2, label: "Situación actual", x: 1, y: 1 },
+      { id: 3, label: "A dónde voy", x: 2, y: 1 },
+      { id: 4, label: "El reto", x: 1, y: 1, overlay: true, rotate: true },
+      { id: 5, label: "Lo que hay en mi mente", x: 1, y: 0 },
+      { id: 6, label: "Lo que hay en mi piso / inconsciente", x: 1, y: 2 },
+      { id: 7, label: "Cómo veo yo la situación", x: 4, y: 0 },
+      { id: 8, label: "Cómo me ven los demás", x: 4, y: 1 },
+      { id: 9, label: "Dudas y temores", x: 4, y: 2 },
+      { id: 10, label: "Resultado final", x: 4, y: 3 },
     ],
   },
   {
@@ -199,4 +199,3 @@ export const tarotSpreads: TarotSpread[] = [
     ],
   },
 ];
-

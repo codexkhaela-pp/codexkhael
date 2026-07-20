@@ -1,10 +1,31 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { AUTH_COOKIE_NAME, isSessionAuthenticated } from "@/lib/auth";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/register", "/forgot-password", "/reset-password"]);
-const PUBLIC_PREFIXES = ["/tarot/"];
-const AUTH_API_PATHS = new Set(["/api/auth/login", "/api/auth/logout", "/api/auth/register", "/api/auth/forgot-password", "/api/auth/reset-password"]);
+const PUBLIC_PATHS = new Set([
+  "/",
+  "/lecturas",
+  "/carta-del-dia",
+  "/acerca-de-mi",
+  "/codex-khael",
+  "/suscribete",
+  "/sobre-mi",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/mis-lecturas/login",
+]);
+const PUBLIC_PREFIXES = ["/assets/", "/tarot/"];
+const AUTH_API_PATHS = new Set([
+  "/api/auth/login",
+  "/api/auth/logout",
+  "/api/auth/register",
+  "/api/auth/subscribe",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+]);
 const INTERNAL_API_PATHS = new Set(["/api/cron/keepalive"]);
+const PUBLIC_API_PATHS = new Set(["/api/carta-del-dia"]);
 
 function allowDevAiTestBypass(pathname: string): boolean {
   return (
@@ -21,17 +42,18 @@ function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const cookieValue = request.cookies.get(AUTH_COOKIE_NAME)?.value;
   const authenticated = isSessionAuthenticated(cookieValue);
   const devAiBypass = allowDevAiTestBypass(pathname);
 
-  if (AUTH_API_PATHS.has(pathname) || INTERNAL_API_PATHS.has(pathname) || isPublicPath(pathname)) {
-    const hasNextParam = request.nextUrl.searchParams.has("next");
-    if (authenticated && pathname === "/login" && !hasNextParam) {
-      return NextResponse.redirect(new URL("/dashboard-preview", request.url));
-    }
+  if (
+    AUTH_API_PATHS.has(pathname) ||
+    INTERNAL_API_PATHS.has(pathname) ||
+    PUBLIC_API_PATHS.has(pathname) ||
+    isPublicPath(pathname)
+  ) {
     return NextResponse.next();
   }
 

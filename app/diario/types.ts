@@ -14,6 +14,11 @@ export interface JournalReadingReflection {
   suggestedAction: string;
 }
 
+export interface JournalCustomPosition {
+  index: number;
+  label: string;
+}
+
 export interface JournalSpreadPosition {
   id: string;
   name: string;
@@ -42,7 +47,39 @@ export interface JournalCanvasSnapshot {
   spreadId?: string;
   canvasWidth?: number;
   canvasHeight?: number;
+  customPositions?: JournalCustomPosition[];
   placements: JournalCardPlacement[];
+}
+
+export interface JournalTraditionalReadingSnapshot {
+  summary: string;
+  positionInterpretations: Array<{
+    positionNumber: number;
+    positionName: string;
+    cardName: string;
+    orientation: string;
+    interpretation: string;
+  }>;
+  cardRelationships: string;
+  finalAdvice: string;
+}
+
+export interface JournalMentorReadingSnapshot {
+  directAnswer: string;
+  blindSpot: string;
+  deepDynamic: string;
+  mainRisk: string;
+  realOpportunity: string;
+  mentorAdvice: string;
+  sevenDayAction: string;
+  reflectionQuestion: string;
+  preferredOption: string;
+  preferredOptionReason: string;
+  alternativeOption: string;
+  alternativeOptionRisk: string;
+  decisionSignal: string;
+  confidenceLevel: string;
+  warning: string;
 }
 
 export interface JournalFlipEvent {
@@ -78,6 +115,8 @@ export interface JournalEntry {
   metadata: JournalReadingMetadata;
   canvas: JournalCanvasSnapshot;
   reflection: JournalReadingReflection;
+  traditionalReading?: JournalTraditionalReadingSnapshot | null;
+  mentorReading?: JournalMentorReadingSnapshot | null;
   flipStats: JournalFlipStat[];
   rereadings: JournalRereading[];
   flipEvents?: JournalFlipEvent[];
