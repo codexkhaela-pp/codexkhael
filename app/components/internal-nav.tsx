@@ -19,6 +19,11 @@ export async function InternalNav() {
         <Link href="/tiradas">Tiradas</Link>
         <Link href="/diario">Diario</Link>
         <Link href="/bitacora">Bitácora</Link>
+        {user?.roles.some(r => r === "ADMIN" || r === "TAROTIST") && (
+          <Link href="/admin/lecturas" style={{ color: "var(--landing-gold-2)" }}>
+            Consultantes
+          </Link>
+        )}
       </nav>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", maxWidth: "100%" }}>
         {user ? (

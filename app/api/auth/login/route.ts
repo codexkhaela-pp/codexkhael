@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     const user = await prisma.user.findUnique({
       where: { email: username },
-      select: { id: true, email: true, passwordHash: true, status: true },
+      select: { id: true, email: true, passwordHash: true, status: true, roles: true },
     });
 
     const userFound = Boolean(user);
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
 
     await logAccess({ userId: user.id, email: user.email, action: "login", userAgent });
 
-    const response = NextResponse.json({ ok: true, user: { id: user.id, email: user.email } });
+    const response = NextResponse.json({ ok: true, user: { id: user.id, email: user.email, roles: user.roles } });
     response.cookies.set(
       AUTH_COOKIE_NAME,
       createSessionCookieValue({

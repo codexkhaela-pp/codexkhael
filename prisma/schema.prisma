@@ -130,46 +130,48 @@ enum ChallengeAttemptStatus {
 }
 
 model User {
-  id                String                 @id @default(uuid()) @db.Uuid
-  name              String?
-  email             String                 @unique
-  passwordHash      String?
-  sessionToken      String?
-  status            UserStatus             @default(ACTIVE)
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-  authSessions      AuthSession[]
-  roles             UserRole[]
-  bitacoraEntries   BitacoraEntry[]
-  reReadings        BitacoraReReading[]
-  subscriptions     UserSubscription[]
-  accessLogs        AccessLog[]
-  resetTokens       PasswordResetToken[]
-  profile           UserProfile?
-  learningSessions  LearningQuizSession[]
-  learningProgress  CardLearningProgress[]
-  xpTransactions    UserXpTransaction[]
-  challengeAttempts UserChallengeAttempt[]
-  challenges        Challenge[]
-  usageLogs         UsageLog[]
-  cartasDelDia      CartaDelDia[]
-  reflexionesDia    ReflexionCartaDia[]
+  id                  String                 @id @default(uuid()) @db.Uuid
+  name                String?
+  email               String                 @unique
+  passwordHash        String?
+  sessionToken        String?
+  status              UserStatus             @default(ACTIVE)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  authSessions        AuthSession[]
+  roles               UserRole[]
+  bitacoraEntries     BitacoraEntry[]
+  reReadings          BitacoraReReading[]
+  subscriptions       UserSubscription[]
+  accessLogs          AccessLog[]
+  resetTokens         PasswordResetToken[]
+  profile             UserProfile?
+  learningSessions    LearningQuizSession[]
+  learningProgress    CardLearningProgress[]
+  xpTransactions      UserXpTransaction[]
+  challengeAttempts   UserChallengeAttempt[]
+  challenges          Challenge[]
+  usageLogs           UsageLog[]
+  cartasDelDia        CartaDelDia[]
+  reflexionesDia      ReflexionCartaDia[]
   dailyJournalEntries DailyJournalEntry[]
+  clientReadings      ClientReading[]        @relation("ClientReadings")
+  tarotistReadings    ClientReading[]        @relation("TarotistReadings")
 
   @@index([email])
 }
 
 model AuthSession {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @db.Uuid
-  sessionToken String   @unique
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  sessionToken String    @unique
   userAgent    String?
   ipAddress    String?
   lastSeenAt   DateTime?
   expiresAt    DateTime
   revokedAt    DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -631,4 +633,151 @@ model DailyJournalEntry {
 
   @@unique([userId, date])
   @@index([userId, date])
+}
+
+// --- CLIENT READINGS (CRM) ---
+
+enum ReadingStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  CANCELLED
+}
+
+enum ClientReadingModality {
+  WHATSAPP
+  VIDEO_CALL
+  IN_PERSON
+  AUDIO
+  OTHER
+}
+
+model ClientReading {
+  id          String  @id @default(uuid()) @db.Uuid
+  tarotistId  String  @db.Uuid // ID de Khael
+  clientId    String? @db.Uuid // ID del usuario cliente (si está registrado)
+  clientEmail String? // Correo del cliente (para invitados o búsqueda rápida)
+  clientName  String?
+
+  // Datos Generales
+  title           String
+  mainQuestion    String                @db.Text
+  category        String? // Amor, Trabajo, Dinero, etc.
+  readingDate     DateTime
+  startTime       DateTime?
+  endTime         DateTime?
+  durationMinutes Int?
+  modality        ClientReadingModality @default(OTHER)
+  status          ReadingStatus         @default(DRAFT)
+  publishedAt     DateTime?
+
+  // Información de la tirada
+  spreadType        String // Cruz Celta, Herradura, etc.
+  customSpreadName  String?
+  totalCards        Int     @default(0)
+  spreadDescription String? @db.Text
+  matName           String? // Fondo o manta utilizada
+  canvasScale       Float?  @default(1.0)
+  canvasWidth       Float?
+  canvasHeight      Float?
+
+  // Baraja utilizada
+  realDeckId             String?
+  realDeckName           String?
+  realDeckPublisher      String?
+  realDeckAuthor         String?
+  realDeckIllustrator    String?
+  realDeckYear           String?
+  imageAuthStatus        String?
+  visualDeckName         String?
+  visualSubstitutionNote String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tarotist User  @relation("TarotistReadings", fields: [tarotistId], references: [id], onDelete: Restrict)
+  client   User? @relation("ClientReadings", fields: [clientId], references: [id], onDelete: SetNull)
+
+  cards    ClientReadingCard[]
+  sections ClientReadingSection[]
+  assets   ClientReadingAsset[]
+  oracle   ClientReadingOracle?
+}
+
+model ClientReadingCard {
+  id        String @id @default(uuid()) @db.Uuid
+  readingId String @db.Uuid
+
+  // Identificadores y significado
+  canonicalCardId String?
+  visualCardId    String?
+  cardName        String
+  positionIndex   Int
+  positionName    String?
+  positionMeaning String?         @db.Text
+  readingOrder    Int?
+  orientation     CardOrientation
+  interpretation  String?         @db.Text
+  observations    String?         @db.Text
+
+  // Posición visual exacta
+  x                 Float
+  y                 Float
+  width             Float?
+  height            Float?
+  rotation          Float           @default(0)
+  zIndex            Int             @default(0)
+  visualOrientation CardOrientation @default(UPRIGHT)
+  isCrossed         Boolean         @default(false)
+  groupName         String?
+  relativeScale     Float           @default(1.0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reading ClientReading @relation(fields: [readingId], references: [id], onDelete: Cascade)
+}
+
+model ClientReadingSection {
+  id          String   @id @default(uuid()) @db.Uuid
+  readingId   String   @db.Uuid
+  sectionType String // Resumen general, Conclusión, Notas privadas, etc.
+  content     String   @db.Text
+  isPrivate   Boolean  @default(false) // Si es true, el consultante nunca lo ve
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reading ClientReading @relation(fields: [readingId], references: [id], onDelete: Cascade)
+}
+
+model ClientReadingAsset {
+  id         String   @id @default(uuid()) @db.Uuid
+  readingId  String   @db.Uuid
+  fileType   String // Foto, Audio, PDF, etc.
+  url        String
+  name       String
+  sizeBytes  Int?
+  isPublic   Boolean  @default(true) // Visible para el consultante
+  order      Int      @default(0)
+  uploadedAt DateTime @default(now())
+
+  reading ClientReading @relation(fields: [readingId], references: [id], onDelete: Cascade)
+}
+
+model ClientReadingOracle {
+  id              String  @id @default(uuid()) @db.Uuid
+  readingId       String  @unique @db.Uuid
+  oracleName      String?
+  cardName        String
+  position        String?
+  message         String? @db.Text
+  interpretation  String? @db.Text
+  imageUrl        String?
+  imageAuthStatus String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reading ClientReading @relation(fields: [readingId], references: [id], onDelete: Cascade)
 }

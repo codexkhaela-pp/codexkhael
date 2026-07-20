@@ -16,6 +16,12 @@ export default async function RootLayout({
 }>) {
   const user = await getCurrentUser();
   const isStudent = user?.roles.includes("STUDENT") ?? false;
+  const isOnlyClient = user?.roles.length === 1 && user?.roles[0] === "CLIENT";
+
+  // Aquí no podemos usar redirect() si estamos dentro del body, pero sí antes.
+  // Sin embargo, si esOnlyClient y está intentando acceder a una ruta protegida (panel),
+  // esto debe manejarse en middleware o en el page.tsx respectivo.
+  // Como layout corre en cada request, no debemos hacer redirect indiscriminado.
 
   return (
     <html lang="es">

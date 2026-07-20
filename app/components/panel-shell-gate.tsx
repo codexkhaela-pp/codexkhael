@@ -20,7 +20,8 @@ function isPanelRoute(pathname: string): boolean {
     pathname.startsWith("/desafios") ||
     pathname.startsWith("/aprendizaje") ||
     pathname.startsWith("/ajustes") ||
-    pathname.startsWith("/planes")
+    pathname.startsWith("/planes") ||
+    pathname.startsWith("/admin")
   );
 }
 

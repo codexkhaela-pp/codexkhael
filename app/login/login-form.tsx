@@ -27,15 +27,19 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         body: JSON.stringify({ username, password }),
       });
 
+      const payload = (await response.json().catch(() => null)) as any;
+
       if (!response.ok) {
-        const payload = (await response.json().catch(() => null)) as
-          | { error?: string }
-          | null;
         setError(payload?.error ?? "No se pudo iniciar sesión.");
         return;
       }
 
-      router.push(nextPath);
+      let finalPath = nextPath;
+      if (payload?.user?.roles?.length === 1 && payload.user.roles[0] === "CLIENT") {
+        finalPath = "/mis-lecturas";
+      }
+
+      router.push(finalPath);
       router.refresh();
     } catch {
       setError("No se pudo iniciar sesión. Intenta nuevamente.");
