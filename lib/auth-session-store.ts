@@ -84,6 +84,7 @@ export async function findActiveAuthSession(session: AppSession) {
       user: {
         select: {
           id: true,
+          name: true,
           email: true,
           status: true,
           roles: {

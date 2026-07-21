@@ -24,5 +24,5 @@ export async function POST(request: Request) {
     maxAge: 0,
   });
   cookieStore.delete(AUTH_COOKIE_NAME);
-  return NextResponse.json({ ok: true });
+  return NextResponse.redirect(new URL("/", request.url));
 }

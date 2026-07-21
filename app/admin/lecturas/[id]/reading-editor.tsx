@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, MouseEvent as ReactMouseEvent } from "react";
-import { updateCardLayout, updateReadingInterpretation, addCardToReading, deleteCard, updateCardInterpretation } from "./actions";
+import { Sparkles, Info } from "lucide-react";
+import { updateCardLayout, updateReadingInterpretation, addCardToReading, deleteCard, updateCardInterpretation, updateReadingStatus } from "./actions";
+import styles from "./reading-editor.module.css";
 
 type CardData = {
   id: string;
@@ -21,6 +23,8 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
   const [cards, setCards] = useState<CardData[]>(reading.cards);
   const [spreadDescription, setSpreadDescription] = useState(reading.spreadDescription || "");
   const [isSavingLayout, setIsSavingLayout] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [status, setStatus] = useState(reading.status || "DRAFT");
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Selector state
@@ -81,7 +85,7 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
   const saveLayout = async () => {
     setIsSavingLayout(true);
     for (const card of cards) {
-      await updateCardLayout(card.id, { x: card.x, y: card.y, rotation: card.rotation, zIndex: card.zIndex });
+      await updateCardLayout(card.id, { x: card.x, y: card.y, rotation: card.rotation, zIndex: card.zIndex, relativeScale: card.relativeScale });
     }
     await updateReadingInterpretation(reading.id, spreadDescription);
     setIsSavingLayout(false);
@@ -107,6 +111,17 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
     }
   };
 
+  const togglePublish = async () => {
+    setIsPublishing(true);
+    const newStatus = status === "PUBLISHED" ? "DRAFT" : "PUBLISHED";
+    const res = await updateReadingStatus(reading.id, newStatus);
+    if (res.success) {
+      setStatus(newStatus);
+      alert(newStatus === "PUBLISHED" ? "Lectura publicada y visible para el consultante." : "Lectura devuelta a borrador.");
+    }
+    setIsPublishing(false);
+  };
+
   const handleDeleteCard = async (id: string) => {
     if (confirm("¿Eliminar carta?")) {
       await deleteCard(id, reading.id);
@@ -129,43 +144,64 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
     
     await updateCardInterpretation(editingCard.id, interp, reading.id);
     // Also save rotation/scale to layout right away
-    await updateCardLayout(editingCard.id, { x: editingCard.x, y: editingCard.y, rotation, zIndex: editingCard.zIndex });
+    await updateCardLayout(editingCard.id, { x: editingCard.x, y: editingCard.y, rotation, zIndex: editingCard.zIndex, relativeScale: scale });
     
     setEditingCard(null);
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 350px", gap: "2rem", minHeight: "80vh" }}>
+    <div className={styles.mainLayout}>
       
       {/* Canvas Area */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={{ fontSize: "1.2rem", color: "var(--landing-gold-1)" }}>Lienzo de Tirada</h2>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button className="btn" style={{ padding: "0.5rem 1rem", background: "rgba(255,255,255,0.1)", color: "white", borderRadius: "6px" }} onClick={() => setShowSelector(true)}>
+      <div className={styles.canvasCard}>
+        <div className={styles.canvasHeader}>
+          <h2 className={styles.canvasTitle}>
+            <Sparkles size={20} className={styles.canvasTitleIcon} />
+            Lienzo de Tirada
+          </h2>
+          <div className={styles.canvasActions}>
+            <button className={styles.btnSecondary} onClick={() => setShowSelector(true)}>
               + Añadir Carta
             </button>
-            <button className="btn btn-primary" style={{ padding: "0.5rem 1rem" }} onClick={saveLayout} disabled={isSavingLayout}>
+            <button className={styles.btnPrimary} onClick={saveLayout} disabled={isSavingLayout}>
               {isSavingLayout ? "Guardando..." : "Guardar Disposición"}
+            </button>
+            <button 
+              className={status === "PUBLISHED" ? styles.btnSecondary : styles.btnPrimary} 
+              onClick={togglePublish} 
+              disabled={isPublishing}
+              style={{ background: status === "PUBLISHED" ? "transparent" : "#4ade80", color: status === "PUBLISHED" ? "inherit" : "#000", borderColor: status === "PUBLISHED" ? "rgba(255,255,255,0.2)" : "#4ade80" }}
+            >
+              {isPublishing ? "Procesando..." : status === "PUBLISHED" ? "Ocultar (Borrador)" : "Publicar Lectura"}
             </button>
           </div>
         </div>
         
         <div 
           ref={containerRef}
-          style={{ 
-            flex: 1, 
-            background: "rgba(10, 12, 18, 0.9)", 
-            border: "1px solid rgba(255,255,255,0.1)", 
-            borderRadius: "12px", 
-            position: "relative",
-            overflow: "hidden",
-            touchAction: "none"
-          }}
+          className={styles.canvasBoard}
         >
-          {/* Background Grid Pattern */}
-          <div style={{ position: "absolute", inset: 0, opacity: 0.05, backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
+
           
+          {cards.length === 0 && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyStateContent}>
+                <div className={styles.emptyStateIcon}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <path d="M7 3v18"></path>
+                    <path d="M17 3v18"></path>
+                  </svg>
+                </div>
+                <h3 className={styles.emptyStateTitle}>Aún no hay cartas en esta tirada</h3>
+                <p className={styles.emptyStateText}>Añade cartas para comenzar la lectura.</p>
+                <button className={styles.btnPrimary} onClick={() => setShowSelector(true)}>
+                  + Añadir Primera Carta
+                </button>
+              </div>
+            </div>
+          )}
+
           {cards.map(card => {
             const cardDef = availableCards.find(ac => ac.id === card.visualCardId);
             const imageSrc = cardDef ? cardDef.image : "/assets/cards/back.jpg";
@@ -184,20 +220,21 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
                   top: `${card.y}%`,
                   transform: `translate(-50%, -50%) rotate(${card.rotation}deg) scale(${card.relativeScale})`,
                   zIndex: card.zIndex,
-                  width: "100px", // Base size, scaled by relativeScale
+                  width: "115px", // Slightly larger for premium feel
                   aspectRatio: "1 / 1.7",
                   cursor: draggingId === card.id ? "grabbing" : "grab",
-                  boxShadow: draggingId === card.id ? "0 10px 30px rgba(0,0,0,0.5), 0 0 0 2px var(--landing-gold-1)" : "0 4px 10px rgba(0,0,0,0.3)",
-                  borderRadius: "6px",
-                  transition: draggingId === card.id ? "none" : "box-shadow 0.2s, transform 0.2s",
+                  boxShadow: draggingId === card.id ? "0 14px 40px rgba(0,0,0,0.6), 0 0 0 1px #c5a880" : "0 8px 24px rgba(0,0,0,0.5)",
+                  borderRadius: "8px",
+                  transition: draggingId === card.id ? "none" : "box-shadow 0.25s ease, transform 0.25s ease",
                   backgroundImage: `url(${imageSrc})`,
                   backgroundSize: "cover",
-                  backgroundPosition: "center"
+                  backgroundPosition: "center",
+                  border: "1px solid rgba(197, 168, 128, 0.2)"
                 }}
               >
                 {/* Optional Overlays */}
                 {editingCard?.id === card.id && (
-                  <div style={{ position: "absolute", inset: "-4px", border: "2px solid var(--landing-gold-1)", borderRadius: "8px", pointerEvents: "none" }} />
+                  <div style={{ position: "absolute", inset: "-4px", border: "2px solid #c5a880", borderRadius: "10px", pointerEvents: "none", boxShadow: "inset 0 0 12px rgba(197, 168, 128, 0.2)" }} />
                 )}
               </div>
             );
@@ -206,89 +243,101 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
       </div>
 
       {/* Sidebar Area */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", background: "rgba(255,255,255,0.03)", padding: "1.5rem", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.05)", overflowY: "auto" }}>
-        
-        {editingCard ? (
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <h3 style={{ color: "var(--landing-gold-1)", fontSize: "1.1rem" }}>Editar Carta</h3>
-              <button onClick={() => setEditingCard(null)} style={{ color: "var(--muted)", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+      <div className={styles.sidebarSticky}>
+        <div className={styles.sidebarCard}>
+          {editingCard ? (
+            <div className={styles.editCardForm}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 className={styles.sidebarTitle} style={{ borderBottom: "none", paddingBottom: 0 }}>Editar Carta</h3>
+                <button onClick={() => setEditingCard(null)} className={styles.modalClose}>✕</button>
+              </div>
+              
+              <form onSubmit={saveCardDetails} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div className={styles.editCardHeader}>
+                  <strong className={styles.editCardTitle}>{editingCard.cardName}</strong>
+                  <span className={styles.editCardSubtitle}>{editingCard.positionName}</span>
+                </div>
+                
+                <div className={styles.formGroup}>
+                  <span className={styles.formLabel}>Rotación (grados)</span>
+                  <input type="number" name="rotation" defaultValue={editingCard.rotation} className={styles.formInput} />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <span className={styles.formLabel}>Escala (1.0 = normal)</span>
+                  <input type="number" step="0.1" name="scale" defaultValue={editingCard.relativeScale} className={styles.formInput} />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <span className={styles.formLabel}>Interpretación Específica</span>
+                  <textarea name="interpretation" defaultValue={editingCard.interpretation || ""} rows={6} className={styles.formTextarea} />
+                </div>
+                
+                <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                  <button type="submit" className={styles.btnPrimary} style={{ flex: 1 }}>Guardar Detalles</button>
+                  <button type="button" onClick={() => handleDeleteCard(editingCard.id)} className={styles.btnDanger}>Eliminar</button>
+                </div>
+              </form>
             </div>
-            
-            <form onSubmit={saveCardDetails} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div style={{ padding: "0.8rem", background: "rgba(0,0,0,0.3)", borderRadius: "6px", fontSize: "0.9rem" }}>
-                <strong>{editingCard.cardName}</strong><br/>
-                <span style={{ color: "var(--muted)" }}>{editingCard.positionName}</span>
-              </div>
+          ) : (
+            <>
+              <h3 className={styles.sidebarTitle}>Interpretación General</h3>
+              <p className={styles.sidebarDesc}>Escribe aquí la interpretación general de la lectura para el consultante. Esta síntesis será visible desde su portal.</p>
               
-              <label className="login-form__field" style={{ gap: "0.5rem" }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Rotación (grados)</span>
-                <input type="number" name="rotation" defaultValue={editingCard.rotation} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }} />
-              </label>
-
-              <label className="login-form__field" style={{ gap: "0.5rem" }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Escala (1.0 = normal)</span>
-                <input type="number" step="0.1" name="scale" defaultValue={editingCard.relativeScale} style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }} />
-              </label>
-
-              <label className="login-form__field" style={{ gap: "0.5rem" }}>
-                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Interpretación Específica</span>
-                <textarea name="interpretation" defaultValue={editingCard.interpretation || ""} rows={5} style={{ width: "100%", padding: "10px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", resize: "vertical" }} />
-              </label>
-              
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: "0.5rem" }}>Guardar Detalles</button>
-                <button type="button" onClick={() => handleDeleteCard(editingCard.id)} className="btn" style={{ padding: "0.5rem", background: "rgba(220, 53, 69, 0.2)", color: "#ff8c8c", border: "1px solid rgba(220, 53, 69, 0.4)", borderRadius: "6px" }}>Eliminar</button>
+              <div style={{ position: "relative" }}>
+                <textarea 
+                  value={spreadDescription}
+                  onChange={e => setSpreadDescription(e.target.value)}
+                  className={styles.editorTextarea}
+                  placeholder="Escribe la interpretación general de la lectura..."
+                  maxLength={10000}
+                />
+                <div className={styles.charCount}>
+                  {spreadDescription.length}/10000
+                </div>
               </div>
-            </form>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <h3 style={{ color: "var(--landing-gold-1)", fontSize: "1.1rem" }}>Interpretación General</h3>
-            <p style={{ fontSize: "0.85rem", color: "var(--muted)" }}>Esta síntesis será visible para el consultante en su portal.</p>
-            <textarea 
-              value={spreadDescription}
-              onChange={e => setSpreadDescription(e.target.value)}
-              rows={12} 
-              style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", resize: "vertical", fontSize: "0.95rem", lineHeight: "1.5" }} 
-              placeholder="Escribe la interpretación general de la lectura..."
-            />
-          </div>
-        )}
-        
+            </>
+          )}
+        </div>
+
+        {/* Advice block */}
+        <div className={styles.adviceBlock}>
+          <Sparkles size={16} className={styles.adviceIcon} />
+          <p className={styles.adviceText}>
+            Conecta las cartas entre sí y con la pregunta para ofrecer una interpretación coherente, profunda y significativa.
+          </p>
+        </div>
       </div>
 
       {/* Modal Selector */}
       {showSelector && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
-          <div style={{ background: "var(--background)", width: "100%", maxWidth: "800px", maxHeight: "80vh", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.1)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modalContent}>
             
-            <div style={{ padding: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ color: "var(--landing-gold-1)", fontSize: "1.2rem" }}>Añadir Carta</h3>
-              <button onClick={() => setShowSelector(false)} style={{ color: "white", background: "none", border: "none", cursor: "pointer", fontSize: "1.5rem" }}>✕</button>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Añadir Carta</h3>
+              <button onClick={() => setShowSelector(false)} className={styles.modalClose}>✕</button>
             </div>
             
-            <div style={{ padding: "1rem", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+            <div className={styles.modalSearch}>
               <input 
                 type="text" 
-                placeholder="Buscar carta..." 
+                placeholder="Buscar carta por nombre..." 
                 value={searchTerm} 
                 onChange={e => setSearchTerm(e.target.value)}
-                style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}
+                className={styles.searchInput}
               />
             </div>
             
-            <div style={{ padding: "1rem", overflowY: "auto", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "1rem" }}>
+            <div className={styles.modalGrid}>
               {filteredCards.map(ac => (
                 <div 
                   key={ac.id} 
                   onClick={() => handleAddCard(ac)}
-                  style={{ display: "flex", flexDirection: "column", gap: "0.5rem", cursor: "pointer", padding: "0.5rem", borderRadius: "8px", transition: "background 0.2s" }}
-                  onMouseOver={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
-                  onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                  className={styles.cardOption}
                 >
-                  <img src={ac.image} alt={ac.nameEs} style={{ width: "100%", aspectRatio: "1/1.7", objectFit: "cover", borderRadius: "4px" }} />
-                  <span style={{ fontSize: "0.75rem", color: "var(--muted)", textAlign: "center", lineHeight: "1.2" }}>{ac.nameEs}</span>
+                  <img src={ac.image} alt={ac.nameEs} />
+                  <span>{ac.nameEs}</span>
                 </div>
               ))}
             </div>

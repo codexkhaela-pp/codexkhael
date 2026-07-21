@@ -1,8 +1,11 @@
 import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth-server";
 import { ReadingEditor } from "./reading-editor";
 import { tarotCards } from "@/src/data/tarotCards";
+import { ArrowLeft } from "lucide-react";
+import styles from "./reading-editor.module.css";
 
 export default async function AdminLecturaDetail({
   params,
@@ -32,13 +35,36 @@ export default async function AdminLecturaDetail({
   }
 
   return (
-    <div className="panel-container" style={{ maxWidth: "100%", padding: "1rem" }}>
-      <header className="panel-header" style={{ marginBottom: "1rem" }}>
-        <h1 className="panel-title">{reading.title}</h1>
-        <p className="panel-subtitle">
-          Consultante: {reading.clientName} ({reading.client?.email}) &bull; {reading.spreadType}
-        </p>
-      </header>
+    <div className={styles.container}>
+      <div className={styles.hero}>
+        <div className={styles.heroLeft}>
+          <Link href="/admin/lecturas" className={styles.heroBackButton}>
+            <ArrowLeft size={14} /> Volver al Gestor
+          </Link>
+          <h1 className={styles.heroTitle}>
+            Lectura de
+            <span className={styles.heroTitleHighlight}>{reading.title}</span>
+          </h1>
+          <div className={styles.heroSubtitle}>
+            Consultante: <span>{reading.clientName}</span>
+            {reading.client?.email && (
+              <>
+                <span className={styles.dotSeparator}>&bull;</span>
+                <span>{reading.client.email}</span>
+              </>
+            )}
+            <span className={styles.dotSeparator}>&bull;</span>
+            <span>{reading.spreadType}</span>
+          </div>
+        </div>
+        <div className={styles.heroRight}>
+          <img 
+            src="/assets/landing/imagen_principal.png" 
+            alt="Estudio de Tarot" 
+            className={styles.heroImage} 
+          />
+        </div>
+      </div>
       
       <ReadingEditor reading={reading} availableCards={tarotCards} />
     </div>

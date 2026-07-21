@@ -16,6 +16,7 @@ export default async function RootLayout({
 }>) {
   const user = await getCurrentUser();
   const isStudent = user?.roles.includes("STUDENT") ?? false;
+  const isAdmin = user?.roles.includes("ADMIN") || user?.roles.includes("TAROTIST");
   const isOnlyClient = user?.roles.length === 1 && user?.roles[0] === "CLIENT";
 
   // Aquí no podemos usar redirect() si estamos dentro del body, pero sí antes.
@@ -29,7 +30,7 @@ export default async function RootLayout({
         <meta charSet="UTF-8" />
       </head>
       <body suppressHydrationWarning>
-        <PanelShellGate isStudent={isStudent}>{children}</PanelShellGate>
+        <PanelShellGate isStudent={isStudent} isAdmin={isAdmin ?? false} isOnlyClient={isOnlyClient}>{children}</PanelShellGate>
       </body>
     </html>
   );

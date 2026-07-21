@@ -33,7 +33,7 @@ export async function addCardToReading(readingId: string, cardData: any) {
   }
 }
 
-export async function updateCardLayout(cardId: string, layout: { x: number, y: number, rotation: number, zIndex: number }) {
+export async function updateCardLayout(cardId: string, layout: { x: number, y: number, rotation: number, zIndex: number, relativeScale?: number }) {
   try {
     await prisma.clientReadingCard.update({
       where: { id: cardId },
@@ -78,5 +78,19 @@ export async function updateCardInterpretation(cardId: string, text: string, rea
     return { success: true };
   } catch (err) {
     return { success: false, error: "Failed to update interpretation" };
+  }
+}
+
+export async function updateReadingStatus(readingId: string, status: string) {
+  try {
+    await prisma.clientReading.update({
+      where: { id: readingId },
+      data: { status }
+    });
+    revalidatePath(`/admin/lecturas/${readingId}`);
+    revalidatePath(`/mis-lecturas`);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: "Failed to update status" };
   }
 }

@@ -493,6 +493,12 @@ async function resolvePreviewUser() {
     redirect("/login?next=/dashboard-preview");
   }
 
+  // Si es un consultante puro (solo tiene rol CLIENT), no puede entrar al Codex
+  const isOnlyClient = currentUser.roles.length === 1 && currentUser.roles[0] === "CLIENT";
+  if (isOnlyClient) {
+    redirect("/mis-lecturas");
+  }
+
   const [profile, userRow] = await Promise.all([
     prisma.userProfile.findUnique({
       where: { userId: currentUser.id },

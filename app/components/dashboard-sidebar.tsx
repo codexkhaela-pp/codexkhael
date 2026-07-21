@@ -24,6 +24,7 @@ type DashboardSidebarProps = {
   footerMessage?: string;
   collapsed?: boolean;
   mobileOpen?: boolean;
+  isAdmin?: boolean;
 };
 
 export function DashboardSidebar({
@@ -32,6 +33,7 @@ export function DashboardSidebar({
   footerMessage,
   collapsed = false,
   mobileOpen = false,
+  isAdmin = false,
 }: DashboardSidebarProps) {
   const sidebarWidth = collapsed ? 86 : 260;
 
@@ -65,6 +67,20 @@ export function DashboardSidebar({
               </Link>
             </li>
           ))}
+          {isAdmin && (
+            <li className={activeKey === "consultantes" ? styles.active : undefined}>
+              <Link
+                href="/admin/lecturas"
+                className={styles.navLink}
+                data-label="Consultantes"
+                aria-label="Consultantes"
+                title={collapsed ? "Consultantes" : undefined}
+              >
+                <span className={styles.navIcon} aria-hidden="true">👥</span>
+                <span className={styles.navLabel}>Consultantes</span>
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
 

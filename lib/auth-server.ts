@@ -4,6 +4,7 @@ import { findActiveAuthSession } from "@/lib/auth-session-store";
 
 export type AuthenticatedUser = {
   id: string;
+  name: string | null;
   email: string;
   roles: string[];
 };
@@ -60,6 +61,7 @@ export async function getCurrentUser(): Promise<AuthenticatedUser | null> {
 
   return {
     id: authSession.user.id,
+    name: authSession.user.name,
     email: authSession.user.email,
     roles: authSession.user.roles.map((r) => r.role.name),
   };

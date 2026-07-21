@@ -1,13 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { DashboardShell } from "@/app/components/dashboard-shell";
 import { StudentMaintenanceModal } from "@/app/components/student-maintenance-modal";
 
 type PanelShellGateProps = {
   children: ReactNode;
   isStudent?: boolean;
+  isAdmin?: boolean;
+  isOnlyClient?: boolean;
 };
 
 function isPanelRoute(pathname: string): boolean {
@@ -25,16 +28,27 @@ function isPanelRoute(pathname: string): boolean {
   );
 }
 
-export function PanelShellGate({ children, isStudent }: PanelShellGateProps) {
+export function PanelShellGate({ children, isStudent, isAdmin, isOnlyClient }: PanelShellGateProps) {
   const pathname = usePathname() ?? "/";
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isPanelRoute(pathname) && isOnlyClient) {
+      router.replace("/mis-lecturas");
+    }
+  }, [pathname, isOnlyClient, router]);
 
   if (!isPanelRoute(pathname)) {
     return <>{children}</>;
+  }
+
+  if (isOnlyClient) {
+    return null; // Evitar renderizar el layout mientras redirige
   }
 
   if (isStudent) {
     return <StudentMaintenanceModal />;
   }
 
-  return <DashboardShell>{children}</DashboardShell>;
+  return <DashboardShell isAdmin={isAdmin}>{children}</DashboardShell>;
 }

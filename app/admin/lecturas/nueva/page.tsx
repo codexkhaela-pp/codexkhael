@@ -2,29 +2,41 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Sparkles, BookOpen } from "lucide-react";
 import { createClientReading } from "../actions";
+import styles from "./nueva-lectura.module.css";
 
 export default function NuevaLecturaPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resultData, setResultData] = useState<{ isNewClient: boolean, generatedPassword?: string | null, clientEmail: string } | null>(null);
 
+  // Form State for Live Preview
+  const [formData, setFormData] = useState({
+    clientName: "",
+    clientEmail: "",
+    title: "",
+    mainQuestion: "",
+    category: "General",
+    spreadType: "Tres Cartas",
+    readingDate: new Date().toISOString().split("T")[0]
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      title: formData.get("title") as string,
-      clientEmail: formData.get("clientEmail") as string,
-      clientName: formData.get("clientName") as string,
-      mainQuestion: formData.get("mainQuestion") as string,
-      category: formData.get("category") as string,
-      spreadType: formData.get("spreadType") as string,
-      readingDate: new Date(formData.get("readingDate") as string),
-    };
-
     try {
+      const data = {
+        ...formData,
+        readingDate: new Date(formData.readingDate)
+      };
       const result = await createClientReading(data);
       if (result.success) {
         if (result.isNewClient) {
@@ -41,7 +53,7 @@ export default function NuevaLecturaPage() {
 
   if (resultData) {
     return (
-      <div className="panel-container">
+      <div className={styles.container}>
         <div style={{ maxWidth: "600px", margin: "4rem auto", padding: "2rem", background: "rgba(5,6,10,0.8)", border: "1px solid var(--landing-gold-2)", borderRadius: "12px", textAlign: "center" }}>
           <h2 style={{ color: "var(--landing-gold-1)", marginBottom: "1rem" }}>¡Cliente Registrado!</h2>
           <p style={{ marginBottom: "2rem" }}>Se ha creado la cuenta para el consultante con el correo <strong>{resultData.clientEmail}</strong>.</p>
@@ -58,7 +70,7 @@ export default function NuevaLecturaPage() {
             El cliente podrá ingresar a <strong>/mis-lecturas/login</strong> con estas credenciales.
           </p>
 
-          <button className="btn btn-primary" onClick={() => router.push("/admin/lecturas")}>
+          <button className={styles.btnPrimary} onClick={() => router.push("/admin/lecturas")}>
             Continuar al gestor
           </button>
         </div>
@@ -67,76 +79,224 @@ export default function NuevaLecturaPage() {
   }
 
   return (
-    <div className="panel-container">
-      <header className="panel-header" style={{ marginBottom: "2rem" }}>
-        <h1 className="panel-title">Nueva Lectura</h1>
-        <p className="panel-subtitle">Registra una nueva consulta para un cliente</p>
+    <div className={styles.container}>
+      
+      {/* HEADER INTEGRATED */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <Link href="/admin/lecturas" className={styles.backLink}>
+            &larr; Volver al Gestor
+          </Link>
+          <h1 className={styles.headerTitle}>
+            Nueva <br/><span className={styles.headerTitleHighlight}>Lectura</span>
+          </h1>
+          <p className={styles.headerSubtitle}>
+            Registra una nueva consulta y prepara el espacio de lectura para tu consultante.
+          </p>
+        </div>
+        <div className={styles.headerRight}>
+          <img src="/assets/landing/imagen_principal.png" alt="Preparación de lectura" className={styles.headerImage} />
+        </div>
       </header>
 
-      <section className="panel-section" style={{ maxWidth: "800px" }}>
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      {/* MAIN GRID LAYOUT */}
+      <main className={styles.mainLayout}>
+        
+        {/* LEFT COLUMN: FORM */}
+        <div className={styles.formCard}>
+          <form onSubmit={handleSubmit} id="readingForm">
+            
+            <div className={styles.formSection}>
+              <h2 className={styles.sectionTitle}>Datos del consultante</h2>
+              <div className={styles.grid2Cols}>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Nombre del consultante</span>
+                  <input 
+                    type="text" 
+                    name="clientName" 
+                    required 
+                    placeholder="Ej: María Pérez" 
+                    className={styles.input}
+                    value={formData.clientName}
+                    onChange={handleChange}
+                  />
+                </label>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Correo electrónico <span className={styles.labelOptional}>(OPCIONAL)</span></span>
+                  <input 
+                    type="email" 
+                    name="clientEmail" 
+                    placeholder="correo@cliente.com" 
+                    className={styles.input}
+                    value={formData.clientEmail}
+                    onChange={handleChange}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className={styles.formSection}>
+              <h2 className={styles.sectionTitle}>Información de la consulta</h2>
+              <div className={styles.fieldGroup} style={{ marginBottom: "20px" }}>
+                <span className={styles.label}>Título de la lectura</span>
+                <input 
+                  type="text" 
+                  name="title" 
+                  required 
+                  placeholder="Lectura General Anual" 
+                  className={styles.input}
+                  value={formData.title}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className={styles.fieldGroup}>
+                <span className={styles.label}>Pregunta principal</span>
+                <textarea 
+                  name="mainQuestion" 
+                  required 
+                  placeholder="¿Qué energías me acompañan este año?" 
+                  className={styles.textarea}
+                  value={formData.mainQuestion}
+                  onChange={handleChange}
+                  maxLength={500}
+                ></textarea>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <p className={styles.hintText}>Formula una pregunta concreta para obtener una lectura más clara y útil.</p>
+                  <span className={styles.charCount}>{formData.mainQuestion.length}/500</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.formSection}>
+              <h2 className={styles.sectionTitle}>Configuración de la tirada</h2>
+              <div className={styles.grid3Cols}>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Categoría</span>
+                  <select 
+                    name="category" 
+                    required 
+                    className={styles.select}
+                    value={formData.category}
+                    onChange={handleChange}
+                  >
+                    <option value="General">General</option>
+                    <option value="Amor">Amor</option>
+                    <option value="Trabajo">Trabajo</option>
+                    <option value="Dinero">Dinero</option>
+                    <option value="Familia">Familia</option>
+                    <option value="Decisiones">Decisiones</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </label>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Tipo de Tirada</span>
+                  <select 
+                    name="spreadType" 
+                    required 
+                    className={styles.select}
+                    value={formData.spreadType}
+                    onChange={handleChange}
+                  >
+                    <option value="Tres Cartas">Tres Cartas</option>
+                    <option value="Cinco Cartas">Cinco Cartas</option>
+                    <option value="Cruz Celta">Cruz Celta</option>
+                    <option value="Herradura">Herradura</option>
+                    <option value="Personalizada">Personalizada</option>
+                  </select>
+                </label>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Fecha de la lectura</span>
+                  <input 
+                    type="date" 
+                    name="readingDate" 
+                    required 
+                    className={styles.input}
+                    style={{ colorScheme: "dark" }}
+                    value={formData.readingDate}
+                    onChange={handleChange}
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className={styles.actions}>
+              <button 
+                type="button" 
+                onClick={() => router.push("/admin/lecturas")} 
+                className={styles.btnSecondary}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className={styles.btnPrimary}
+              >
+                {isSubmitting ? "Guardando..." : "Crear Borrador de Lectura"}
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        {/* RIGHT COLUMN: SUMMARY & CONTEXT */}
+        <aside className={styles.stickySidebar}>
           
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-            <label className="login-form__field">
-              <span>Nombre del Consultante</span>
-              <input type="text" name="clientName" required placeholder="Ej: María Pérez" style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }} />
-            </label>
-            <label className="login-form__field">
-              <span>Correo Electrónico</span>
-              <input type="email" name="clientEmail" required placeholder="correo@cliente.com" style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }} />
-            </label>
+          <div className={styles.summaryCard}>
+            <h3 className={styles.summaryTitle}>Resumen de la lectura</h3>
+            
+            <div className={styles.summaryList}>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Consultante</span>
+                <span className={formData.clientName ? styles.summaryValue : `${styles.summaryValue} ${styles.summaryValueEmpty}`}>
+                  {formData.clientName || "Sin definir"}
+                </span>
+              </div>
+              
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Título</span>
+                <span className={formData.title ? styles.summaryValue : `${styles.summaryValue} ${styles.summaryValueEmpty}`}>
+                  {formData.title || "Sin definir"}
+                </span>
+              </div>
+
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Categoría</span>
+                <span className={styles.summaryValue}>{formData.category}</span>
+              </div>
+
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Tirada</span>
+                <span className={styles.summaryValue}>{formData.spreadType}</span>
+                <div className={styles.spreadIndicator}>
+                  <BookOpen className={styles.spreadIcon} />
+                  {formData.spreadType}
+                </div>
+              </div>
+
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Fecha</span>
+                <span className={styles.summaryValue}>
+                  {formData.readingDate ? new Date(formData.readingDate + "T12:00:00").toLocaleDateString('es-ES') : "Sin definir"}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <label className="login-form__field">
-            <span>Título de la Lectura</span>
-            <input type="text" name="title" required placeholder="Lectura General Anual" style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }} />
-          </label>
-
-          <label className="login-form__field">
-            <span>Pregunta Principal</span>
-            <textarea name="mainQuestion" rows={3} required placeholder="¿Qué energías me acompañan este año?" style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}></textarea>
-          </label>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1.5rem" }}>
-            <label className="login-form__field">
-              <span>Categoría</span>
-              <select name="category" required style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}>
-                <option value="General">General</option>
-                <option value="Amor">Amor</option>
-                <option value="Trabajo">Trabajo</option>
-                <option value="Dinero">Dinero</option>
-                <option value="Familia">Familia</option>
-                <option value="Decisiones">Decisiones</option>
-                <option value="Otro">Otro</option>
-              </select>
-            </label>
-            <label className="login-form__field">
-              <span>Tipo de Tirada</span>
-              <select name="spreadType" required style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}>
-                <option value="Tres Cartas">Tres Cartas</option>
-                <option value="Cinco Cartas">Cinco Cartas</option>
-                <option value="Cruz Celta">Cruz Celta</option>
-                <option value="Herradura">Herradura</option>
-                <option value="Personalizada">Personalizada</option>
-              </select>
-            </label>
-            <label className="login-form__field">
-              <span>Fecha de la Lectura</span>
-              <input type="date" name="readingDate" defaultValue={new Date().toISOString().split("T")[0]} required style={{ width: "100%", padding: "12px", borderRadius: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "white", colorScheme: "dark" }} />
-            </label>
+          <div className={styles.consejoCard}>
+            <Sparkles size={18} className={styles.consejoIcon} />
+            <div>
+              <span className={styles.consejoTitle}>Consejo</span>
+              <p className={styles.consejoText}>
+                Sé claro y específico. Una pregunta bien formulada ayuda a obtener una lectura más precisa y significativa.
+              </p>
+            </div>
           </div>
 
-          <div style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}>
-            <button type="submit" disabled={isSubmitting} className="btn btn-primary">
-              {isSubmitting ? "Guardando..." : "Crear Borrador de Lectura"}
-            </button>
-            <button type="button" onClick={() => router.back()} className="btn" style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.2)" }}>
-              Cancelar
-            </button>
-          </div>
+        </aside>
 
-        </form>
-      </section>
+      </main>
+
     </div>
   );
 }

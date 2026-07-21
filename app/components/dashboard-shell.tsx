@@ -8,6 +8,7 @@ import styles from "./dashboard-shell.module.css";
 
 type DashboardShellProps = {
   children: ReactNode;
+  isAdmin?: boolean;
 };
 
 function resolveActiveKey(pathname: string): string {
@@ -18,10 +19,11 @@ function resolveActiveKey(pathname: string): string {
   if (pathname.startsWith("/aprendizaje")) return "repaso";
   if (pathname.startsWith("/desafios")) return "desafios";
   if (pathname.startsWith("/ajustes")) return "ajustes";
+  if (pathname.startsWith("/admin/lecturas")) return "consultantes";
   return "inicio";
 }
 
-export function DashboardShell({ children }: DashboardShellProps) {
+export function DashboardShell({ children, isAdmin }: DashboardShellProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -66,6 +68,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
         activeKey={activeKey}
         collapsed={sidebarCollapsed}
         mobileOpen={mobileSidebarOpen}
+        isAdmin={isAdmin}
       />
       {mobileSidebarOpen ? (
         <button
