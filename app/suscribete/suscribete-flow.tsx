@@ -204,13 +204,15 @@ export function SuscribeteFlow() {
       <div className="subscribe-shell">
         <header className="landing-header subscribe-topbar">
           <Link className="landing-brand" href="/" aria-label="Khael Tarotista">
-            <span className="landing-brand__seal" aria-hidden="true">
-              ✦
-            </span>
-            <span className="landing-brand__text">
-              <strong>Khael</strong>
-              <span>Tarotista</span>
-            </span>
+            <Image 
+              src="/assets/brand/final-01.png" 
+              alt="Khael Tarotista Logo" 
+              width={65} 
+              height={65}
+              priority
+              className="landing-brand-logo-img"
+              style={{ objectFit: "contain" }}
+            />
           </Link>
 
           <nav className="landing-nav" aria-label="Navegación principal">

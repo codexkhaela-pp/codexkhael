@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import { Search, BookOpen, Clock, Calendar, Bookmark, Eye, Download, Share2, Library, Sparkles } from "lucide-react";
+import { Search, BookOpen, Clock, Calendar, Bookmark, Eye, Download, Share2, Library, Sparkles, LayoutGrid, Filter, Star, ChevronRight, List } from "lucide-react";
+import estrellasBg from "@/src/image/estrellas.png";
 import styles from "./mis-lecturas.module.css";
 
 // Props from Server Component
@@ -109,9 +110,6 @@ export default function MisLecturasClient({ readings, availableCards }: MisLectu
             >
               Solicitar Nueva Lectura <span>→</span>
             </a>
-            <Link className="landing-btn landing-btn--ghost" href="/">
-              Conocer el proceso <span>→</span>
-            </Link>
           </div>
         </div>
 
@@ -235,9 +233,9 @@ export default function MisLecturasClient({ readings, availableCards }: MisLectu
         ) : (
           <div className={styles.libraryGrid}>
             {filteredReadings.map((reading, index) => {
-              // Create slight variations based on index to feel like a collection
-              const rotation = index % 2 === 0 ? 9 : 11;
-              const translateY = index % 3 === 0 ? 4 : (index % 3 === 1 ? -2 : 0);
+              // Deterministic rotation based on index
+              const rotations = [5, 7, -5];
+              const rotation = rotations[index % 3];
               
               let imageSrc = `/assets/carta_dia/carta${(index % 7) + 1}.png`; // fallback
               if (reading.cards && reading.cards.length > 0 && reading.cards[0].visualCardId) {
@@ -247,62 +245,75 @@ export default function MisLecturasClient({ readings, availableCards }: MisLectu
                  }
               }
 
-              return (
-                <Link key={reading.id} href={`/mis-lecturas/${reading.id}`} className={styles.readingCard}>
-                  
-                  {/* Decorative Background */}
-                  <div className={styles.cardDeco}></div>
-                  
-                  {/* Subtle Watermark Symbol */}
-                  <Sparkles size={160} className={styles.cardWatermark} strokeWidth={0.3} />
+              // Build metadata array
+              const metadata = [
+                format(new Date(reading.readingDate), "dd 'de' MMMM 'de' yyyy", { locale: es }),
+                reading.category,
+                reading.realDeckName
+              ].filter(Boolean); // removes null/undefined
 
-                  {/* Tarot Card Image */}
-                  <div className={styles.cardImageWrapper} style={{ transform: `rotate(${rotation}deg) translateY(${translateY}px)` }}>
-                    <Image 
+              return (
+                <article 
+                  key={reading.id} 
+                  className={styles.readingCard}
+                >
+                  <div className={styles.readingContent}>
+                    <header className={styles.readingHeader}>
+                      <h3 className={styles.readingTitle}>
+                        {reading.title}
+                      </h3>
+                      <div className={styles.readingMetadata}>
+                        {metadata.map((item, index) => (
+                          <Fragment key={`${item}-${index}`}>
+                            {index > 0 && (
+                              <span
+                                className={styles.metadataDot}
+                                aria-hidden="true"
+                              />
+                            )}
+                            <span>{item}</span>
+                          </Fragment>
+                        ))}
+                      </div>
+                    </header>
+
+                    <div className={styles.readingExcerptWrapper}>
+                      <p className={styles.readingExcerpt}>
+                        {reading.spreadDescription || reading.readingSummary || reading.position1Interpretation || reading.mainQuestion || "Sin interpretación disponible."}
+                      </p>
+                    </div>
+
+                    <footer className={styles.readingActions}>
+                      <Link 
+                        href={`/mis-lecturas/${reading.id}`} 
+                        className={styles.readingAction}
+                        aria-label={`Ver lectura ${reading.title}`}
+                      >
+                        <Eye className={styles.readingActionIcon} />
+                        <span>Ver lectura</span>
+                      </Link>
+                      
+                      <a 
+                        href={`/api/mis-lecturas/${reading.id}/export`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.readingAction} 
+                        aria-label={`Descargar ${reading.title} en PDF`}
+                      >
+                        <Download className={styles.readingActionIcon} />
+                        <span>PDF</span>
+                      </a>
+                    </footer>
+                  </div>
+
+                  <div className={styles.readingVisual}>
+                    <img 
+                      className={styles.readingCardImage}
                       src={imageSrc}
                       alt="Carta del Tarot"
-                      fill
                     />
                   </div>
-
-                  <div className={styles.cardHeader}>
-                    <h3 className={styles.cardTitle}>{reading.title}</h3>
-                    <div className={styles.cardMeta}>
-                      <span>{format(new Date(reading.readingDate), "dd 'de' MMMM 'de' yyyy", { locale: es })}</span>
-                      {reading.category && (
-                        <>
-                          <span className={styles.metaDot}>•</span>
-                          <span>{reading.category}</span>
-                        </>
-                      )}
-                      {reading.realDeckName && (
-                        <>
-                          <span className={styles.metaDot}>•</span>
-                          <span>{reading.realDeckName}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className={styles.cardBody}>
-                    <p className={styles.cardExcerpt}>
-                      {reading.spreadDescription || reading.mainQuestion || "Sin interpretación disponible."}
-                    </p>
-                  </div>
-
-                  <div className={styles.cardSeparator}></div>
-
-                  <div className={styles.cardFooter}>
-                    <div className={styles.cardAction}>
-                      <Eye className={styles.cardActionIcon} strokeWidth={1.5} />
-                      Ver lectura
-                    </div>
-                    <div className={styles.cardAction}>
-                      <Download className={styles.cardActionIcon} strokeWidth={1.5} />
-                      PDF
-                    </div>
-                  </div>
-                </Link>
+                </article>
               );
             })}
           </div>

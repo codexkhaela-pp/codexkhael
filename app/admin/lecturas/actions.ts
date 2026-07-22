@@ -12,13 +12,22 @@ export async function createClientReading(data: {
   category: string;
   spreadType: string;
   readingDate: Date;
+  realDeckName?: string;
+  realDeckPublisher?: string;
+  realDeckAuthor?: string;
+  realDeckIllustrator?: string;
+  realDeckYear?: string;
 }) {
   const user = await getCurrentUser();
   if (!user || (!user.roles.includes("ADMIN") && !user.roles.includes("TAROTIST"))) {
     throw new Error("No autorizado");
   }
 
-  const { title, clientEmail, clientName, mainQuestion, category, spreadType, readingDate } = data;
+  const { 
+    title, clientEmail, clientName, mainQuestion, 
+    category, spreadType, readingDate,
+    realDeckName, realDeckPublisher, realDeckAuthor, realDeckIllustrator, realDeckYear
+  } = data;
   const email = clientEmail.toLowerCase().trim();
 
   // Buscar si el cliente ya existe
@@ -94,6 +103,11 @@ export async function createClientReading(data: {
       category,
       spreadType,
       readingDate: new Date(readingDate),
+      realDeckName,
+      realDeckPublisher,
+      realDeckAuthor,
+      realDeckIllustrator,
+      realDeckYear,
       status: "DRAFT",
     }
   });

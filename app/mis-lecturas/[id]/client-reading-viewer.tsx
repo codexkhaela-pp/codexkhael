@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Compass, Download, Share2, ArrowRight, Sun } from "lucide-react";
 import styles from "./viewer.module.css";
 
@@ -74,11 +75,14 @@ export function ClientReadingViewer({
       {/* HEADER */}
       <header className={styles.header}>
         <Link href="/" className={styles.brand}>
-          <Compass size={32} className={styles.brandLogo} strokeWidth={1} />
-          <div className={styles.brandText}>
-            <span className={styles.brandName}>KHAEL</span>
-            <span className={styles.brandSubtitle}>TAROTISTA</span>
-          </div>
+          <Image 
+            src="/assets/brand/final-01.png" 
+            alt="Khael Tarotista Logo" 
+            width={65} 
+            height={65}
+            priority
+            style={{ objectFit: "contain" }}
+          />
         </Link>
 
         <div className={styles.userNav}>

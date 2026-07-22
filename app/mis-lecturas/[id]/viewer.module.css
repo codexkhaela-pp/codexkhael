@@ -317,14 +317,18 @@
   border-radius: 12px;
   padding: 40px; /* Provides breathing room so cards never touch the border */
   position: relative;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .canvasContainer {
   width: 100%;
+  min-width: 600px; /* Ensure cards don't become too microscopic on phones */
   aspect-ratio: 1.5; /* Force proportion so cards don't stretch */
   max-height: 800px;
   position: relative;
+  margin: 0 auto;
 }
 
 .canvasTexture {
@@ -342,7 +346,8 @@
 .cardSlot {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 115px;
+  width: 11.5%; /* Scales proportionally with the container */
+  max-width: 115px; /* Cap at original size */
   aspect-ratio: 1 / 1.7;
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
@@ -564,13 +569,36 @@
   }
   .positionBlock {
     flex-direction: column;
-    padding: 2rem;
+    padding: 1.5rem;
     gap: 1.5rem;
   }
   .positionCardImage {
     width: 100px;
   }
+  .conclusionBlock {
+    flex-direction: column;
+    padding: 2rem;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  .conclusionQuote {
+    align-self: center;
+  }
   .actionsBar {
     flex-direction: column;
+  }
+  .canvasWrapper {
+    padding: 20px; /* Reduce padding on mobile */
+  }
+  .header {
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .userInfo {
+    display: none;
+  }
+  .userNav {
+    gap: 1rem;
   }
 }

@@ -287,7 +287,7 @@ footer {
 }
 
 .dashboard-preview-bg {
-  background-color: #06050b;
+  background-color: #030509;
   background-image:
     radial-gradient(circle at 20% 30%, rgba(46, 36, 84, 0.25) 0%, transparent 40%),
     radial-gradient(circle at 75% 70%, rgba(21, 18, 38, 0.4) 0%, transparent 45%),
@@ -1754,7 +1754,7 @@ footer {
   width: 27px;
   height: 27px;
   border-radius: 50%;
-  background: #0e0f22;
+  background: #030509;
   border: 1.5px solid rgba(201, 166, 107, 0.7);
   box-shadow: 0 0 10px rgba(201, 166, 107, 0.3);
   display: flex;
@@ -4778,7 +4778,7 @@ footer {
   left: 16px;
   bottom: 18px;
   width: 258px;
-  background: #070a1b;
+  background: #030509;
   border: 1px solid rgba(201, 166, 107, 0.2);
   border-radius: 22px;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -5209,7 +5209,7 @@ footer {
   bottom: 10px;
   border-radius: 18px;
   padding: 18px 12px;
-  background: linear-gradient(180deg, #070b20 0%, #06081a 100%);
+  background: linear-gradient(180deg, #030509 0%, #030509 100%);
 }
 
 .db-sidebar-brand {
@@ -5352,7 +5352,7 @@ footer {
   border-radius: 70px 0 0 70px;
   border: 3px solid rgba(228, 198, 131, 0.88);
   border-right: none;
-  box-shadow: -8px 0 0 0 #070b20;
+  box-shadow: -8px 0 0 0 #030509;
 }
 
 .db-streak-card {
@@ -5664,7 +5664,7 @@ footer {
   padding: 12px 16px 10px !important;
   border-radius: 16px !important;
   border: 1px solid rgba(201, 156, 84, 0.7);
-  background: linear-gradient(135deg, #0b1030 0%, #090d27 62%, #0a1437 100%);
+  background: linear-gradient(135deg, #030509 0%, #030509 62%, #030509 100%);
   box-shadow:
     inset 0 0 0 1px rgba(232, 196, 125, 0.08),
     0 0 22px rgba(201, 166, 107, 0.16);
@@ -6538,7 +6538,7 @@ textarea {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .landing-page {
-  --landing-bg: #06070b;
+  --landing-bg: #030509;
   --landing-ink: #f7efe2;
   --landing-muted: rgba(247, 239, 226, 0.72);
   --landing-gold: #d7ad69;
@@ -6548,7 +6548,7 @@ textarea {
   max-width: 100%;
   min-height: 100dvh;
   color: var(--landing-ink);
-  background-color: #070708;
+  background-color: #030509;
   font-family: Georgia, "Times New Roman", serif;
 }
 
@@ -6698,7 +6698,7 @@ textarea {
   align-items: center;
   gap: clamp(14px, 2vw, 34px);
   padding: clamp(14px, 2vw, 30px) 0 clamp(30px, 3.8vw, 54px);
-  background: #070708;
+  background: #030509;
 }
 
 .landing-hero__copy {
@@ -6799,7 +6799,7 @@ textarea {
   border-radius: 0;
   overflow: hidden;
   isolation: isolate;
-  background: #070708;
+  background: #030509;
 }
 
 .landing-hero__visual::before {
@@ -7224,7 +7224,7 @@ textarea {
   margin-bottom: 34px;
   padding: clamp(24px, 3vw, 40px);
   border-radius: 20px;
-  background: #060810;
+  background: #030509;
   overflow: hidden;
 }
 
@@ -7437,7 +7437,7 @@ textarea {
 
 @media (max-width: 768px) {
   .landing-page {
-    background-color: #070708;
+    background-color: #030509;
   }
 
   .landing-header,
@@ -7702,8 +7702,8 @@ textarea {
 /* Public about page */
 
 .about-me-page {
-  background-color: #070708;
-  background: #070708;
+  background-color: #030509;
+  background: #030509;
 }
 
 .about-me-page .landing-nav a:first-child::after {
@@ -7729,7 +7729,6 @@ textarea {
   align-items: stretch;
   padding: 0 0 clamp(26px, 3vw, 38px);
   min-height: clamp(470px, 36vw, 590px);
-  border-top: 1px solid rgba(215, 173, 105, 0.18);
   overflow: hidden;
 }
 
@@ -7802,7 +7801,7 @@ textarea {
   overflow: hidden;
   background:
     radial-gradient(circle at 50% 40%, rgba(179, 128, 57, 0.11), transparent 46%),
-    #070708;
+    #030509;
 }
 
 .about-hero__visual::before {
@@ -7812,8 +7811,8 @@ textarea {
   z-index: 2;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(7, 7, 8, 0.92) 0%, rgba(7, 7, 8, 0.58) 10%, rgba(7, 7, 8, 0.16) 22%, transparent 34%),
-    linear-gradient(180deg, rgba(7, 7, 8, 0.08) 0%, transparent 18%, transparent 78%, rgba(7, 7, 8, 0.22) 100%);
+    linear-gradient(90deg, rgba(3, 5, 9, 0.92) 0%, rgba(3, 5, 9, 0.58) 10%, rgba(3, 5, 9, 0.16) 22%, transparent 34%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.08) 0%, transparent 18%, transparent 78%, rgba(3, 5, 9, 0.22) 100%);
 }
 
 .about-hero__visual::after {
@@ -7823,8 +7822,8 @@ textarea {
   z-index: 3;
   pointer-events: none;
   background:
-    radial-gradient(circle at 96% 52%, rgba(7, 7, 8, 0.18), transparent 18%),
-    radial-gradient(circle at 78% 92%, rgba(7, 7, 8, 0.28), transparent 20%);
+    radial-gradient(circle at 96% 52%, rgba(3, 5, 9, 0.18), transparent 18%),
+    radial-gradient(circle at 78% 92%, rgba(3, 5, 9, 0.28), transparent 20%);
 }
 
 .about-hero__visual img {
@@ -7965,7 +7964,7 @@ textarea {
   border-radius: 14px;
   background:
     radial-gradient(circle at 84% 48%, rgba(215, 173, 105, 0.1), transparent 28%),
-    linear-gradient(90deg, rgba(6, 9, 15, 0.96), #070708 58%, rgba(6, 8, 13, 0.98));
+    linear-gradient(90deg, rgba(3, 5, 9, 0.96), #030509 58%, rgba(3, 5, 9, 0.98));
   box-shadow: inset 0 0 0 1px rgba(215, 173, 105, 0.05);
   overflow: hidden;
 }
@@ -8002,7 +8001,7 @@ textarea {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(7, 7, 8, 0.05) 58%, #070708 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(3, 5, 9, 0.05) 58%, #030509 100%);
   pointer-events: none;
 }
 
@@ -8081,7 +8080,7 @@ textarea {
 .about-approach__visual {
   position: relative;
   min-height: 660px;
-  background: #070708;
+  background: #030509;
 }
 
 .about-approach__visual::after {
@@ -8091,8 +8090,8 @@ textarea {
   z-index: 2;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(7, 7, 8, 0.02) 0%, rgba(7, 7, 8, 0.03) 58%, rgba(7, 7, 8, 0.72) 82%, rgba(7, 7, 8, 0.95) 100%),
-    linear-gradient(180deg, rgba(7, 7, 8, 0.12) 0%, transparent 18%, transparent 84%, rgba(7, 7, 8, 0.26) 100%);
+    linear-gradient(90deg, rgba(3, 5, 9, 0.02) 0%, rgba(3, 5, 9, 0.03) 58%, rgba(3, 5, 9, 0.72) 82%, rgba(3, 5, 9, 0.95) 100%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.12) 0%, transparent 18%, transparent 84%, rgba(3, 5, 9, 0.26) 100%);
 }
 
 .about-approach__image {
@@ -8300,7 +8299,7 @@ textarea {
 
   .about-approach__visual::after {
     background:
-      linear-gradient(180deg, rgba(7, 7, 8, 0.04) 0%, rgba(7, 7, 8, 0.12) 70%, rgba(7, 7, 8, 0.88) 100%);
+      linear-gradient(180deg, rgba(3, 5, 9, 0.04) 0%, rgba(3, 5, 9, 0.12) 70%, rgba(3, 5, 9, 0.88) 100%);
   }
 
   .about-approach__content {
@@ -8427,8 +8426,8 @@ textarea {
 /* Public codex page */
 
 .codex-page {
-  background-color: #070708;
-  background: #070708;
+  background-color: #030509;
+  background: #030509;
 }
 
 .codex-page .landing-nav a:first-child::after {
@@ -8469,8 +8468,8 @@ textarea {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, #070708 0%, rgba(7, 7, 8, 0.98) 18%, rgba(7, 7, 8, 0.88) 34%, rgba(7, 7, 8, 0.22) 54%, rgba(7, 7, 8, 0.04) 76%),
-    linear-gradient(180deg, rgba(7, 7, 8, 0.14) 0%, transparent 16%, transparent 84%, rgba(7, 7, 8, 0.2) 100%);
+    linear-gradient(90deg, #030509 0%, rgba(3, 5, 9, 0.98) 18%, rgba(3, 5, 9, 0.88) 34%, rgba(3, 5, 9, 0.22) 54%, rgba(3, 5, 9, 0.04) 76%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.14) 0%, transparent 16%, transparent 84%, rgba(3, 5, 9, 0.2) 100%);
   pointer-events: none;
 }
 
@@ -8599,8 +8598,8 @@ textarea {
   border: 1px solid rgba(179, 112, 48, 0.56);
   border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(7, 7, 8, 0.98)),
-    #070708;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(3, 5, 9, 0.98)),
+    #030509;
   overflow: hidden;
 }
 
@@ -8727,8 +8726,8 @@ textarea {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, #070708 0%, rgba(7, 7, 8, 0.9) 12%, rgba(7, 7, 8, 0.18) 28%, transparent 42%),
-    linear-gradient(180deg, rgba(7, 7, 8, 0.1) 0%, transparent 18%, transparent 84%, rgba(7, 7, 8, 0.18) 100%);
+    linear-gradient(90deg, #030509 0%, rgba(3, 5, 9, 0.9) 12%, rgba(3, 5, 9, 0.18) 28%, transparent 42%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.1) 0%, transparent 18%, transparent 84%, rgba(3, 5, 9, 0.18) 100%);
   pointer-events: none;
 }
 
@@ -8747,8 +8746,8 @@ textarea {
   border-radius: 16px;
   padding: clamp(22px, 2vw, 30px) clamp(18px, 1.9vw, 26px);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(7, 7, 8, 0.98)),
-    #070708;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(3, 5, 9, 0.98)),
+    #030509;
 }
 
 .codex-journey__panel h2 {
@@ -8839,8 +8838,8 @@ textarea {
   border: 1px solid rgba(179, 112, 48, 0.38);
   border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(7, 7, 8, 0.98)),
-    #070708;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), rgba(3, 5, 9, 0.98)),
+    #030509;
   overflow: hidden;
 }
 
@@ -8896,8 +8895,8 @@ textarea {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(7, 7, 8, 0.6) 0%, rgba(7, 7, 8, 0.28) 24%, rgba(7, 7, 8, 0.62) 52%, rgba(7, 7, 8, 0.9) 100%),
-    linear-gradient(180deg, rgba(7, 7, 8, 0.18) 0%, rgba(7, 7, 8, 0.42) 100%);
+    linear-gradient(90deg, rgba(3, 5, 9, 0.6) 0%, rgba(3, 5, 9, 0.28) 24%, rgba(3, 5, 9, 0.62) 52%, rgba(3, 5, 9, 0.9) 100%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.18) 0%, rgba(3, 5, 9, 0.42) 100%);
 }
 
 .codex-final__visual img {
@@ -9024,7 +9023,7 @@ textarea {
 
   .codex-hero__visual::after {
     background:
-      linear-gradient(180deg, rgba(7, 7, 8, 0.76) 0%, rgba(7, 7, 8, 0.52) 34%, rgba(7, 7, 8, 0.86) 100%);
+      linear-gradient(180deg, rgba(3, 5, 9, 0.76) 0%, rgba(3, 5, 9, 0.52) 34%, rgba(3, 5, 9, 0.86) 100%);
   }
 
   .codex-hero__copy {
@@ -9060,7 +9059,7 @@ textarea {
 
   .codex-content__visual::after {
     background:
-      linear-gradient(180deg, rgba(7, 7, 8, 0.18) 0%, rgba(7, 7, 8, 0.02) 18%, rgba(7, 7, 8, 0.72) 100%);
+      linear-gradient(180deg, rgba(3, 5, 9, 0.18) 0%, rgba(3, 5, 9, 0.02) 18%, rgba(3, 5, 9, 0.72) 100%);
   }
 
   .codex-journey__grid {
@@ -9111,8 +9110,8 @@ textarea {
 }
 
 .readings-page {
-  background-color: #070708;
-  background: #070708;
+  background-color: #030509;
+  background: #030509;
 }
 
 .readings-page .landing-nav a:first-child::after {
@@ -9124,8 +9123,8 @@ textarea {
 }
 
 .readings-page {
-  background-color: #070708;
-  background: #070708;
+  background-color: #030509;
+  background: #030509;
 }
 
 .readings-hero,
@@ -9226,7 +9225,7 @@ textarea {
   min-height: clamp(380px, 38vw, 560px);
   border-radius: 24px;
   overflow: hidden;
-  background: #050506;
+  background: #030509;
 }
 
 .readings-hero__image img {
@@ -9478,7 +9477,7 @@ textarea {
   height: 78px;
   border: 1px solid rgba(215, 173, 105, 0.28);
   border-radius: 999px;
-  background: #070708;
+  background: #030509;
   color: var(--landing-gold-2);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 22px;
@@ -9563,7 +9562,7 @@ textarea {
   margin-bottom: 34px;
   padding: clamp(24px, 3vw, 42px);
   border-radius: 24px;
-  background: #060810;
+  background: #030509;
   overflow: hidden;
 }
 
@@ -9756,7 +9755,7 @@ textarea {
 
 .readings-page {
   background:
-    linear-gradient(180deg, #070708 0%, #070708 72%, #ebdfd2 72%, #ebdfd2 100%);
+    linear-gradient(180deg, #030509 0%, #030509 72%, #ebdfd2 72%, #ebdfd2 100%);
 }
 
 .readings-page .landing-nav a:first-child::after {
@@ -10087,7 +10086,7 @@ textarea {
   margin-bottom: 34px;
   padding: clamp(24px, 3vw, 40px);
   border-radius: 20px;
-  background: #060810;
+  background: #030509;
   overflow: hidden;
 }
 
@@ -10240,13 +10239,15 @@ textarea {
 .readings-page .readings-hero {
   position: relative;
   display: block;
+  width: min(1480px, calc(100% - clamp(28px, 5vw, 72px)));
+  margin-inline: auto;
   min-height: clamp(440px, 34vw, 540px);
   padding: 0;
   margin-top: clamp(18px, 2vw, 30px);
  /*margin-bottom: clamp(48px, 6vw, 86px);*/
   overflow: hidden;
   border-radius: 0;
-  background: #050506;
+  background: #030509;
   isolation: isolate;
 }
 
@@ -10265,9 +10266,9 @@ textarea {
   position: absolute;
   inset: 0;
   min-height: 100%;
-  overflow: hidden;
+  overflow: visible;
   isolation: auto;
-  background: #050506;
+  background: transparent;
   margin-left: 500px;
 }
 
@@ -10280,7 +10281,8 @@ textarea {
   object-fit: cover;
   object-position: center right;
   filter: brightness(0.86) contrast(1.03) saturate(0.96);
-  mask-image: none;
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 40%, transparent 100%);
 }
 
 .readings-page .readings-hero__copy {
@@ -10408,32 +10410,30 @@ textarea {
 
 @media (max-width: 768px) {
   .readings-page .readings-hero {
-    width: 100%;
+    width: min(1480px, calc(100% - 46px));
+    margin-inline: auto;
     min-height: auto;
-    margin-top: 8px;
-    margin-bottom: 40px;
+    margin-top: 10px;
+    margin-bottom: 20px;
     padding: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .readings-page .readings-hero::before {
-    background:
-      linear-gradient(180deg, rgba(3, 5, 9, 0.76) 0%, rgba(3, 5, 9, 0.9) 54%, rgba(3, 5, 9, 0.98) 100%),
-      linear-gradient(90deg, rgba(3, 5, 9, 0.18), rgba(3, 5, 9, 0.24));
+    display: none;
   }
 
   .readings-page .readings-hero__image {
-    position: relative;
-    min-height: clamp(310px, 78vw, 520px);
-  }
-
-  .readings-page .readings-hero__image img {
-    object-position: center;
+    display: none;
   }
 
   .readings-page .readings-hero__copy {
-    padding: 26px 18px 38px;
+    padding: 10px 0px 20px;
     max-width: none;
-    margin-top: calc(clamp(310px, 78vw, 520px) * -0.45);
+    margin-top: 0;
+    z-index: 3;
+    position: relative;
   }
 
   .readings-page .readings-hero h1 {
@@ -10460,7 +10460,7 @@ textarea {
 
 @media (max-width: 390px) {
   .readings-page .readings-hero__copy {
-    padding-inline: 14px;
+    padding-inline: 0px;
   }
 
   .readings-page .readings-hero h1 {
@@ -10475,7 +10475,7 @@ textarea {
   padding: clamp(34px, 4.2vw, 58px) 0 clamp(48px, 5vw, 74px);
   border: 0;
   border-radius: 0;
-  background:#070708;
+  background:#030509;
   box-shadow: none;
   overflow: visible;
   padding-top: 20px;
@@ -10542,7 +10542,7 @@ textarea {
   border-radius: 20px;
   background:
     radial-gradient(circle at 80% 12%, rgba(213, 162, 87, 0.045), transparent 24%),
-    linear-gradient(145deg, #070708, #050506);
+    linear-gradient(145deg, #030509, #030509);
   box-shadow:
     inset 0 0 44px rgba(0, 0, 0, 0.38),
     0 20px 44px rgba(0, 0, 0, 0.2);
@@ -10577,7 +10577,7 @@ textarea {
   margin: 0 auto clamp(18px, 1.8vw, 24px);
   border-radius: 999px;
   overflow: visible;
-  background: #070708;
+  background: #030509;
 }
 
 .readings-page .readings-type-card__image img {
@@ -10678,7 +10678,7 @@ textarea {
   padding: 0;
   border: 1px solid rgba(173, 112, 42, 0.72);
   border-radius: 22px;
-  background: #070708;
+  background: #030509;
   box-shadow:
     inset 0 0 70px rgba(0, 0, 0, 0.4),
     0 18px 46px rgba(0, 0, 0, 0.28);
@@ -10691,8 +10691,8 @@ textarea {
   inset: 0;
   z-index: 2;
   background:
-    linear-gradient(90deg, rgba(7, 7, 8, 0.04) 0%, rgba(7, 7, 8, 0.16) 38%, rgba(7, 7, 8, 0.72) 52%, rgba(7, 7, 8, 0.9) 100%),
-    linear-gradient(180deg, rgba(7, 7, 8, 0.08), rgba(7, 7, 8, 0.16));
+    linear-gradient(90deg, rgba(3, 5, 9, 0.04) 0%, rgba(3, 5, 9, 0.16) 38%, rgba(3, 5, 9, 0.72) 52%, rgba(3, 5, 9, 0.9) 100%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.08), rgba(3, 5, 9, 0.16));
   pointer-events: none;
 }
 
@@ -10771,8 +10771,8 @@ textarea {
 
   .readings-page .readings-method::before {
     background:
-      linear-gradient(90deg, rgba(7, 7, 8, 0.08) 0%, rgba(7, 7, 8, 0.34) 34%, rgba(7, 7, 8, 0.88) 64%, rgba(7, 7, 8, 0.94) 100%),
-      linear-gradient(180deg, rgba(7, 7, 8, 0.1), rgba(7, 7, 8, 0.2));
+      linear-gradient(90deg, rgba(3, 5, 9, 0.08) 0%, rgba(3, 5, 9, 0.34) 34%, rgba(3, 5, 9, 0.88) 64%, rgba(3, 5, 9, 0.94) 100%),
+      linear-gradient(180deg, rgba(3, 5, 9, 0.1), rgba(3, 5, 9, 0.2));
   }
 
   .readings-page .readings-method__copy {
@@ -10789,7 +10789,7 @@ textarea {
 
   .readings-page .readings-method::before {
     background:
-      linear-gradient(180deg, rgba(7, 7, 8, 0.36) 0%, rgba(7, 7, 8, 0.94) 48%, rgba(7, 7, 8, 0.98) 100%);
+      linear-gradient(180deg, rgba(3, 5, 9, 0.36) 0%, rgba(3, 5, 9, 0.94) 48%, rgba(3, 5, 9, 0.98) 100%);
   }
 
   .readings-page .readings-method__image {
@@ -10929,14 +10929,14 @@ textarea {
   margin: 0 auto -8px;
   border: 2px solid rgba(213, 162, 87, 0.78);
   border-radius: 999px;
-  background: #070708;
+  background: #030509;
   color: #f0d7a8;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(24px, 2vw, 32px);
   font-weight: 700;
   line-height: 1;
   box-shadow:
-    0 0 0 5px rgba(7, 7, 8, 0.92),
+    0 0 0 5px rgba(3, 5, 9, 0.92),
     0 0 24px rgba(213, 162, 87, 0.16);
 }
 
@@ -10950,7 +10950,7 @@ textarea {
   margin: 0 auto clamp(12px, 1.2vw, 18px);
   border: 1px solid rgba(213, 162, 87, 0.56);
   border-radius: 999px;
-  background: #070708;
+  background: #030509;
   overflow: hidden;
 }
 
@@ -11215,14 +11215,14 @@ textarea {
 /* Lecturas: uniform black base; only the "Que recibes" panel stays ivory. */
 html:has(.landing-page),
 body:has(.landing-page) {
-  background-color: #070708;
-  background: #070708;
+  background-color: #030509;
+  background: #030509;
 }
 
 .landing-page.readings-page,
 .readings-page {
-  background-color: #070708;
-  background: #070708;
+  background-color: #030509;
+  background: #030509;
 }
 
 /* Lecturas final polish: larger ivory band and compact CTA from reference. */
@@ -11270,7 +11270,7 @@ body:has(.landing-page) {
   border-radius: 14px;
   background:
     radial-gradient(circle at 84% 48%, rgba(215, 173, 105, 0.1), transparent 28%),
-    linear-gradient(90deg, rgba(6, 9, 15, 0.96), #070708 58%, rgba(6, 8, 13, 0.98));
+    linear-gradient(90deg, rgba(3, 5, 9, 0.96), #030509 58%, rgba(3, 5, 9, 0.98));
   box-shadow: inset 0 0 0 1px rgba(215, 173, 105, 0.05);
   overflow: hidden;
 }
@@ -11307,7 +11307,7 @@ body:has(.landing-page) {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(7, 7, 8, 0.05) 58%, #070708 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(3, 5, 9, 0.05) 58%, #030509 100%);
   pointer-events: none;
 }
 
@@ -11411,7 +11411,7 @@ body:has(.landing-page) {
 /* Public footer: solid dark background, no separator lines. */
 .landing-page .landing-footer {
   border-top: 0;
-  background: #070708;
+  background: #030509;
 }
 
 .landing-page .landing-footer::before {
@@ -11960,7 +11960,7 @@ body:has(.landing-page) {
 
 /* Carta del Dia public landing alignment */
 .daily-public-page {
-  background: #070708;
+  background: #030509;
 }
 
 .daily-public-page .daily-card-page {
@@ -11979,7 +11979,7 @@ body:has(.landing-page) {
   border-radius: 24px;
   background:
     radial-gradient(circle at 50% 34%, rgba(215, 173, 105, 0.1), transparent 28%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(7, 7, 8, 0.92));
+    linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(3, 5, 9, 0.92));
   box-shadow: inset 0 0 0 1px rgba(215, 173, 105, 0.04);
 }
 
@@ -12016,7 +12016,7 @@ body:has(.landing-page) {
   border-radius: 22px;
   background:
     radial-gradient(circle at 86% 12%, rgba(215, 173, 105, 0.08), transparent 28%),
-    linear-gradient(160deg, rgba(255, 255, 255, 0.055), rgba(7, 7, 8, 0.94));
+    linear-gradient(160deg, rgba(255, 255, 255, 0.055), rgba(3, 5, 9, 0.94));
 }
 
 .daily-public-page .daily-message-card {
@@ -12066,9 +12066,9 @@ body:has(.landing-page) {
   border: 0;
   border-radius: 0;
   background:
-    linear-gradient(90deg, #070708 0%, rgba(7, 7, 8, 0.98) 31%, rgba(7, 7, 8, 0.62) 50%, rgba(7, 7, 8, 0.08) 75%),
+    linear-gradient(90deg, #030509 0%, rgba(3, 5, 9, 0.98) 31%, rgba(3, 5, 9, 0.62) 50%, rgba(3, 5, 9, 0.08) 75%),
     url("/assets/carta_dia/carta1.png") right center / cover no-repeat,
-    #070708;
+    #030509;
   box-shadow: none;
   overflow: hidden;
   text-align: left;
@@ -12222,9 +12222,9 @@ body:has(.landing-page) {
     gap: 26px;
     padding: 34px 20px 42px;
     background:
-      linear-gradient(180deg, #070708 0%, rgba(7, 7, 8, 0.92) 38%, rgba(7, 7, 8, 0.48) 100%),
+      linear-gradient(180deg, #030509 0%, rgba(3, 5, 9, 0.92) 38%, rgba(3, 5, 9, 0.48) 100%),
       url("/assets/carta_dia/carta1.png") center bottom / cover no-repeat,
-      #070708;
+      #030509;
     text-align: center;
   }
 
@@ -12286,9 +12286,9 @@ body:has(.landing-page) {
   margin-bottom: clamp(26px, 3.2vw, 44px);
   padding: clamp(34px, 3.8vw, 58px) max(clamp(42px, 6vw, 88px), calc((100vw - 1480px) / 2 + 42px));
   background:
-    linear-gradient(90deg, #070708 0%, rgba(7, 7, 8, 0.98) 24%, rgba(7, 7, 8, 0.78) 39%, rgba(7, 7, 8, 0.2) 66%, rgba(7, 7, 8, 0.04) 100%),
+    linear-gradient(90deg, #030509 0%, rgba(3, 5, 9, 0.98) 24%, rgba(3, 5, 9, 0.78) 39%, rgba(3, 5, 9, 0.2) 66%, rgba(3, 5, 9, 0.04) 100%),
     url("/assets/carta_dia/carta1.png") center center / cover no-repeat,
-    #070708;
+    #030509;
     padding-bottom: 10px !important;
 }
 
@@ -12397,8 +12397,8 @@ body:has(.landing-page) {
 .daily-public-page .daily-hero--landing {
   position: relative;
   background:
-    linear-gradient(90deg, #070708 0%, rgba(7, 7, 8, 0.98) 30%, rgba(7, 7, 8, 0.82) 44%, rgba(7, 7, 8, 0.18) 72%, rgba(7, 7, 8, 0.04) 100%),
-    #070708;
+    linear-gradient(90deg, #030509 0%, rgba(3, 5, 9, 0.98) 30%, rgba(3, 5, 9, 0.82) 44%, rgba(3, 5, 9, 0.18) 72%, rgba(3, 5, 9, 0.04) 100%),
+    #030509;
 }
 
 .daily-public-page .daily-hero-bg {
@@ -12420,7 +12420,7 @@ body:has(.landing-page) {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(90deg, #070708 0%, rgba(7, 7, 8, 0.98) 27%, rgba(7, 7, 8, 0.66) 46%, rgba(7, 7, 8, 0.1) 72%, rgba(7, 7, 8, 0.01) 100%);
+  background: linear-gradient(90deg, #030509 0%, rgba(3, 5, 9, 0.98) 27%, rgba(3, 5, 9, 0.66) 46%, rgba(3, 5, 9, 0.1) 72%, rgba(3, 5, 9, 0.01) 100%);
   pointer-events: none;
 }
 
@@ -12445,7 +12445,7 @@ body:has(.landing-page) {
   }
 
   .daily-public-page .daily-hero--landing::after {
-    background: linear-gradient(180deg, #070708 0%, rgba(7, 7, 8, 0.9) 42%, rgba(7, 7, 8, 0.58) 100%);
+    background: linear-gradient(180deg, #030509 0%, rgba(3, 5, 9, 0.9) 42%, rgba(3, 5, 9, 0.58) 100%);
   }
 }
 
@@ -12465,8 +12465,8 @@ body:has(.landing-page) {
   border-radius: 14px;
   padding: clamp(32px, 3vw, 52px);
   background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.035), rgba(7, 7, 8, 0.96)),
-    #070708;
+    linear-gradient(160deg, rgba(255, 255, 255, 0.035), rgba(3, 5, 9, 0.96)),
+    #030509;
   box-shadow:
     inset 0 0 0 1px rgba(215, 173, 105, 0.04),
     0 22px 54px rgba(0, 0, 0, 0.42);
@@ -12509,8 +12509,8 @@ body:has(.landing-page) {
   position: relative;
   justify-content: start;
   background:
-    linear-gradient(90deg, rgba(7, 7, 8, 0.96), rgba(7, 7, 8, 0.82) 58%, rgba(7, 7, 8, 0.42) 100%),
-    #070708;
+    linear-gradient(90deg, rgba(3, 5, 9, 0.96), rgba(3, 5, 9, 0.82) 58%, rgba(3, 5, 9, 0.42) 100%),
+    #030509;
 }
 
 .daily-public-page .daily-action-illustration {
@@ -12573,8 +12573,8 @@ body:has(.landing-page) {
 
   .daily-public-page .daily-reading-pair .daily-action-card {
     background:
-      linear-gradient(180deg, rgba(7, 7, 8, 0.95), rgba(7, 7, 8, 0.62)),
-      #070708;
+      linear-gradient(180deg, rgba(3, 5, 9, 0.95), rgba(3, 5, 9, 0.62)),
+      #030509;
   }
 
   .daily-public-page .daily-reading-pair .daily-action-card p {
@@ -13073,7 +13073,7 @@ body:has(.landing-page) {
 .subscribe-page {
   min-height: 100dvh;
   padding: 8px;
-  background: #070708;
+  background: #030509;
   color: #f7efe2;
 }
 
@@ -13082,7 +13082,7 @@ body:has(.landing-page) {
   min-height: calc(100dvh - 16px);
   border: 1px solid rgba(215, 173, 105, 0.18);
   border-radius: 10px;
-  background: #070708;
+  background: #030509;
   overflow: hidden;
 }
 
@@ -13482,7 +13482,7 @@ body:has(.landing-page) {
   padding: 0;
   border: 1px solid rgba(215, 173, 105, 0.32);
   border-radius: 22px;
-  background: #0c0b17;
+  background: #030509;
   box-shadow:
     inset 0 0 0 1px rgba(255, 239, 209, 0.03),
     0 24px 58px rgba(0, 0, 0, 0.34);
@@ -13500,7 +13500,7 @@ body:has(.landing-page) {
 
 .subscribe-plan.is-pro {
   border-color: rgba(165, 112, 218, 0.42);
-  background: #0c0b17;
+  background: #030509;
 }
 
 .subscribe-plan.is-selected {
@@ -16798,3 +16798,6 @@ body:has(.landing-page) {
     flex-direction: column;
   }
 }
+.header-actions { display: flex; align-items: center; gap: 24px; margin-left: auto; } .header-user { display: flex; align-items: center; gap: 12px; } .header-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(201, 166, 107, 0.1); color: #c9a66b; display: flex; align-items: center; justify-content: center; font-size: 15px; font-family: var(--font-cinzel), serif; border: 1px solid rgba(201, 166, 107, 0.2); } .header-user-info { display: flex; flex-direction: column; } .header-user-name { color: #f3ebdd; font-size: 14px; font-weight: 500; } .header-user-email { color: #8c8694; font-size: 12px; } .header-divider { width: 1px; height: 24px; background: rgba(255, 255, 255, 0.1); } .header-logout-btn { background: transparent; border: 1px solid rgba(215, 173, 105, 0.4); border-radius: 999px; padding: 8px 16px; color: var(--muted); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; } @media (max-width: 768px) { .header-actions { gap: 12px; } .header-user-email { display: none; } .header-logout-btn { padding: 8px; } .header-logout-btn span { display: none; } } @media (max-width: 480px) { .header-user-name { display: none; } .header-divider { display: none; } .landing-header { padding: 16px 20px; } }
+@media (max-width: 768px) { .readings-page .landing-header { grid-template-columns: 1fr auto; } }
+@media (max-width: 768px) { .header-user { display: none !important; } }

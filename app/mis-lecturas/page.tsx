@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { prisma } from "@/lib/prisma";
@@ -40,60 +41,38 @@ export default async function MisLecturasPage() {
     <div className="landing-page readings-page">
       <header className="landing-header">
         <Link className="landing-brand" href="/" aria-label="Khael Tarotista">
-          <span className="landing-brand__seal" aria-hidden="true">
-            ✦
-          </span>
-          <span className="landing-brand__text">
-            <strong>Khael</strong>
-            <span>Tarotista</span>
-          </span>
+          <Image 
+            src="/assets/brand/final-01.png" 
+            alt="Khael Tarotista Logo" 
+            width={65} 
+            height={65}
+            priority
+            className="landing-brand-logo-img"
+            style={{ objectFit: "contain" }}
+          />
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginLeft: 'auto' }}>
+        <div className="header-actions">
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: 'rgba(201, 166, 107, 0.1)',
-              color: '#c9a66b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '15px',
-              fontFamily: 'var(--font-cinzel), serif',
-              border: '1px solid rgba(201, 166, 107, 0.2)'
-            }}>
+          <div className="header-user">
+            <div className="header-avatar">
               {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ color: '#f3ebdd', fontSize: '14px', fontWeight: 500 }}>
+            <div className="header-user-info">
+              <span className="header-user-name">
                 {user.name || user.email.split('@')[0]}
               </span>
-              <span style={{ color: '#8c8694', fontSize: '12px' }}>
+              <span className="header-user-email">
                 {user.email}
               </span>
             </div>
           </div>
 
-          <div style={{ width: '1px', height: '24px', background: 'rgba(255, 255, 255, 0.1)' }}></div>
+          <div className="header-divider"></div>
 
           <ChangePasswordModal />
 
           <form action="/api/auth/logout" method="POST">
-            <button type="submit" style={{ 
-              background: 'transparent', 
-              borderColor: 'rgba(215, 173, 105, 0.4)',
-              border: '1px solid',
-              borderRadius: '999px',
-              padding: '8px 16px',
-              color: 'var(--muted)',
-              fontSize: '13px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
+            <button type="submit" className="header-logout-btn">
               Cerrar Sesión <span>→</span>
             </button>
           </form>

@@ -81,7 +81,9 @@ export async function updateCardInterpretation(cardId: string, text: string, rea
   }
 }
 
-export async function updateReadingStatus(readingId: string, status: string) {
+import { ReadingStatus } from "@/src/generated/prisma/client";
+
+export async function updateReadingStatus(readingId: string, status: ReadingStatus) {
   try {
     await prisma.clientReading.update({
       where: { id: readingId },

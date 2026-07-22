@@ -53,13 +53,15 @@ function PublicHeader() {
   return (
     <header className="landing-header">
       <Link className="landing-brand" href="/" aria-label="Khael Tarotista">
-        <span className="landing-brand__seal" aria-hidden="true">
-          ✦
-        </span>
-        <span className="landing-brand__text">
-          <strong>Khael</strong>
-          <span>Tarotista</span>
-        </span>
+          <Image 
+            src="/assets/brand/final-01.png" 
+            alt="Khael Tarotista Logo" 
+            width={65} 
+            height={65}
+            priority
+            className="landing-brand-logo-img"
+            style={{ objectFit: "contain" }}
+          />
       </Link>
 
       <nav className="landing-nav" aria-label="Navegación principal">
@@ -93,13 +95,15 @@ function PublicFooter() {
     <footer className="landing-footer">
       <div className="landing-footer__brand">
         <Link className="landing-brand" href="/" aria-label="Khael Tarotista">
-          <span className="landing-brand__seal" aria-hidden="true">
-            ✦
-          </span>
-          <span className="landing-brand__text">
-            <strong>Khael</strong>
-            <span>Tarotista</span>
-          </span>
+          <Image 
+            src="/assets/brand/final-01.png" 
+            alt="Khael Tarotista Logo" 
+            width={65} 
+            height={65}
+            priority
+            className="landing-brand-logo-img"
+            style={{ objectFit: "contain" }}
+          />
         </Link>
         <p>Tarot · Estudio · Simbolismo</p>
         <small>© 2026 Khael Tarotista. Todos los derechos reservados.</small>

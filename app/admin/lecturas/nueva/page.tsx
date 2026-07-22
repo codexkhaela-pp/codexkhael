@@ -20,7 +20,12 @@ export default function NuevaLecturaPage() {
     mainQuestion: "",
     category: "General",
     spreadType: "Tres Cartas",
-    readingDate: new Date().toISOString().split("T")[0]
+    readingDate: new Date().toISOString().split("T")[0],
+    realDeckName: "",
+    realDeckPublisher: "",
+    realDeckAuthor: "",
+    realDeckIllustrator: "",
+    realDeckYear: ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -219,6 +224,74 @@ export default function NuevaLecturaPage() {
               </div>
             </div>
 
+            <div className={styles.formSection}>
+              <h2 className={styles.sectionTitle}>Detalles de la Baraja (Opcional)</h2>
+              <p style={{color: "var(--muted)", fontSize: "0.85rem", marginBottom: "16px"}}>
+                Estos datos añaden autenticidad a la lectura, mostrando al cliente el origen de las cartas utilizadas.
+              </p>
+              
+              <div className={styles.grid2Cols} style={{ marginBottom: "20px" }}>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Nombre de la Baraja</span>
+                  <input 
+                    type="text" 
+                    name="realDeckName" 
+                    placeholder="Ej: Rider Waite Smith" 
+                    className={styles.input}
+                    value={formData.realDeckName}
+                    onChange={handleChange}
+                  />
+                </label>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Editorial</span>
+                  <input 
+                    type="text" 
+                    name="realDeckPublisher" 
+                    placeholder="Ej: U.S. Games Systems" 
+                    className={styles.input}
+                    value={formData.realDeckPublisher}
+                    onChange={handleChange}
+                  />
+                </label>
+              </div>
+
+              <div className={styles.grid3Cols}>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Autor</span>
+                  <input 
+                    type="text" 
+                    name="realDeckAuthor" 
+                    placeholder="Ej: Arthur E. Waite" 
+                    className={styles.input}
+                    value={formData.realDeckAuthor}
+                    onChange={handleChange}
+                  />
+                </label>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Ilustrador</span>
+                  <input 
+                    type="text" 
+                    name="realDeckIllustrator" 
+                    placeholder="Ej: Pamela Colman Smith" 
+                    className={styles.input}
+                    value={formData.realDeckIllustrator}
+                    onChange={handleChange}
+                  />
+                </label>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Año de edición</span>
+                  <input 
+                    type="text" 
+                    name="realDeckYear" 
+                    placeholder="Ej: 1909" 
+                    className={styles.input}
+                    value={formData.realDeckYear}
+                    onChange={handleChange}
+                  />
+                </label>
+              </div>
+            </div>
+
             <div className={styles.actions}>
               <button 
                 type="button" 
@@ -280,6 +353,13 @@ export default function NuevaLecturaPage() {
                   {formData.readingDate ? new Date(formData.readingDate + "T12:00:00").toLocaleDateString('es-ES') : "Sin definir"}
                 </span>
               </div>
+              
+              {formData.realDeckName && (
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Baraja Utilizada</span>
+                  <span className={styles.summaryValue}>{formData.realDeckName}</span>
+                </div>
+              )}
             </div>
           </div>
 

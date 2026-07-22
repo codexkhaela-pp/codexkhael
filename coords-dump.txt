@@ -1,0 +1,12 @@
+Canvas: nullxnull
+- La Estrella: x=39.6830316300739, y=41.3479614257812, rot=180, scale=0.6
+- Cinco de Bastos: x=39.4344328733284, y=44.6081595585264, rot=90, scale=0.6
+- Cuatro de Bastos: x=16.5630864592907, y=41.0971858583648, rot=0, scale=0.6
+- Seis de Bastos: x=60.6898612891751, y=41.0971805967134, rot=0, scale=0.6
+- Ocho de Bastos: x=39.8073257925774, y=17.3981186439251, rot=0, scale=0.6
+- El Diablo: x=40.1802291435647, y=65.0470233785695, rot=0, scale=0.6
+- La Torre: x=53.107520970402, y=17.6489047346444, rot=0, scale=0.6
+- El Sol: x=79.210672085607, y=13.7617492675781, rot=0, scale=0.6
+- El Emperador: x=79.0863987865802, y=34.8275862068966, rot=0, scale=0.6
+- La Fuerza: x=79.0863883548418, y=55.893423146215, rot=180, scale=0.6
+- Reina de Bastos: x=79.3349975433256, y=77.2100514379041, rot=0, scale=0.6
