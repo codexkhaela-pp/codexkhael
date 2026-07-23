@@ -50,11 +50,11 @@ export async function GET(
       const realImagePath = cardDef ? cardDef.image : "/tarot/the_fool.jpg";
       
       return {
-        id: card.id,
+        cardId: card.id,
         name: card.cardName,
         imagePath: realImagePath,
         order: idx,
-        orientation: card.orientation.toLowerCase(),
+        orientation: card.orientation === "REVERSED" ? "invertida" : "derecha",
         x: card.x,
         y: card.y,
         rotation: card.rotation,
@@ -63,6 +63,7 @@ export async function GET(
     });
 
     const pdfData: ReadingPdfData = {
+      readingId: reading.id,
       coverTitle: reading.title,
       coverSubtitle: "Una guía simbólica para comprender tu presente\ny orientar tus próximos pasos.",
       spreadName: reading.customSpreadName || reading.spreadType,
@@ -77,7 +78,7 @@ export async function GET(
         summary: summarySection?.content || reading.spreadDescription || "Interpretación general no disponible.",
         positions: reading.cards.map(c => ({
           positionNumber: c.positionIndex + 1,
-          positionName: c.positionName,
+          positionName: c.positionName || `Posición ${c.positionIndex + 1}`,
           cardName: c.cardName,
           orientation: c.orientation === "REVERSED" ? "Invertida" : "Al derecho",
           interpretation: c.interpretation || c.positionMeaning || ""
@@ -93,7 +94,7 @@ export async function GET(
     const safeTitle = reading.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const filename = `lectura-${safeTitle}-${format(new Date(), "yyyyMMdd")}.pdf`;
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
