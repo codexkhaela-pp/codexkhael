@@ -4,6 +4,7 @@ import * as fs from "fs";
 
 async function main() {
   const data: ReadingPdfData = {
+    readingId: "test-reading-id",
     coverTitle: "Tu lectura personalizada",
     coverSubtitle: "Una guía simbólica para comprender tu presente\ny orientar tus próximos pasos.",
     spreadName: "TIRADA DE TRES CARTAS",
@@ -15,29 +16,29 @@ async function main() {
     canvasHeight: 600,
     cards: [
       {
-        id: "1",
+        cardId: "1",
         name: "El Mago",
         imagePath: "/tarot/01_magician.jpg",
         order: 0,
-        orientation: "al derecho",
+        orientation: "derecha",
         x: 20, 
         y: 50,
         rotation: -5,
         relativeScale: 1.0,
       },
       {
-        id: "2",
+        cardId: "2",
         name: "La Sacerdotisa",
         imagePath: "/tarot/02_high_priestess.jpg",
         order: 1,
-        orientation: "al derecho",
+        orientation: "derecha",
         x: 50, 
         y: 50,
         rotation: 0,
         relativeScale: 1.0,
       },
       {
-        id: "3",
+        cardId: "3",
         name: "El Loco",
         imagePath: "/tarot/00_fool.jpg",
         order: 2,
