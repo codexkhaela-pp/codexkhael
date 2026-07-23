@@ -4,10 +4,40 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth-server";
 import { randomBytes } from "crypto";
 
+export async function searchClients(query: string) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || (!currentUser.roles.includes("ADMIN") && !currentUser.roles.includes("TAROTIST"))) {
+    throw new Error("No autorizado");
+  }
+
+  if (!query || query.trim().length < 2) {
+    return [];
+  }
+
+  return prisma.user.findMany({
+    where: {
+      OR: [
+        { name: { contains: query, mode: "insensitive" } },
+        { email: { contains: query, mode: "insensitive" } }
+      ]
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      birthDate: true,
+      phone: true
+    },
+    take: 10
+  });
+}
+
 export async function createClientReading(data: {
   title: string;
   clientEmail: string;
   clientName: string;
+  clientBirthDate?: Date | null;
+  clientPhone?: string | null;
   mainQuestion: string;
   category: string;
   spreadType: string;
@@ -24,7 +54,7 @@ export async function createClientReading(data: {
   }
 
   const { 
-    title, clientEmail, clientName, mainQuestion, 
+    title, clientEmail, clientName, clientBirthDate, clientPhone, mainQuestion, 
     category, spreadType, readingDate,
     realDeckName, realDeckPublisher, realDeckAuthor, realDeckIllustrator, realDeckYear
   } = data;
@@ -61,6 +91,9 @@ export async function createClientReading(data: {
         name: clientName,
         passwordHash: generatedPassword, 
         status: "ACTIVE",
+        birthDate: clientBirthDate ? new Date(clientBirthDate) : null,
+        phone: clientPhone || null,
+        requiresPasswordChange: true,
         roles: clientRole ? {
           create: {
             roleId: clientRole.id
@@ -88,6 +121,25 @@ export async function createClientReading(data: {
            }
          });
        }
+    }
+    
+    // Actualizar datos del cliente (cumpleaños y teléfono) si se proporcionan y no están vacíos
+    const updateData: any = {};
+    if (clientName && clientName.trim() !== "") {
+      updateData.name = clientName;
+    }
+    if (clientBirthDate) {
+      updateData.birthDate = new Date(clientBirthDate);
+    }
+    if (clientPhone !== undefined) {
+      updateData.phone = clientPhone;
+    }
+    
+    if (Object.keys(updateData).length > 0) {
+      await prisma.user.update({
+        where: { id: clientUser.id },
+        data: updateData
+      });
     }
   }
 

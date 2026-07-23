@@ -472,3 +472,50 @@
     width: 100%;
   }
 }
+
+/* AUTOCOMPLETE SUGGESTIONS */
+.suggestionsList {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #111016;
+  border: 1px solid rgba(197, 168, 128, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px 0;
+  margin: 0;
+  list-style: none;
+}
+
+.suggestionItem {
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: background 0.2s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.suggestionItem:last-child {
+  border-bottom: none;
+}
+
+.suggestionItem:hover {
+  background: rgba(197, 168, 128, 0.1);
+}
+
+.suggestionName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e1e9;
+}
+
+.suggestionEmail {
+  font-size: 11px;
+  color: #8c889f;
+}

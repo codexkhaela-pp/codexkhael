@@ -7,6 +7,7 @@ export type AuthenticatedUser = {
   name: string | null;
   email: string;
   roles: string[];
+  requiresPasswordChange: boolean;
 };
 
 function logSessionEvent(stage: string, details: Record<string, unknown>) {
@@ -64,5 +65,6 @@ export async function getCurrentUser(): Promise<AuthenticatedUser | null> {
     name: authSession.user.name,
     email: authSession.user.email,
     roles: authSession.user.roles.map((r) => r.role.name),
+    requiresPasswordChange: authSession.user.requiresPasswordChange,
   };
 }

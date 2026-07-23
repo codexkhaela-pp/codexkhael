@@ -25,7 +25,7 @@ export default async function AdminLecturaDetail({
         orderBy: { positionIndex: "asc" },
       },
       client: {
-        select: { email: true }
+        select: { email: true, phone: true }
       }
     },
   });

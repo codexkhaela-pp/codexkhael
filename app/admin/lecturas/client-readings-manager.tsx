@@ -19,6 +19,9 @@ type Reading = {
   totalCards: number;
   readingDate: Date;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED" | "CANCELLED";
+  client?: {
+    phone: string | null;
+  } | null;
 };
 
 type Props = {
@@ -188,6 +191,22 @@ export function ClientReadingsManager({ readings }: Props) {
     const parts = name.trim().split(" ");
     if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const getWhatsAppShareUrl = (reading: Reading) => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const readingUrl = `${origin}/mis-lecturas/${reading.id}`;
+    const name = reading.clientName || "Consultante";
+    const text = `Hola ${name}, ya está disponible tu lectura de Tarot "${reading.title}" en tu perfil: ${readingUrl}`;
+    const encodedText = encodeURIComponent(text);
+    const phone = reading.client?.phone;
+    
+    if (phone) {
+      const cleanPhone = phone.replace(/[^0-9]/g, "");
+      return `https://wa.me/${cleanPhone}?text=${encodedText}`;
+    }
+    
+    return `https://api.whatsapp.com/send?text=${encodedText}`;
   };
 
   // 1. ESTADO VACÍO TOTAL Y VISTA PRINCIPAL UNIFICADOS
@@ -420,6 +439,25 @@ export function ClientReadingsManager({ readings }: Props) {
                                 >
                                   Editar Lectura
                                 </Link>
+                                {reading.status === "PUBLISHED" && (
+                                  <a 
+                                    href={getWhatsAppShareUrl(reading)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                      display: "block",
+                                      padding: "8px 12px",
+                                      color: "#4ade80",
+                                      fontSize: "0.85rem",
+                                      textDecoration: "none",
+                                      textAlign: "left",
+                                      borderTop: "1px solid rgba(255, 255, 255, 0.05)"
+                                    }}
+                                    onClick={() => setActiveDropdown(null)}
+                                  >
+                                    Compartir WhatsApp
+                                  </a>
+                                )}
                               </div>
                             )}
                           </div>

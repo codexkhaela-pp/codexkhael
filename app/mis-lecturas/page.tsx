@@ -7,11 +7,41 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import MisLecturasClient from "./mis-lecturas-client";
 import ChangePasswordModal from "./ChangePasswordModal";
+import { ForcedPasswordChangeForm } from "./ForcedPasswordChangeForm";
 import { tarotCards } from "@/src/data/tarotCards";
 
 export default async function MisLecturasPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/mis-lecturas/login");
+  
+  if (user.requiresPasswordChange) {
+    return (
+      <div className="landing-page readings-page">
+        <header className="landing-header">
+          <Link className="landing-brand" href="/" aria-label="Khael Tarotista">
+            <Image 
+              src="/assets/brand/final-01.png" 
+              alt="Khael Tarotista Logo" 
+              width={65} 
+              height={65}
+              priority
+              className="landing-brand-logo-img"
+              style={{ objectFit: "contain" }}
+            />
+          </Link>
+          <div className="header-actions">
+            <form action="/api/auth/logout" method="POST">
+              <button type="submit" className="header-logout-btn">
+                Cerrar Sesión <span>→</span>
+              </button>
+            </form>
+          </div>
+        </header>
+
+        <ForcedPasswordChangeForm />
+      </div>
+    );
+  }
   
   const isKhael = user.roles.includes("ADMIN") || user.roles.includes("TAROTIST");
   

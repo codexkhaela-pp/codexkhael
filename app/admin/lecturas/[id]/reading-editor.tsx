@@ -149,6 +149,22 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
     setEditingCard(null);
   };
 
+  const getWhatsAppShareUrl = () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const readingUrl = `${origin}/mis-lecturas/${reading.id}`;
+    const name = reading.clientName || "Consultante";
+    const text = `Hola ${name}, ya está disponible tu lectura de Tarot "${reading.title}" en tu perfil: ${readingUrl}`;
+    const encodedText = encodeURIComponent(text);
+    const phone = reading.client?.phone;
+    
+    if (phone) {
+      const cleanPhone = phone.replace(/[^0-9]/g, "");
+      return `https://wa.me/${cleanPhone}?text=${encodedText}`;
+    }
+    
+    return `https://api.whatsapp.com/send?text=${encodedText}`;
+  };
+
   return (
     <div className={styles.mainLayout}>
       
@@ -174,6 +190,17 @@ export function ReadingEditor({ reading, availableCards }: { reading: any, avail
             >
               {isPublishing ? "Procesando..." : status === "PUBLISHED" ? "Ocultar (Borrador)" : "Publicar Lectura"}
             </button>
+            {status === "PUBLISHED" && (
+              <a 
+                href={getWhatsAppShareUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.btnPrimary}
+                style={{ background: "#25D366", borderColor: "#25D366", color: "#fff", textDecoration: "none" }}
+              >
+                Compartir WhatsApp
+              </a>
+            )}
           </div>
         </div>
         

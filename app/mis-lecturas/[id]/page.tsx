@@ -14,6 +14,10 @@ export default async function MisLecturasDetail({
     redirect("/mis-lecturas/login");
   }
 
+  if (user.requiresPasswordChange) {
+    redirect("/mis-lecturas");
+  }
+
   const { id } = await params;
   const reading = await prisma.clientReading.findUnique({
     where: { id },

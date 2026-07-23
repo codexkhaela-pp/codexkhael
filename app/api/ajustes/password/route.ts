@@ -40,7 +40,10 @@ export async function PUT(request: Request) {
     // En el futuro: await bcrypt.hash(newPassword, 10)
     await prisma.user.update({
       where: { id: userSession.id },
-      data: { passwordHash: newPassword },
+      data: { 
+        passwordHash: newPassword,
+        requiresPasswordChange: false
+      },
     });
 
     return NextResponse.json({ success: true });

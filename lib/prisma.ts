@@ -61,6 +61,11 @@ function createPrismaClient() {
 function hasExpectedDelegates(client: PrismaClient): boolean {
   // In dev, Next can retain a singleton created before `prisma generate`.
   // Recreate it if the cached client predates the current schema.
+  const schemaVersion = 3; // Incremented from 2 to 3 to invalidate cached prisma instance
+  if ((client as any)._schemaVersion !== schemaVersion) {
+    (client as any)._schemaVersion = schemaVersion;
+    return false;
+  }
   return typeof (client as PrismaClient & { dailyJournalEntry?: unknown }).dailyJournalEntry !== "undefined";
 }
 

@@ -25,6 +25,11 @@ export default async function AdminLecturasPage() {
       totalCards: true,
       readingDate: true,
       status: true,
+      client: {
+        select: {
+          phone: true
+        }
+      }
     }
   });
 

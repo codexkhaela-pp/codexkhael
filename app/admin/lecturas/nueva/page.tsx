@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, BookOpen } from "lucide-react";
-import { createClientReading } from "../actions";
+import { createClientReading, searchClients } from "../actions";
 import styles from "./nueva-lectura.module.css";
 
 export default function NuevaLecturaPage() {
@@ -16,6 +16,8 @@ export default function NuevaLecturaPage() {
   const [formData, setFormData] = useState({
     clientName: "",
     clientEmail: "",
+    clientBirthDate: "",
+    clientPhone: "",
     title: "",
     mainQuestion: "",
     category: "General",
@@ -28,9 +30,46 @@ export default function NuevaLecturaPage() {
     realDeckYear: ""
   });
 
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, clientName: value }));
+
+    if (value.trim().length >= 2) {
+      setIsSearching(true);
+      try {
+        const results = await searchClients(value);
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      } catch (err) {
+        console.error("Error searching clients:", err);
+      } finally {
+        setIsSearching(false);
+      }
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSelectSuggestion = (client: any) => {
+    setFormData(prev => ({
+      ...prev,
+      clientName: client.name || "",
+      clientEmail: client.email || "",
+      clientBirthDate: client.birthDate ? new Date(client.birthDate).toISOString().split("T")[0] : "",
+      clientPhone: client.phone || ""
+    }));
+    setShowSuggestions(false);
   };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -40,7 +79,9 @@ export default function NuevaLecturaPage() {
     try {
       const data = {
         ...formData,
-        readingDate: new Date(formData.readingDate)
+        readingDate: new Date(formData.readingDate),
+        clientBirthDate: formData.clientBirthDate ? new Date(formData.clientBirthDate) : null,
+        clientPhone: formData.clientPhone || null
       };
       const result = await createClientReading(data);
       if (result.success) {
@@ -111,10 +152,11 @@ export default function NuevaLecturaPage() {
         <div className={styles.formCard}>
           <form onSubmit={handleSubmit} id="readingForm">
             
-            <div className={styles.formSection}>
+             <div className={styles.formSection}>
               <h2 className={styles.sectionTitle}>Datos del consultante</h2>
-              <div className={styles.grid2Cols}>
-                <label className={styles.fieldGroup}>
+              
+              <div className={styles.grid2Cols} style={{ marginBottom: "20px" }}>
+                <div className={styles.fieldGroup} style={{ position: "relative" }}>
                   <span className={styles.label}>Nombre del consultante</span>
                   <input 
                     type="text" 
@@ -123,9 +165,32 @@ export default function NuevaLecturaPage() {
                     placeholder="Ej: María Pérez" 
                     className={styles.input}
                     value={formData.clientName}
-                    onChange={handleChange}
+                    onChange={handleNameChange}
+                    onFocus={() => {
+                      if (suggestions.length > 0) setShowSuggestions(true);
+                    }}
+                    onBlur={() => {
+                      // Small timeout to allow click on suggestion to register before blur hides it
+                      setTimeout(() => setShowSuggestions(false), 200);
+                    }}
+                    autoComplete="off"
                   />
-                </label>
+                  {showSuggestions && (
+                    <ul className={styles.suggestionsList}>
+                      {suggestions.map((client) => (
+                        <li 
+                          key={client.id}
+                          onMouseDown={() => handleSelectSuggestion(client)}
+                          className={styles.suggestionItem}
+                        >
+                          <div className={styles.suggestionName}>{client.name}</div>
+                          <div className={styles.suggestionEmail}>{client.email}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
                 <label className={styles.fieldGroup}>
                   <span className={styles.label}>Correo electrónico <span className={styles.labelOptional}>(OPCIONAL)</span></span>
                   <input 
@@ -134,6 +199,31 @@ export default function NuevaLecturaPage() {
                     placeholder="correo@cliente.com" 
                     className={styles.input}
                     value={formData.clientEmail}
+                    onChange={handleChange}
+                  />
+                </label>
+              </div>
+
+              <div className={styles.grid2Cols}>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Fecha de nacimiento <span className={styles.labelOptional}>(OPCIONAL)</span></span>
+                  <input 
+                    type="date" 
+                    name="clientBirthDate" 
+                    className={styles.input}
+                    style={{ colorScheme: "dark" }}
+                    value={formData.clientBirthDate}
+                    onChange={handleChange}
+                  />
+                </label>
+                <label className={styles.fieldGroup}>
+                  <span className={styles.label}>Teléfono/WhatsApp <span className={styles.labelOptional}>(OPCIONAL)</span></span>
+                  <input 
+                    type="text" 
+                    name="clientPhone" 
+                    placeholder="Ej: +51997150983" 
+                    className={styles.input}
+                    value={formData.clientPhone}
                     onChange={handleChange}
                   />
                 </label>
@@ -354,6 +444,20 @@ export default function NuevaLecturaPage() {
                 </span>
               </div>
               
+              {formData.clientBirthDate && (
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Cumpleaños</span>
+                  <span className={styles.summaryValue}>
+                    {new Date(formData.clientBirthDate + "T12:00:00").toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
+                  </span>
+                </div>
+              )}
+              {formData.clientPhone && (
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Teléfono</span>
+                  <span className={styles.summaryValue}>{formData.clientPhone}</span>
+                </div>
+              )}
               {formData.realDeckName && (
                 <div className={styles.summaryItem}>
                   <span className={styles.summaryLabel}>Baraja Utilizada</span>
