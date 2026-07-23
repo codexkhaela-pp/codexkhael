@@ -85,29 +85,34 @@ export async function createClientReading(data: {
     const clientRole = await prisma.role.findUnique({ where: { name: "CLIENT" } });
     
     // Crear el usuario
-    const newUser = await prisma.user.create({
-      data: {
-        email,
-        name: clientName,
-        passwordHash: generatedPassword, 
-        status: "ACTIVE",
-        birthDate: clientBirthDate ? new Date(clientBirthDate) : null,
-        phone: clientPhone || null,
-        requiresPasswordChange: true,
-        roles: clientRole ? {
-          create: {
-            roleId: clientRole.id
+    try {
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          name: clientName,
+          passwordHash: generatedPassword, 
+          status: "ACTIVE",
+          birthDate: clientBirthDate ? new Date(clientBirthDate) : null,
+          phone: clientPhone || null,
+          requiresPasswordChange: true,
+          roles: clientRole ? {
+            create: {
+              roleId: clientRole.id
+            }
+          } : undefined
+        },
+        include: {
+          roles: {
+            select: { role: { select: { name: true } } }
           }
-        } : undefined
-      },
-      include: {
-        roles: {
-          select: { role: { select: { name: true } } }
         }
-      }
-    });
-    clientUser = { id: newUser.id, roles: newUser.roles, passwordHash: newUser.passwordHash };
-    isNewClient = true;
+      });
+      clientUser = { id: newUser.id, roles: newUser.roles, passwordHash: newUser.passwordHash };
+      isNewClient = true;
+    } catch (error: any) {
+      console.error("❌ ERROR CREATING USER:", error);
+      throw error;
+    }
   } else {
     // Si ya existe pero no tiene rol CLIENT
     const hasClientRole = clientUser.roles.some((r: any) => r.role.name === "CLIENT");

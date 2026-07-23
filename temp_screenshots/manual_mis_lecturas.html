@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Manual de Usuario — Mis Lecturas | Khael Tarotista</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-dark: #09090f;
+      --bg-card: #13131a;
+      --gold: #c9a66b;
+      --gold-light: #e6d3a8;
+      --gold-dim: rgba(201,166,107,0.3);
+      --text-primary: #f3ebdd;
+      --text-secondary: #a19ba8;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 10.5pt;
+      line-height: 1.65;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* ══════════════════════════════════
+       COVER PAGE
+       ══════════════════════════════════ */
+    .cover {
+      width: 100%;
+      height: 297mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 30%, rgba(201,166,107,0.08) 0%, transparent 60%),
+                  var(--bg-dark);
+      page-break-after: always;
+      padding: 60px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: 40px; left: 40px; right: 40px; bottom: 40px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+    }
+
+    .cover-logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 1px solid var(--gold-dim);
+      overflow: hidden;
+      margin-bottom: 36px;
+      background: var(--bg-card);
+    }
+
+    .cover-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .cover h1 {
+      font-family: var(--font-serif);
+      font-size: 34pt;
+      font-weight: 300;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .cover .subtitle {
+      font-family: var(--font-serif);
+      font-size: 16pt;
+      color: var(--gold);
+      margin-bottom: 36px;
+    }
+
+    .cover-divider {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 36px; color: var(--gold-dim);
+    }
+    .cover-divider span { color: var(--gold); font-size: 14pt; }
+    .cover-divider i { display: block; width: 60px; height: 1px; background: var(--gold-dim); }
+
+    .cover-description {
+      max-width: 440px;
+      color: var(--text-secondary);
+      font-size: 11pt;
+      line-height: 1.8;
+    }
+
+    .cover-footer {
+      position: absolute;
+      bottom: 60px;
+      font-size: 9pt;
+      color: var(--text-secondary);
+      opacity: 0.6;
+    }
+
+    /* ══════════════════════════════════
+       PAGE LAYOUT — fixed A4 height
+       ══════════════════════════════════ */
+    .page {
+      width: 210mm;
+      height: 297mm;
+      padding: 44px 56px 60px;
+      page-break-after: always;
+      position: relative;
+      background: var(--bg-dark);
+      overflow: hidden;
+    }
+
+    .page::before {
+      content: '';
+      position: absolute;
+      top: 28px; left: 28px; right: 28px; bottom: 28px;
+      border: 1px solid rgba(201,166,107,0.1);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .page-number {
+      position: absolute;
+      bottom: 36px; right: 56px;
+      font-size: 9pt;
+      color: var(--gold-dim);
+      font-family: var(--font-serif);
+    }
+
+    .page-brand {
+      position: absolute;
+      bottom: 36px; left: 56px;
+      font-size: 8pt;
+      color: rgba(201,166,107,0.2);
+      font-family: var(--font-serif);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* ══════════════════════════════════
+       TYPOGRAPHY
+       ══════════════════════════════════ */
+    .section-number {
+      font-family: var(--font-serif);
+      font-size: 11pt;
+      color: var(--gold);
+      margin-bottom: 2px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-family: var(--font-serif);
+      font-size: 21pt;
+      font-weight: 400;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    h3 {
+      font-family: var(--font-serif);
+      font-size: 13pt;
+      font-weight: 400;
+      color: var(--gold-light);
+      margin-bottom: 8px;
+      margin-top: 18px;
+    }
+
+    .section-sub {
+      font-size: 9.5pt;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .heading-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px; margin-top: 4px;
+    }
+    .heading-divider span { color: var(--gold); font-size: 9pt; }
+    .heading-divider i { display: block; width: 36px; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); }
+
+    p {
+      margin-bottom: 10px;
+      color: var(--text-secondary);
+      font-size: 10pt;
+      line-height: 1.7;
+    }
+
+    strong { color: var(--gold-light); font-weight: 500; }
+
+    /* ══════════════════════════════════
+       SCREENSHOT
+       ══════════════════════════════════ */
+    .screenshot-wrapper {
+      margin: 14px 0;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--gold-dim);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+      break-inside: avoid;
+    }
+
+    .screenshot-wrapper img {
+      width: 100%;
+      display: block;
+    }
+
+    .screenshot-caption {
+      background: var(--bg-card);
+      padding: 8px 14px;
+      font-size: 8.5pt;
+      color: var(--text-secondary);
+      border-top: 1px solid rgba(201,166,107,0.1);
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* ══════════════════════════════════
+       STEP BLOCKS
+       ══════════════════════════════════ */
+    .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+      break-inside: avoid;
+    }
+
+    .step-number {
+      width: 28px; height: 28px; min-width: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #a8834a);
+      color: var(--bg-dark);
+      font-family: var(--font-serif);
+      font-size: 13pt; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+
+    .step-content { flex: 1; }
+
+    .step-content h4 {
+      font-family: var(--font-serif);
+      font-size: 11pt;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+      font-weight: 600;
+    }
+
+    .step-content p {
+      font-size: 9.5pt;
+      margin-bottom: 0;
+    }
+
+    /* ══════════════════════════════════
+       INFO / WARNING BOXES
+       ══════════════════════════════════ */
+    .info-box {
+      background: rgba(201,166,107,0.06);
+      border: 1px solid var(--gold-dim);
+      border-left: 3px solid var(--gold);
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 14px 0;
+      break-inside: avoid;
+    }
+    .info-box p { margin-bottom: 0; font-size: 9.5pt; }
+    .info-box strong {
+      display: block; margin-bottom: 4px;
+      color: var(--gold); font-family: var(--font-serif); font-size: 10.5pt;
+    }
+
+    .warning-box {
+      background: rgba(220,38,38,0.06);
+      border: 1px solid rgba(220,38,38,0.2);
+      border-left: 3px solid #dc2626;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 14px 0;
+      break-inside: avoid;
+    }
+    .warning-box strong {
+      color: #f87171; display: block; margin-bottom: 4px;
+      font-family: var(--font-serif); font-size: 10.5pt;
+    }
+    .warning-box p { margin-bottom: 0; font-size: 9.5pt; }
+
+    /* ══════════════════════════════════
+       TABLE OF CONTENTS
+       ══════════════════════════════════ */
+    .toc { list-style: none; padding: 0; margin: 20px 0; }
+    .toc li {
+      display: flex; align-items: baseline;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(201,166,107,0.08);
+      gap: 10px;
+    }
+    .toc-number { font-family: var(--font-serif); font-size: 13pt; color: var(--gold); min-width: 28px; }
+    .toc-title { font-family: var(--font-serif); font-size: 12pt; color: var(--text-primary); flex: 1; }
+    .toc-page { font-family: var(--font-serif); font-size: 10pt; color: var(--text-secondary); }
+
+    /* ══════════════════════════════════
+       FEATURES GRID
+       ══════════════════════════════════ */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .feature-item {
+      background: var(--bg-card);
+      border: 1px solid rgba(201,166,107,0.12);
+      border-radius: 6px;
+      padding: 14px 16px;
+      break-inside: avoid;
+    }
+    .feature-icon { font-size: 18pt; margin-bottom: 6px; }
+    .feature-item h4 {
+      font-family: var(--font-serif);
+      font-size: 10.5pt; color: var(--gold-light); margin-bottom: 4px;
+    }
+    .feature-item p { font-size: 8.5pt; margin-bottom: 0; line-height: 1.5; }
+
+    /* ══════════════════════════════════
+       CONTACT CARD
+       ══════════════════════════════════ */
+    .contact-card {
+      background: linear-gradient(135deg, rgba(201,166,107,0.08), rgba(201,166,107,0.02));
+      border: 1px solid var(--gold-dim);
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      margin: 20px 0;
+      break-inside: avoid;
+    }
+    .contact-card h3 { margin-top: 0; font-size: 15pt; color: var(--gold); }
+    .contact-card p { max-width: 380px; margin: 0 auto 12px; }
+    .contact-item {
+      display: inline-block;
+      background: var(--bg-card);
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      padding: 8px 16px;
+      margin: 4px 6px;
+      font-size: 9.5pt;
+      color: var(--gold-light);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════ PORTADA ═══════════════ -->
+  <div class="cover">
+    <div class="cover-logo">
+      <img src="../public/assets/brand/final-01.png" alt="Khael Tarotista">
+    </div>
+    <h1>Manual de Usuario</h1>
+    <div class="subtitle">Mis Lecturas — Khael Tarotista</div>
+    <div class="cover-divider"><i></i><span>✦</span><i></i></div>
+    <p class="cover-description">
+      Guía paso a paso para acceder a tu biblioteca privada de lecturas de tarot.
+      Aquí encontrarás cómo iniciar sesión, explorar tus consultas,
+      revisar las interpretaciones y descargar tus lecturas en PDF.
+    </p>
+    <div class="cover-footer">Versión 1.0 — Julio 2026 · codexkhael.com</div>
+  </div>
+
+  <!-- ═══════════════ ÍNDICE ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Contenido</div>
+    <h2>Índice del Manual</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p>Este manual te guiará a través de cada sección del apartado <strong>Mis Lecturas</strong>,
+    tu espacio privado donde se guardan todas las consultas realizadas con Khael Tarotista.</p>
+
+    <ul class="toc">
+      <li><span class="toc-number">01</span><span class="toc-title">¿Qué es "Mis Lecturas"?</span><span class="toc-page">3</span></li>
+      <li><span class="toc-number">02</span><span class="toc-title">Acceso e Inicio de Sesión</span><span class="toc-page">4</span></li>
+      <li><span class="toc-number">03</span><span class="toc-title">Tu Biblioteca Privada (Panel Principal)</span><span class="toc-page">5</span></li>
+      <li><span class="toc-number">04</span><span class="toc-title">Explorando tus Lecturas</span><span class="toc-page">6–7</span></li>
+      <li><span class="toc-number">05</span><span class="toc-title">Detalle de una Lectura</span><span class="toc-page">8</span></li>
+      <li><span class="toc-number">06</span><span class="toc-title">La Tirada y las Cartas</span><span class="toc-page">9</span></li>
+      <li><span class="toc-number">07</span><span class="toc-title">Interpretación y Posiciones</span><span class="toc-page">10</span></li>
+      <li><span class="toc-number">08</span><span class="toc-title">Descargar tu Lectura en PDF</span><span class="toc-page">11</span></li>
+      <li><span class="toc-number">09</span><span class="toc-title">Cambiar tu Contraseña</span><span class="toc-page">12</span></li>
+      <li><span class="toc-number">10</span><span class="toc-title">Preguntas Frecuentes y Soporte</span><span class="toc-page">13</span></li>
+    </ul>
+
+    <div class="info-box">
+      <strong>💡 Nota importante</strong>
+      <p>Para acceder a <strong>Mis Lecturas</strong> necesitas las credenciales (correo y contraseña) que te fueron proporcionadas por Khael Tarotista al momento de tu consulta. Si no las recuerdas, puedes usar la opción "Olvidé mi contraseña" en la pantalla de inicio de sesión.</p>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">2</span>
+  </div>
+
+  <!-- ═══════════════ 01 — QUÉ ES ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 01</div>
+    <h2>¿Qué es "Mis Lecturas"?</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">Tu espacio privado de consultas de tarot</p>
+
+    <p><strong>Mis Lecturas</strong> es tu biblioteca personal dentro de la plataforma de Khael Tarotista.
+    Cada vez que realizas una consulta, la lectura completa queda registrada y disponible en este espacio
+    para que puedas revisarla cuando lo desees.</p>
+
+    <p>Desde aquí puedes:</p>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">📖</div>
+        <h4>Revisar tus consultas</h4>
+        <p>Accede a todas las lecturas que has realizado, organizadas por fecha.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🃏</div>
+        <h4>Ver la tirada de cartas</h4>
+        <p>Observa la disposición exacta de las cartas tal como fueron colocadas.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📝</div>
+        <h4>Leer las interpretaciones</h4>
+        <p>Revisa la interpretación detallada de cada posición y la conclusión general.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📄</div>
+        <h4>Descargar en PDF</h4>
+        <p>Descarga cualquier lectura como un documento PDF profesional.</p>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>🔒 Privacidad garantizada</strong>
+      <p>Cada consultante solo puede ver sus propias lecturas. Nadie más tiene acceso a tu información personal ni a tus consultas. Tu espacio es completamente privado.</p>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">3</span>
+  </div>
+
+  <!-- ═══════════════ 02 — LOGIN (pasos) ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 02</div>
+    <h2>Acceso e Inicio de Sesión</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">Cómo ingresar a tu espacio privado</p>
+
+    <p>Para acceder a <strong>Mis Lecturas</strong>, sigue estos pasos:</p>
+
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h4>Abre tu navegador y visita la página</h4>
+        <p>Ingresa <strong>codexkhael.com/mis-lecturas</strong> en tu navegador (Chrome, Safari, Firefox). Serás redirigido a la pantalla de inicio de sesión.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h4>Ingresa tu correo electrónico</h4>
+        <p>Escribe el correo que utilizaste al momento de tu consulta con Khael Tarotista.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h4>Ingresa tu contraseña</h4>
+        <p>Escribe la contraseña que te fue proporcionada. Si es tu primera vez, se te pedirá cambiarla.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">4</div>
+      <div class="step-content">
+        <h4>Presiona "Ingresar a Mis Lecturas"</h4>
+        <p>Haz clic en el botón dorado para acceder a tu biblioteca privada.</p>
+      </div>
+    </div>
+
+    <div class="screenshot-wrapper">
+      <img src="01_login_desktop.png" alt="Pantalla de inicio de sesión">
+      <div class="screenshot-caption">Pantalla de inicio de sesión — Ingresa tu correo y contraseña para acceder</div>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">4</span>
+  </div>
+
+  <!-- ═══════════════ 03 — BIBLIOTECA ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 03</div>
+    <h2>Tu Biblioteca Privada</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">El panel principal de Mis Lecturas</p>
+
+    <p>Una vez que inicies sesión, serás recibido por tu <strong>Biblioteca Privada</strong>. Este es tu panel principal.</p>
+
+    <div class="screenshot-wrapper">
+      <img src="03_dashboard_desktop.png" alt="Panel principal">
+      <div class="screenshot-caption">Panel principal — Tu biblioteca privada con el resumen de tus consultas</div>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">5</span>
+  </div>
+
+  <!-- ═══════════════ 03b — ELEMENTOS DEL PANEL ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 03 (cont.)</div>
+    <h2>Elementos del Panel Principal</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+
+    <div class="step">
+      <div class="step-number">A</div>
+      <div class="step-content">
+        <h4>Encabezado con tu información</h4>
+        <p>En la parte superior derecha verás tu <strong>nombre</strong> y <strong>correo electrónico</strong>, junto con opciones para cambiar tu contraseña (⚙️) o cerrar sesión.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">B</div>
+      <div class="step-content">
+        <h4>Panel de estadísticas</h4>
+        <p>Debajo del banner verás cuatro tarjetas con información resumida: <strong>Lecturas realizadas</strong>, <strong>Primera consulta</strong>, <strong>Última consulta</strong> y <strong>Baraja más utilizada</strong>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">C</div>
+      <div class="step-content">
+        <h4>Solicitar nueva lectura</h4>
+        <p>El botón dorado <strong>"Solicitar Nueva Lectura"</strong> te conecta directamente con Khael Tarotista a través de WhatsApp para agendar una nueva consulta.</p>
+      </div>
+    </div>
+
+    <h3>Barra de búsqueda y filtros</h3>
+    <p>Más abajo encontrarás herramientas para organizar y encontrar tus lecturas:</p>
+
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h4>Barra de búsqueda</h4>
+        <p>Escribe cualquier palabra clave (título, pregunta, tema) para encontrar rápidamente una lectura específica.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h4>Filtro por Categoría</h4>
+        <p>Filtra tus lecturas por tema: <strong>Amor</strong>, <strong>Trabajo</strong>, <strong>Dinero</strong>, etc.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h4>Filtro por Baraja</h4>
+        <p>Si has tenido consultas con diferentes barajas, puedes filtrar por la baraja utilizada.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">4</div>
+      <div class="step-content">
+        <h4>Ordenar</h4>
+        <p>Ordena tus lecturas de <strong>más recientes</strong> a más antiguas o viceversa.</p>
+      </div>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">6</span>
+  </div>
+
+  <!-- ═══════════════ 04 — EXPLORANDO LECTURAS ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 04</div>
+    <h2>Explorando tus Lecturas</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">Tus consultas organizadas como tarjetas</p>
+
+    <p>Cada lectura aparece como una tarjeta con un resumen, la imagen de la primera carta y la información clave de la consulta.</p>
+
+    <div class="screenshot-wrapper">
+      <img src="03b_dashboard_scrolled.png" alt="Lecturas guardadas">
+      <div class="screenshot-caption">Tus lecturas guardadas con filtros de búsqueda y tarjetas de cada consulta</div>
+    </div>
+
+    <h3>Acciones en cada lectura</h3>
+    <p>En la parte inferior de cada tarjeta encontrarás dos botones:</p>
+
+    <p>👁️ <strong>Ver lectura</strong> — Abre la lectura completa con todos los detalles, cartas e interpretaciones.</p>
+    <p>📥 <strong>PDF</strong> — Descarga la lectura como un documento PDF profesional que puedes guardar o imprimir.</p>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">7</span>
+  </div>
+
+  <!-- ═══════════════ 05 — DETALLE DE LECTURA ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 05</div>
+    <h2>Detalle de una Lectura</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">Explora cada aspecto de tu consulta personalizada</p>
+
+    <p>Al hacer clic en <strong>"Ver lectura"</strong>, accederás a la vista completa de tu consulta.</p>
+
+    <div class="screenshot-wrapper">
+      <img src="04_reading_detail_desktop.png" alt="Vista detallada">
+      <div class="screenshot-caption">Vista detallada — Encabezado con título, fecha y pregunta del consultante</div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">A</div>
+      <div class="step-content">
+        <h4>Barra lateral de navegación</h4>
+        <p>En el lado izquierdo encontrarás un <strong>índice</strong> que te permite saltar a cualquier sección: Pregunta, Tirada, Interpretación, cada Posición y la Conclusión Final.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">B</div>
+      <div class="step-content">
+        <h4>Encabezado de la lectura</h4>
+        <p>Muestra el <strong>título</strong>, la <strong>fecha</strong>, la <strong>baraja</strong> utilizada y el <strong>número total de cartas</strong>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">C</div>
+      <div class="step-content">
+        <h4>Pregunta del consultante</h4>
+        <p>La pregunta que formulaste aparece destacada entre comillas.</p>
+      </div>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">8</span>
+  </div>
+
+  <!-- ═══════════════ 06 — TIRADA ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 06</div>
+    <h2>La Tirada y las Cartas</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">Visualiza la disposición exacta de las cartas</p>
+
+    <p>La sección <strong>"Tirada"</strong> muestra la disposición visual de todas las cartas tal como fueron colocadas durante tu consulta, incluyendo rotaciones e inversiones.</p>
+
+    <div class="screenshot-wrapper">
+      <img src="04b_reading_tirada.png" alt="Vista de la tirada">
+      <div class="screenshot-caption">Sección de Tirada — Disposición visual completa de las cartas en su posición original</div>
+    </div>
+
+    <div class="info-box">
+      <strong>🃏 ¿Cartas invertidas?</strong>
+      <p>Si una carta aparece girada, significa que fue leída en posición <strong>invertida</strong>. Esto modifica su interpretación y queda preservado fielmente en este registro.</p>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">9</span>
+  </div>
+
+  <!-- ═══════════════ 07 — INTERPRETACIÓN ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 07</div>
+    <h2>Interpretación y Posiciones</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">La sabiduría detrás de cada carta</p>
+
+    <p>Debajo de la tirada encontrarás la <strong>Interpretación General</strong>, seguida del detalle de cada posición.</p>
+
+    <div class="screenshot-wrapper">
+      <img src="04c_reading_interpretation.png" alt="Interpretación general">
+      <div class="screenshot-caption">Interpretación General — El análisis completo de tu lectura</div>
+    </div>
+
+    <h3>En cada posición verás:</h3>
+
+    <div class="step">
+      <div class="step-number">•</div>
+      <div class="step-content">
+        <h4>Imagen de la carta</h4>
+        <p>La carta del tarot con su orientación (derecha o invertida).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">•</div>
+      <div class="step-content">
+        <h4>Nombre de la posición</h4>
+        <p>Qué aspecto representa (ej: "Obstáculo", "Futuro Cercano", "Consejo").</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">•</div>
+      <div class="step-content">
+        <h4>Interpretación personalizada</h4>
+        <p>Análisis de lo que significa esa carta en esa posición, aplicado a tu pregunta.</p>
+      </div>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">10</span>
+  </div>
+
+  <!-- ═══════════════ 08 — DESCARGAR PDF ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 08</div>
+    <h2>Descargar tu Lectura en PDF</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">Guarda tus lecturas para siempre</p>
+
+    <p>Puedes descargar cualquier lectura como un <strong>documento PDF profesional</strong> de dos maneras:</p>
+
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h4>Desde la lista de lecturas</h4>
+        <p>Cada tarjeta de lectura tiene un botón <strong>📥 PDF</strong> en la parte inferior. Al hacer clic, se abrirá una nueva pestaña con tu lectura en PDF lista para descargar.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h4>Desde el detalle de la lectura</h4>
+        <p>Dentro de la vista detallada, encontrarás un botón <strong>"Descargar PDF"</strong> en la parte inferior de la página.</p>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>📄 ¿Qué incluye el PDF?</strong>
+      <p>El documento incluye: portada personalizada, la disposición visual de las cartas, la interpretación general, el detalle de cada posición con su carta y la conclusión final. Es un registro completo de tu consulta.</p>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">11</span>
+  </div>
+
+  <!-- ═══════════════ 09 — CONTRASEÑA ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 09</div>
+    <h2>Cambiar tu Contraseña</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+    <p class="section-sub">Mantén tu cuenta segura</p>
+
+    <p>Si deseas cambiar tu contraseña, sigue estos pasos:</p>
+
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h4>Haz clic en el ícono de ajustes (⚙️)</h4>
+        <p>Lo encontrarás en la esquina superior derecha del panel principal, junto a tu nombre.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h4>Completa el formulario</h4>
+        <p>Ingresa tu <strong>contraseña actual</strong>, luego escribe tu <strong>nueva contraseña</strong> y confírmala.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h4>Guarda los cambios</h4>
+        <p>Presiona el botón para confirmar. Tu nueva contraseña quedará activa inmediatamente.</p>
+      </div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ ¿Olvidaste tu contraseña?</strong>
+      <p>En la pantalla de inicio de sesión encontrarás el enlace <strong>"Olvidé mi contraseña"</strong>. Haz clic e ingresa tu correo electrónico. Recibirás un enlace para restablecerla. Si no recibes el correo, revisa tu carpeta de spam o contacta directamente a Khael Tarotista.</p>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">12</span>
+  </div>
+
+  <!-- ═══════════════ 10 — FAQ ═══════════════ -->
+  <div class="page">
+    <div class="section-number">Sección 10</div>
+    <h2>Preguntas Frecuentes</h2>
+    <div class="heading-divider"><span>✦</span><i></i></div>
+
+    <h3>¿Puedo acceder desde mi celular?</h3>
+    <p>Sí. <strong>Mis Lecturas</strong> funciona en cualquier dispositivo: computadora, tablet o celular. Solo necesitas un navegador web y conexión a internet.</p>
+
+    <h3>¿Cuánto tiempo permanecen mis lecturas?</h3>
+    <p>Tus lecturas permanecen disponibles <strong>indefinidamente</strong>. Puedes volver a consultarlas en cualquier momento. Te recomendamos descargar los PDFs para tener una copia personal.</p>
+
+    <h3>¿Otra persona puede ver mis lecturas?</h3>
+    <p><strong>No.</strong> Tu espacio es completamente privado. Cada consultante accede únicamente a sus propias lecturas.</p>
+
+    <h3>No recuerdo mi correo o contraseña</h3>
+    <p>Si no recuerdas tu correo, contacta a Khael por WhatsApp. Si recuerdas tu correo pero no tu contraseña, usa <strong>"Olvidé mi contraseña"</strong> en la pantalla de inicio de sesión.</p>
+
+    <h3>¿Puedo solicitar una nueva lectura desde la plataforma?</h3>
+    <p>Sí. El botón <strong>"Solicitar Nueva Lectura"</strong> te conecta directamente con Khael Tarotista a través de WhatsApp.</p>
+
+    <h3>El PDF no se descarga correctamente</h3>
+    <p>Intenta usar otro navegador (Chrome es el recomendado). También puedes hacer clic derecho y seleccionar "Guardar enlace como...".</p>
+
+    <div class="contact-card">
+      <h3>¿Necesitas ayuda?</h3>
+      <p>Si tienes cualquier duda o problema técnico, contacta a Khael Tarotista:</p>
+      <div class="contact-item">📱 WhatsApp: +51 997 150 983</div>
+      <div class="contact-item">🌐 codexkhael.com</div>
+    </div>
+
+    <div class="info-box">
+      <strong>✨ Gracias por confiar en Khael Tarotista</strong>
+      <p>Tu lectura es un reflejo de tu momento presente y una guía para tus próximos pasos. Vuelve a consultarla cada vez que lo necesites.</p>
+    </div>
+
+    <span class="page-brand">KHAEL TAROTISTA</span>
+    <span class="page-number">13</span>
+  </div>
+
+</body>
+</html>
