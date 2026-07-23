@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { LandingHeader } from "./components/landing-header";
 import { BookMarked, BookOpen, Layers, Notebook, ShoppingBag, Sparkles } from "lucide-react";
+import { WhatsappFloatingButton } from "./components/whatsapp-floating-button";
 
 const landingImages = {
   hero: "/assets/landing/imagen_principal.png?v=3",
@@ -310,7 +311,7 @@ export default function HomePage() {
         <div className="landing-footer__newsletter">
           <h3>Sígueme</h3>
           <div className="landing-socials" aria-label="Redes sociales">
-            <a href="#contacto">◎</a>
+            <a href="https://www.instagram.com/khael.tarotista?igsh=ZDh0a2x3ZHpwN2k4&utm_source=qr" target="_blank" rel="noopener noreferrer">◎</a>
             <a href="#contacto">♪</a>
             <a href="#contacto">▶</a>
             <a href="mailto:hola@codexkhael.com">✉</a>
@@ -328,6 +329,7 @@ export default function HomePage() {
           <Image src={landingImages.sun} alt="" fill unoptimized sizes="280px" />
         </div>
       </footer>
+      <WhatsappFloatingButton />
     </div>
   );
 }

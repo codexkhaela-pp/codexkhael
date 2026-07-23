@@ -286,7 +286,7 @@ export default function CodexKhaelPage() {
         <div className="landing-footer__newsletter">
           <h3>Sígueme</h3>
           <div className="landing-socials" aria-label="Redes sociales">
-            <a href="mailto:hola@codexkhael.com">◍</a>
+            <a href="https://www.instagram.com/khael.tarotista?igsh=ZDh0a2x3ZHpwN2k4&utm_source=qr" target="_blank" rel="noopener noreferrer">◍</a>
             <a href="mailto:hola@codexkhael.com">♪</a>
             <a href="mailto:hola@codexkhael.com">▶</a>
             <a href="mailto:hola@codexkhael.com">✉</a>
