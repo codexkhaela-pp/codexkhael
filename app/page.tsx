@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LandingHeader } from "./components/landing-header";
 import { BookMarked, BookOpen, Layers, Notebook, ShoppingBag, Sparkles } from "lucide-react";
 
 const landingImages = {
@@ -90,40 +91,7 @@ const products = [
 export default function HomePage() {
   return (
     <div className="landing-page">
-      <header className="landing-header">
-        <a className="landing-brand" href="#inicio" aria-label="Khael Tarotista">
-          <Image 
-            src="/assets/brand/final-01.png" 
-            alt="Khael Tarotista Logo" 
-            width={65} 
-            height={65}
-            priority
-            className="landing-brand-logo-img"
-            style={{ objectFit: "contain" }}
-          />
-        </a>
-
-        <nav className="landing-nav" aria-label="Navegación principal">
-          <a href="#inicio">Inicio</a>
-          <Link href="/lecturas">Lecturas</Link>
-          <Link href="/carta-del-dia">Carta del Día</Link>
-          <Link href="/codex-khael">
-            Codex Khael
-          </Link>
-          {/* <a href="#tienda">Tienda</a> */}
-          <Link href="/acerca-de-mi">Sobre mí</Link>
-          {/* <a href="#contacto">Contacto</a> */}
-        </nav>
-
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <Link className="landing-access" href="/mis-lecturas/login" prefetch={false} style={{ background: 'transparent', borderColor: 'rgba(215, 173, 105, 0.4)' }}>
-            Mis Lecturas <span>+</span>
-          </Link>
-          <Link className="landing-access" href="/login" prefetch={false}>
-            Acceso a Codex <span>+</span>
-          </Link>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main>
         <section className="landing-hero" id="inicio">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { LandingHeader } from "../components/landing-header";
 
 export const metadata: Metadata = {
   title: "Códex Kahel | Khael Tarotista",
@@ -100,40 +101,7 @@ const faqs = [
 export default function CodexKhaelPage() {
   return (
     <div className="landing-page codex-page">
-      <header className="landing-header">
-        <Link className="landing-brand" href="/" aria-label="Khael Tarotista">
-          <Image 
-            src="/assets/brand/final-01.png" 
-            alt="Khael Tarotista Logo" 
-            width={65} 
-            height={65}
-            priority
-            className="landing-brand-logo-img"
-            style={{ objectFit: "contain" }}
-          />
-        </Link>
-
-        <nav className="landing-nav" aria-label="Navegación principal">
-          <Link href="/">Inicio</Link>
-          <Link href="/lecturas">Lecturas</Link>
-          <Link href="/carta-del-dia">Carta del Día</Link>
-          <Link href="/codex-khael" className="is-active">
-            Codex Khael
-          </Link>
-          {/* <Link href="/#tienda">Tienda</Link> */}
-          <Link href="/acerca-de-mi">Sobre mí</Link>
-          {/* <Link href="/#contacto">Contacto</Link> */}
-        </nav>
-
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <Link className="landing-access" href="/mis-lecturas/login" prefetch={false} style={{ background: 'transparent', borderColor: 'rgba(215, 173, 105, 0.4)' }}>
-            Mis Lecturas <span>+</span>
-          </Link>
-          <Link className="landing-access" href="/login" prefetch={false}>
-            Acceso a Codex <span>+</span>
-          </Link>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main>
         <section className="codex-hero" id="el-codex" aria-labelledby="codex-hero-title">
