@@ -1,4 +1,4 @@
-﻿.pageMain {
+.pageMain {
   display: grid;
   gap: 20px;
 }
@@ -891,4 +891,384 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* --- REDISEÑO DASHBOARD DE APRENDIZAJE --- */
+.dashWrapper {
+  width: 100%;
+  padding-inline: clamp(16px, 4vw, 56px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 60px;
+}
+
+/* TOP CABECERA Y KPIS */
+.dashTopArea {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+}
+@media (max-width: 1024px) {
+  .dashTopArea {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.dashTitleBlock {
+  flex: 0 0 35%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashTitle {
+  margin: 0;
+  font-family: "Georgia", serif;
+  color: #f7efe2;
+  font-size: 52px;
+  font-weight: normal;
+  line-height: 0.95;
+}
+.dashSubtitle {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.72);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.dashKpisRow {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 1024px) {
+  .dashTitleBlock { flex: none; }
+}
+@media (max-width: 640px) {
+  .dashKpisRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashKpiCard {
+  background: linear-gradient(180deg, rgba(247,239,226,.012), rgba(5,6,10,.18));
+  border: 1px solid rgba(215,173,105,.22);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashKpiHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashKpiIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(215,173,105,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d7ad69;
+  font-size: 12px;
+}
+
+.dashKpiLabel {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.85);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dashKpiValue {
+  margin: 6px 0 0;
+  font-family: "Georgia", serif;
+  color: #f7efe2;
+  font-size: 36px;
+  line-height: 1;
+}
+
+.dashKpiSub {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.5);
+  font-size: 11px;
+}
+
+/* CONTENIDO PRINCIPAL */
+.dashMainLayout {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: 32px;
+}
+@media (max-width: 1024px) {
+  .dashMainLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* SESIONES RECIENTES */
+.dashRecentPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashRecentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(215,173,105,.12);
+  padding-bottom: 12px;
+}
+
+.dashRecentTitle {
+  margin: 0;
+  font-family: "Georgia", serif;
+  color: #d7ad69;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashRecentActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashAvgScore {
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.72);
+  font-size: 13px;
+  border: 1px solid rgba(215,173,105,.28);
+  border-radius: 6px;
+  padding: 4px 10px;
+  background: rgba(5,6,10,.3);
+}
+
+.dashBtnPrimary {
+  background: linear-gradient(135deg,#ffe3ab,#d5a257);
+  color: #20170b;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 16px;
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s ease;
+}
+.dashBtnPrimary:hover {
+  opacity: 0.9;
+}
+
+/* TABLA */
+.dashTableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.dashTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+.dashTable th {
+  text-align: left;
+  font-family: "Inter", sans-serif;
+  color: rgba(215,173,105,.72);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 10px;
+  border-bottom: 1px solid rgba(215,173,105,.2);
+}
+.dashTable td {
+  text-align: left;
+  font-family: "Inter", sans-serif;
+  color: #f7efe2;
+  font-size: 13px;
+  padding: 14px 10px;
+  border-bottom: 1px solid rgba(215,173,105,.12);
+  white-space: nowrap;
+}
+
+.dashStatusDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.dashStatusDot.activa {
+  background-color: #5ebf8f;
+  box-shadow: 0 0 8px rgba(94, 191, 143, 0.4);
+}
+.dashStatusDot.finalizada {
+  background-color: rgba(247,239,226,.3);
+}
+
+.dashBtnRow {
+  background: rgba(5,6,10,.46);
+  border: 1px solid rgba(215,173,105,.38);
+  color: #f2d6a0;
+  border-radius: 7px;
+  padding: 6px 14px;
+  font-family: "Inter", sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  display: inline-flex;
+}
+.dashBtnRow:hover {
+  background: rgba(215,173,105,.1);
+}
+
+.dashViewAll {
+  text-align: center;
+  margin-top: 10px;
+  font-family: "Inter", sans-serif;
+  color: rgba(215,173,105,.8);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* CARTAS PROBLEMATICAS */
+.dashProblemPanel {
+  background: linear-gradient(180deg, rgba(247,239,226,.012), rgba(5,6,10,.18));
+  border: 1px solid rgba(215,173,105,.22);
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: fit-content;
+}
+
+.dashProblemTitle {
+  margin: 0;
+  font-family: "Georgia", serif;
+  color: #d7ad69;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashProblemList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashProblemCard {
+  border: 1px solid rgba(215,173,105,.12);
+  border-radius: 8px;
+  background: rgba(5,6,10,.4);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.dashProblemThumb {
+  width: 44px;
+  height: 60px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(215,173,105,.28);
+}
+.dashProblemThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dashProblemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashProblemName {
+  margin: 0;
+  font-family: "Georgia", serif;
+  color: #f7efe2;
+  font-size: 14px;
+}
+.dashProblemOrientation {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.72);
+  font-size: 12px;
+}
+.dashProblemStats {
+  margin: 4px 0 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.5);
+  font-size: 11px;
+}
+
+.dashProblemWeight {
+  font-family: "Inter", sans-serif;
+  color: #d7ad69;
+  border: 1px solid rgba(215,173,105,.2);
+  background: rgba(215,173,105,.05);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+}
+
+.dashProblemActionBtn {
+  width: 100%;
+  justify-content: center;
+  background: linear-gradient(135deg,#ffe3ab,#d5a257);
+  color: #20170b;
+  border: none;
+  border-radius: 7px;
+  padding: 12px 16px;
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dashEmpty {
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.5);
+  font-size: 13px;
 }
