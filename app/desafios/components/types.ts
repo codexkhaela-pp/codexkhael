@@ -17,6 +17,7 @@ export type ChallengeItem = {
   description: string;
   difficulty: "Fácil" | "Media" | "Difícil";
   xpReward: number;
+  status?: "LOCKED" | "COMPLETED" | "AVAILABLE" | "IN_PROGRESS" | string;
 };
 
 export type InterpreterRank = {
