@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -40,7 +40,9 @@ type FeedbackPayload = {
   title: string;
   message: string;
   cardName: string;
+  cardImage: string | null;
   orientationLabel: string;
+  orientation: "UPRIGHT" | "REVERSED";
   selectedAnswer: string;
   correctAnswer: string;
   meaning: string;
@@ -156,18 +158,26 @@ export function SessionPlayer({ sessionId }: { sessionId: string }) {
       });
 
       setFeedback(
-        data.feedback ?? {
-          status: data.isCorrect ? "correct" : "incorrect",
-          title: data.isCorrect ? "Correcto" : "Respuesta incorrecta",
-          message: data.isCorrect
-            ? "Bien hecho. Continúa con la siguiente carta."
-            : "Esta carta aparecerá más seguido para reforzarla.",
-          cardName: pendingQuestion.cardName,
-          orientationLabel: pendingQuestion.orientationLabel,
-          selectedAnswer: selectedOption,
-          correctAnswer: selectedOption,
-          meaning: "",
-        },
+        data.feedback
+          ? {
+              ...data.feedback,
+              cardImage: pendingQuestion.cardImage,
+              orientation: pendingQuestion.orientation,
+            }
+          : {
+              status: data.isCorrect ? "correct" : "incorrect",
+              title: data.isCorrect ? "Correcto" : "Respuesta incorrecta",
+              message: data.isCorrect
+                ? "Bien hecho. Continúa con la siguiente carta."
+                : "Esta carta aparecerá más seguido para reforzarla.",
+              cardName: pendingQuestion.cardName,
+              cardImage: pendingQuestion.cardImage,
+              orientationLabel: pendingQuestion.orientationLabel,
+              orientation: pendingQuestion.orientation,
+              selectedAnswer: selectedOption,
+              correctAnswer: selectedOption,
+              meaning: "",
+            },
       );
       setLastAnswerFinishedSession(data.finished);
     } catch (answerError) {
@@ -224,110 +234,112 @@ export function SessionPlayer({ sessionId }: { sessionId: string }) {
     : "Selecciona la carta correcta";
 
   return (
-    <>
-      <button
-        type="button"
-        className={styles.backModuleButton}
-        onClick={() => router.push("/aprendizaje")}
-      >
-        ← Volver al módulo
-      </button>
-
-      <section className={styles.sessionBadges}>
-        <span className={styles.sessionChip}>
-          <span className={styles.sessionChipIcon} aria-hidden="true">◈</span>
-          <span>Modo: {modeLabel(payload.session.mode)}</span>
-        </span>
-        <span className={styles.sessionChip}>
-          <span className={styles.sessionChipIcon} aria-hidden="true">◈</span>
-          <span>Ámbito: {payload.session.selectedDeckScopeLabel}</span>
-        </span>
-        <span className={styles.sessionChip}>
-          <span className={styles.sessionChipIcon} aria-hidden="true">◈</span>
-          <span>Orientación: {payload.session.orientationScopeLabel}</span>
-        </span>
-        <span className={styles.sessionChip}>
-          <span className={styles.sessionChipIcon} aria-hidden="true">◈</span>
-          <span>
-          Pregunta {pendingQuestion?.order ?? payload.session.questionCount} / {payload.session.questionCount}
+    <main className={styles.activeWrapper}>
+      <header className={styles.activeHeader}>
+        <p className={styles.activeKicker}>Aprendizaje</p>
+        <h1 className={styles.activeTitle}>Sesión activa</h1>
+        <p className={styles.activeSubtitle}>Responde cada pregunta considerando orientación al derecho o invertida.</p>
+        
+        <div className={styles.activeContextBar}>
+          <button type="button" className={`${styles.activeContextPill} ${styles.activeBackBtn}`} onClick={() => router.push("/aprendizaje")}>
+            ← Volver al módulo
+          </button>
+          <span className={styles.activeContextPill}>
+            <span className={styles.activeContextIcon} aria-hidden="true">◈</span> Modo: {modeLabel(payload.session.mode)}
           </span>
-        </span>
-      </section>
+          <span className={styles.activeContextPill}>
+            <span className={styles.activeContextIcon} aria-hidden="true">◈</span> Ámbito: {payload.session.selectedDeckScopeLabel}
+          </span>
+          <span className={styles.activeContextPill}>
+            <span className={styles.activeContextIcon} aria-hidden="true">◈</span> Orientación: {payload.session.orientationScopeLabel}
+          </span>
+          <span className={styles.activeContextPill}>
+            <span className={styles.activeContextIcon} aria-hidden="true">◈</span> Pregunta {pendingQuestion?.order ?? payload.session.questionCount} / {payload.session.questionCount}
+          </span>
+        </div>
+      </header>
 
       {pendingQuestion ? (
-        <section className={`${styles.surface} ${styles.activeSessionSurface}`}>
-          <article className={styles.activeQuestionLayout}>
-            <div className={styles.activeCardPanel}>
-              {isImageToMeaningQuestion ? (
-                <>
-                  <p className={styles.activePanelKicker}>Carta actual</p>
-                  <h3 className={styles.activeCardName}>{pendingQuestion.cardName}</h3>
-                  <p className={styles.activeCardOrientation}>({pendingQuestion.orientationLabel})</p>
-
+        <section className={styles.activeMainGrid}>
+          <article className={styles.activeCardBox}>
+            {isImageToMeaningQuestion ? (
+              <>
+                <p className={styles.activeCardBoxTitle}>Carta actual</p>
+                <h2 className={styles.activeCardBoxName}>{pendingQuestion.cardName}</h2>
+                <div className={styles.activeCardOrientation}>
+                  {pendingQuestion.orientationLabel}
+                  <span className={`${styles.orientationDot} ${pendingQuestion.orientation === "UPRIGHT" ? styles.dotUpright : styles.dotReversed}`} />
+                </div>
+                
+                <div className={styles.activeCardImageWrap}>
                   {pendingQuestion.cardImage ? (
-                    <div className={styles.activeCardPreview}>
-                      <img
-                        src={pendingQuestion.cardImage}
-                        alt={pendingQuestion.cardName}
-                        style={pendingQuestion.orientation === "REVERSED" ? { transform: "rotate(180deg)" } : undefined}
-                      />
-                    </div>
+                    <img 
+                      src={pendingQuestion.cardImage} 
+                      alt={pendingQuestion.cardName} 
+                      style={pendingQuestion.orientation === "REVERSED" ? { transform: "rotate(180deg)" } : undefined} 
+                    />
                   ) : null}
-                </>
-              ) : (
-                <>
-                  <p className={styles.activePanelKicker}>Significado actual</p>
-                  <h3 className={styles.activeMeaningTitle}>Interpretación</h3>
-                  <p className={styles.activeMeaningText}>{pendingQuestion.promptText}</p>
-                  <p className={styles.activeCardOrientation}>({pendingQuestion.orientationLabel})</p>
-                </>
-              )}
-            </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className={styles.activeCardBoxTitle}>Significado actual</p>
+                <h2 className={styles.activeCardBoxName}>Interpretación</h2>
+                <p style={{ color: "#f7efe2", fontSize: "15px", margin: "12px 0 24px", lineHeight: 1.5 }}>{pendingQuestion.promptText}</p>
+                <div className={styles.activeCardOrientation}>
+                  {pendingQuestion.orientationLabel}
+                  <span className={`${styles.orientationDot} ${pendingQuestion.orientation === "UPRIGHT" ? styles.dotUpright : styles.dotReversed}`} />
+                </div>
+              </>
+            )}
 
-            <div className={styles.activeOptionsPanel}>
-              <h3 className={styles.activeOptionsTitle}>{promptTitle}</h3>
-
-              <div className={styles.optionsListVertical}>
-                {pendingQuestion.options.map((option) => {
-                  const isSelected = selectedOption === option;
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      className={`${styles.optionRowButton} ${isSelected ? styles.optionRowSelected : ""}`}
-                      onClick={() => setSelectedOption(option)}
-                      disabled={answering || Boolean(feedback)}
-                    >
-                      <span className={styles.optionRadioDot} aria-hidden="true" />
-                      <span>{option}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <hr className={styles.activeTipDivider} />
+            <p className={styles.activeTipTitle}>✦ Consejo</p>
+            <p className={styles.activeTipText}>Piensa en la energía de la carta por orientación antes de confirmar.</p>
           </article>
 
-          <footer className={styles.activeQuestionFooter}>
-            <div>
-              <p className={styles.activeFooterTitle}>Consejo</p>
-              <p className={styles.activeFooterText}>
-                Piensa en la energía de la carta por orientación antes de confirmar.
-              </p>
+          <article className={styles.activeQuestionBox}>
+            <h2 className={styles.activeQuestionTitle}>✦ {promptTitle}</h2>
+            
+            <div className={styles.activeOptionsWrap}>
+              {pendingQuestion.options.map((option) => {
+                const isSelected = selectedOption === option;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`${styles.activeOptionRow} ${isSelected ? styles.activeOptionRowSelected : ""}`}
+                    onClick={() => setSelectedOption(option)}
+                    disabled={answering || Boolean(feedback)}
+                  >
+                    <div className={styles.activeRadioCircle}>
+                      <div className={styles.activeRadioInner} />
+                    </div>
+                    <span className={styles.activeOptionText}>{option}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            <button
-              type="button"
-              className={styles.primaryButton}
-              onClick={handleConfirmAnswer}
-              disabled={answering || !selectedOption || Boolean(feedback)}
-            >
-              {answering ? "Confirmando..." : "Confirmar respuesta →"}
-            </button>
-          </footer>
+            <div className={styles.activeConfirmWrap}>
+              <button
+                type="button"
+                className={styles.activeBtnPrimary}
+                onClick={handleConfirmAnswer}
+                disabled={answering || !selectedOption || Boolean(feedback)}
+              >
+                {answering ? "Confirmando..." : "Confirmar respuesta →"}
+              </button>
+            </div>
+          </article>
         </section>
       ) : (
-        <section className={styles.surface}>
-          <p className={styles.emptyState}>No hay más preguntas pendientes.</p>
+        <section className={styles.activeEndBox}>
+          <h2 className={styles.activeTitle}>Sesión finalizada</h2>
+          <p className={styles.activeSubtitle} style={{ marginBottom: "24px" }}>Todas las preguntas fueron respondidas.</p>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button type="button" className={styles.activeBtnPrimary} onClick={() => router.push(`/aprendizaje/resultados/${sessionId}`)}>Ver resultados</button>
+          </div>
         </section>
       )}
 
@@ -337,6 +349,6 @@ export function SessionPlayer({ sessionId }: { sessionId: string }) {
         onContinue={handleContinueAfterFeedback}
         isFinishing={lastAnswerFinishedSession}
       />
-    </>
+    </main>
   );
 }

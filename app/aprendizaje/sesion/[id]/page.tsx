@@ -15,14 +15,9 @@ export default async function AprendizajeSesionPage({ params }: SessionPageProps
   const { id } = await params;
 
   return (
-    <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
-      <DashboardPageHeader
-        kicker="Aprendizaje"
-        title="Sesión activa"
-        description="Responde cada pregunta considerando orientación al derecho o invertida."
-      />
+    <div className={styles.activePageWrapper}>
       <SessionPlayer sessionId={id} />
-    </main>
+    </div>
   );
 }
 
