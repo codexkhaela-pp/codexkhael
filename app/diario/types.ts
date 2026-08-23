@@ -108,6 +108,7 @@ export interface JournalRereading {
   reflection: string;
   newPersonalInterpretation: string;
   lessonLearned: string;
+  recordType?: "REREADING" | "PERSONAL_INTERPRETATION";
 }
 
 export interface JournalEntry {

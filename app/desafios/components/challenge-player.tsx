@@ -7,6 +7,7 @@ import type { ChallengeDetail } from "@/app/desafios/components/types";
 import { ChallengeQuestionCard } from "@/app/desafios/components/challenge-question-card";
 import { ChallengeFeedback } from "@/app/desafios/components/challenge-feedback";
 import { cleanQuestionText, cleanDescription } from "@/app/desafios/components/challenge-mappers";
+import { ChallengeDetailPreView } from "@/app/desafios/components/challenge-detail-preview";
 
 type ChallengePlayerProps = {
   challenge: ChallengeDetail;
@@ -133,17 +134,11 @@ export function ChallengePlayer({ challenge }: ChallengePlayerProps) {
 
   if (!attemptId) {
     return (
-      <section className={styles.playerContainer}>
-        <h1 className={styles.playerTitle}>{challenge.title}</h1>
-        <p className={styles.playerDescription}>{cleanDescription(challenge.description, challenge.isDaily)}</p>
-        <p className={styles.playerMeta}>
-          Dificultad: <strong>{challenge.difficulty}</strong> · XP base: <strong>{challenge.baseXp}</strong>
-        </p>
-        {error ? <p className={styles.error}>{error}</p> : null}
-        <button type="button" className={styles.primaryAction} onClick={startAttempt} disabled={loading}>
-          {loading ? "Iniciando..." : "Iniciar desafío"}
-        </button>
-      </section>
+      <ChallengeDetailPreView 
+        challenge={challenge} 
+        onStartAttempt={startAttempt} 
+        loading={loading} 
+      />
     );
   }
 
@@ -156,44 +151,58 @@ export function ChallengePlayer({ challenge }: ChallengePlayerProps) {
   }
 
   return (
-    <section className={styles.playerContainer}>
-      <header className={styles.playerHeader}>
-        <h1 className={styles.playerTitle}>{challenge.title}</h1>
-        <span className={styles.difficultyBadge}>Pregunta {progressLabel}</span>
-      </header>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <nav className={styles.challengePlayBreadcrumb}>
+        <a href="/desafios">Desafíos</a> › <span>Desafío Diario</span> › <span>Resolución</span>
+      </nav>
 
-      <ChallengeQuestionCard
-        question={currentQuestion}
-        selectedOption={selectedOption}
-        onSelectOption={setSelectedOption}
-        disabled={loading || Boolean(feedback)}
-      />
+      <section className={styles.challengePlayContainer}>
+        <header className={styles.challengePlayHeader}>
+          <h1 className={styles.challengePlayTitle}>{challenge.title}</h1>
+          <span className={styles.challengePlayCounter}>Pregunta {progressLabel}</span>
+        </header>
 
-      <ChallengeFeedback
-        visible={Boolean(feedback)}
-        isCorrect={feedback?.isCorrect ?? false}
-        correctAnswer={feedback?.correctAnswer ?? ""}
-        explanation={feedback?.explanation ?? ""}
-      />
+        <ChallengeQuestionCard
+          question={currentQuestion}
+          selectedOption={selectedOption}
+          onSelectOption={setSelectedOption}
+          disabled={loading || Boolean(feedback)}
+          feedbackArea={
+            <ChallengeFeedback
+              visible={Boolean(feedback)}
+              isCorrect={feedback?.isCorrect ?? false}
+              correctAnswer={feedback?.correctAnswer ?? ""}
+              explanation={feedback?.explanation ?? ""}
+            />
+          }
+          actionArea={
+            !feedback ? (
+              <button
+                type="button"
+                className={styles.challengePlayConfirmBtn}
+                onClick={confirmAnswer}
+                disabled={!selectedOption || loading}
+              >
+                {loading ? "Confirmando..." : "Confirmar respuesta →"}
+              </button>
+            ) : (
+              <button type="button" className={styles.challengePlayConfirmBtn} onClick={continueFlow} disabled={loading}>
+                {loading ? "Procesando..." : currentIndex + 1 < challenge.questions.length ? "Siguiente pregunta →" : "Finalizar desafío →"}
+              </button>
+            )
+          }
+        />
+      </section>
 
-      {error ? <p className={styles.error}>{error}</p> : null}
-
-      <footer className={styles.playerActions}>
-        {!feedback ? (
-          <button
-            type="button"
-            className={styles.primaryAction}
-            onClick={confirmAnswer}
-            disabled={!selectedOption || loading}
-          >
-            {loading ? "Confirmando..." : "Confirmar respuesta"}
-          </button>
-        ) : (
-          <button type="button" className={styles.primaryAction} onClick={continueFlow} disabled={loading}>
-            {loading ? "Procesando..." : currentIndex + 1 < challenge.questions.length ? "Siguiente pregunta" : "Finalizar desafío"}
-          </button>
-        )}
-      </footer>
-    </section>
+      <div>
+        <button
+          type="button"
+          className={styles.challengePlayBackLink}
+          onClick={() => router.push(`/desafios/${challenge.id}`)}
+        >
+          ← Volver al desafío
+        </button>
+      </div>
+    </div>
   );
 }

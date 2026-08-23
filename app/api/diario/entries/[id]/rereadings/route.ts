@@ -50,6 +50,7 @@ export async function POST(request: Request, { params }: Params) {
       reflection: body.reflection?.trim() || null,
       newInterpretation: body.newInterpretation?.trim() || null,
       lessonLearned: body.lessonLearned?.trim() || null,
+      recordType: body.recordType ?? "REREADING",
     },
   });
 

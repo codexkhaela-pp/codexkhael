@@ -60,23 +60,30 @@ export function ChallengeResultPageClient({ attemptId }: ChallengeResultPageClie
   if (!attempt) return <p className={styles.emptyState}>No se encontró el intento solicitado.</p>;
 
   return (
-    <section className={styles.resultContainer}>
-      <header className={styles.resultHeader}>
-        <h1 className={styles.heroTitle}>Resultado del desafío</h1>
-        <p className={styles.heroDescription}>{attempt.challenge.title}</p>
+    <div className={styles.resultPageContainer}>
+      <nav className={styles.resultPageBreadcrumb}>
+        <Link href="/desafios">Desafíos</Link> › <span>{attempt.challenge.title}</span> › <span>Resultado</span>
+      </nav>
+
+      <header className={styles.resultPageHeader}>
+        <div className={styles.resultPageHeaderIcon} aria-hidden="true">✧</div>
+        <div className={styles.resultPageHeaderContent}>
+          <h1 className={styles.resultPageTitle}>Resultado del desafío</h1>
+          <p className={styles.resultPageSubtitle}>{attempt.challenge.title}</p>
+        </div>
       </header>
 
       <ChallengeResultSummary attempt={attempt} progress={progress} />
       <ChallengeAnswersReview attempt={attempt} />
 
-      <div className={styles.resultActions}>
-        <Link href="/desafios" className={styles.tertiaryAction}>
-          Volver a desafíos
+      <div className={styles.resultPageActions}>
+        <Link href="/desafios" className={styles.resultPageBtnGhost}>
+          ← Volver a desafíos
         </Link>
-        <Link href={`/desafios/${attempt.challengeId}`} className={styles.primaryAction}>
-          Resolver otro desafío
+        <Link href={`/desafios/${attempt.challengeId}`} className={styles.resultPageBtnPrimary}>
+          Resolver otro desafío <span aria-hidden="true">✧</span>
         </Link>
       </div>
-    </section>
+    </div>
   );
 }

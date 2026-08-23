@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-server";
 import { DesafiosPageClient } from "@/app/desafios/components/desafios-page-client";
-import styles from "@/app/desafios/desafios.module.css";
+import styles from "@/app/desafios/desafios-hub.module.css";
 
 export const metadata = {
   title: "Desafíos | Codex Khael",
@@ -15,7 +15,7 @@ export default async function DesafiosRoutePage() {
   }
 
   return (
-    <main className={`app-shell dashboard-preview-bg ${styles.pageMain}`}>
+    <main className={`app-shell landing-page ${styles.pageMain}`}>
       <DesafiosPageClient />
     </main>
   );

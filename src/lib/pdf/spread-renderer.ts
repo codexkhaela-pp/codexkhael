@@ -34,8 +34,8 @@ export class SpreadRenderer {
       const cw = BASE_CARD_WIDTH * scale;
       const ch = BASE_CARD_HEIGHT * scale;
       
-      const centerX = (card.x / 100) * VIRTUAL_CANVAS_WIDTH;
-      const centerY = (card.y / 100) * VIRTUAL_CANVAS_HEIGHT;
+      const centerX = card.x + cw / 2;
+      const centerY = card.y + ch / 2;
       
       const radius = Math.sqrt((cw / 2)**2 + (ch / 2)**2);
       
@@ -87,8 +87,8 @@ export class SpreadRenderer {
       const cw = BASE_CARD_WIDTH * scale;
       const ch = BASE_CARD_HEIGHT * scale;
       
-      const centerX = (card.x / 100) * VIRTUAL_CANVAS_WIDTH;
-      const centerY = (card.y / 100) * VIRTUAL_CANVAS_HEIGHT;
+      const centerX = card.x + cw / 2;
+      const centerY = card.y + ch / 2;
       
       const radius = Math.sqrt((cw / 2)**2 + (ch / 2)**2);
       

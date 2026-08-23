@@ -1,4 +1,4 @@
-.container {
+﻿.container {
   max-width: 800px;
   margin: 0 auto;
   padding: 40px 20px;
@@ -205,4 +205,402 @@
     width: 100%;
     max-width: 100%;
   }
+}
+
+/* --- REDISEÑO AJUSTES MAIN --- */
+.settingsMain {
+  width: min(1480px, calc(100% - clamp(28px, 5vw, 72px)));
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 40px;
+}
+
+.settingsHeader {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settingsTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingsTitleIcon {
+  color: #d7ad69;
+  font-size: 24px;
+}
+
+.settingsTitle {
+  margin: 0;
+  font-family: "Georgia", serif;
+  color: #f7efe2;
+  font-size: 32px;
+  font-weight: normal;
+}
+
+.settingsSubtitle {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.72);
+  font-size: 14px;
+}
+
+.settingsPanel {
+  background: linear-gradient(180deg, rgba(247,239,226,.012), rgba(5,6,10,.18));
+  border: 1px solid rgba(215,173,105,.28);
+  border-radius: 10px;
+  padding: 24px 32px;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.28fr) minmax(0, 1fr);
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.settingsPanel::after {
+  content: " ";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle at top right, rgba(215,173,105,.05), transparent 70%);
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .settingsPanel {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px 24px;
+  }
+}
+
+.settingsPanelLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settingsPanelIconBox {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(215,173,105,.6);
+  background: rgba(5,6,10,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d7ad69;
+  font-size: 20px;
+}
+
+.settingsPanelTitle {
+  margin: 0;
+  font-family: "Georgia", serif;
+  color: #d7ad69;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.settingsPanelDesc {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.72);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settingsPanelRight {
+  display: flex;
+  flex-direction: column;
+}
+
+.settingsFormFields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settingsFormRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .settingsFormRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .settingsFormRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settingsField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settingsLabel {
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.85);
+  font-size: 13px;
+}
+
+.settingsInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.settingsInputIcon {
+  position: absolute;
+  left: 12px;
+  color: rgba(215,173,105,.8);
+  font-size: 14px;
+}
+
+.settingsInput {
+  width: 100%;
+  background: rgba(5,6,10,.48);
+  border: 1px solid rgba(215,173,105,.28);
+  color: #f7efe2;
+  border-radius: 7px;
+  padding: 10px 14px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.settingsInputWithIcon {
+  padding-left: 36px;
+}
+
+.settingsInput:focus {
+  border-color: #d7ad69;
+  box-shadow: 0 0 0 3px rgba(215,173,105,.08);
+}
+
+.settingsInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.settingsInputToggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: rgba(215,173,105,.8);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settingsFormActions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.settingsBtnPrimary {
+  background: linear-gradient(135deg,#ffe3ab,#d5a257);
+  color: #20170b;
+  border: none;
+  border-radius: 7px;
+  padding: 12px 24px;
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settingsBtnPrimary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.settingsBtnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settingsBtnGhost {
+  background: rgba(5,6,10,.46);
+  border: 1px solid rgba(215,173,105,.72);
+  color: #f2d6a0;
+  border-radius: 7px;
+  padding: 12px 24px;
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settingsBtnGhost:hover {
+  background: rgba(215,173,105,.1);
+}
+
+.settingsMessage {
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+.settingsMessageError {
+  color: #e66055;
+  margin-top: 6px;
+}
+.settingsMessageSuccess {
+  color: #5ebf8f;
+}
+
+.settingsSubscriptionCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(215,173,105,.15);
+  border-radius: 8px;
+  padding: 20px 24px;
+  background: rgba(5,6,10,.38);
+}
+
+@media (max-width: 640px) {
+  .settingsSubscriptionCard {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+}
+
+.settingsSubscriptionInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.settingsSubscriptionBadge {
+  background: rgba(94, 191, 143, 0.15);
+  color: #5ebf8f;
+  border: 1px solid rgba(94, 191, 143, 0.3);
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.settingsSubscriptionName {
+  margin: 0;
+  font-family: "Georgia", serif;
+  color: #f7efe2;
+  font-size: 20px;
+}
+
+.settingsSubscriptionDesc {
+  margin: 4px 0 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.72);
+  font-size: 13px;
+}
+
+.settingsFooterPanel {
+  background: linear-gradient(180deg, rgba(247,239,226,.012), rgba(5,6,10,.18));
+  border: 1px solid rgba(215,173,105,.28);
+  border-radius: 10px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 640px) {
+  .settingsFooterPanel {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+.settingsFooterLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingsFooterIcon {
+  color: #d7ad69;
+  font-size: 24px;
+}
+
+.settingsFooterText {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: #f7efe2;
+  font-size: 13px;
+}
+.settingsFooterSubtext {
+  margin: 4px 0 0;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.72);
+  font-size: 12px;
+}
+
+.settingsFooterRight p {
+  margin: 0 0 4px;
+  font-family: "Inter", sans-serif;
+  color: rgba(247,239,226,.72);
+  font-size: 12px;
+  text-align: right;
+}
+@media (max-width: 640px) {
+  .settingsFooterRight p {
+    text-align: left;
+  }
+}
+.settingsFooterRight a {
+  color: #d7ad69;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.settingsFooterRight a:hover {
+  text-decoration: underline;
+}
+.settingsPageWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #030509;
+  width: 100%;
+  padding-top: 48px;
 }

@@ -11,7 +11,7 @@ export function ChallengeFeedback({ visible, isCorrect, correctAnswer, explanati
   if (!visible) return null;
 
   return (
-    <div className={`${styles.feedbackBlock} ${isCorrect ? styles.feedbackOk : styles.feedbackError}`}>
+    <div className={`${styles.challengePlayFeedbackBlock} ${isCorrect ? styles.challengePlayFeedbackOk : styles.challengePlayFeedbackError}`}>
       <p className={styles.feedbackTitleText}>{isCorrect ? "Correcto" : "Respuesta incorrecta"}</p>
       {!isCorrect ? (
         <p className={styles.feedbackMessageText}>

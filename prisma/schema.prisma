@@ -467,6 +467,7 @@ model BitacoraReReading {
   reflection        String?  @db.Text
   newInterpretation String?  @db.Text
   lessonLearned     String?  @db.Text
+  recordType        String   @default("REREADING")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

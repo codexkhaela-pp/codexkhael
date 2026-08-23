@@ -126,6 +126,7 @@ type CreateRereadingPayload = {
   reflection?: string;
   newInterpretation?: string;
   lessonLearned?: string;
+  recordType?: "REREADING" | "PERSONAL_INTERPRETATION";
 };
 
 export async function createRereadingInApi(entryId: string, payload: CreateRereadingPayload): Promise<JournalEntry> {

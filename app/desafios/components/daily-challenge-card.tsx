@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import styles from "@/app/desafios/desafios.module.css";
+import styles from "@/app/desafios/desafios-hub.module.css";
 import type { ChallengeDetail } from "@/app/desafios/components/types";
 import { cardIdToImage, cardIdToLabel, cleanQuestionText, cleanDescription } from "@/app/desafios/components/challenge-mappers";
 
@@ -53,35 +53,23 @@ export function DailyChallengeCard({ challenge, onReset }: DailyChallengeCardPro
   if (!challenge) {
     return (
       <section className={styles.dailyCard}>
-        <h2 className={styles.sectionTitle}>🔥 Desafío del día</h2>
+        <div className={styles.dailyHeader}>
+          <h2 className={styles.sectionTitle}>🔥 DESAFÍO DEL DÍA</h2>
+        </div>
         <p className={styles.emptyState}>No hay desafío diario disponible por ahora.</p>
       </section>
     );
   }
 
   const firstQuestion = challenge.questions[0];
-  const cards = (firstQuestion?.cardsJson ?? []).slice(0, 3);
-
-  const countdownUnits = [
-    { value: timeLeft.hours, label: "Horas" },
-    { value: timeLeft.minutes, label: "Minutos" },
-    { value: timeLeft.seconds, label: "Segundos" },
-  ];
+  // Map all cards dynamically, not limited to 3 unless that's what's available
+  const cards = firstQuestion?.cardsJson ?? [];
 
   return (
     <section className={styles.dailyCard}>
-      <div className={styles.dailyLeft}>
-        <h2 className={styles.sectionTitle}>🔥 Desafío del día</h2>
-        <p className={styles.dailyLabel}>Nuevo desafío disponible en:</p>
-
-        <div className={styles.countdownGrid}>
-          {countdownUnits.map((unit) => (
-            <article key={unit.label} className={styles.countdownItem}>
-              <strong>{unit.value}</strong>
-              <span>{unit.label}</span>
-            </article>
-          ))}
-        </div>
+      <div className={styles.dailyHeader}>
+        <h2 className={styles.sectionTitle}>🔥 DESAFÍO DEL DÍA</h2>
+        <span className={styles.xpBadge}>+{challenge.baseXp} XP</span>
       </div>
 
       <div className={styles.dailyCardsShowcase}>
@@ -97,15 +85,26 @@ export function DailyChallengeCard({ challenge, onReset }: DailyChallengeCardPro
         ))}
       </div>
 
-      <div className={styles.dailyRight}>
-        <span className={styles.difficultyBadge}>Dificultad: {challenge.difficulty}</span>
-        <h3 className={styles.dailyQuestion}>
-          {cleanQuestionText(firstQuestion?.questionText ?? "¿Qué mensaje general transmite esta tirada?", challenge.isDaily)}
-        </h3>
-        <p className={styles.dailyBody}>{cleanDescription(challenge.description, challenge.isDaily)}</p>
-        <Link href={`/desafios/${challenge.id}`} className={styles.primaryAction}>
-          Resolver desafío <span aria-hidden="true">→</span>
-        </Link>
+      <div className={styles.dailyDifficulty}>
+        <span aria-hidden="true">▥</span>
+        DIFICULTAD: {challenge.difficulty}
+      </div>
+
+      <h3 className={styles.dailyQuestion}>
+        {cleanQuestionText(firstQuestion?.questionText ?? "¿Qué mensaje general transmite esta tirada?", challenge.isDaily)}
+      </h3>
+      
+      <p className={styles.dailyBody}>
+        {cleanDescription(challenge.description, challenge.isDaily)}
+      </p>
+
+      <Link href={`/desafios/${challenge.id}`} className={styles.primaryAction}>
+        RESOLVER DESAFÍO <span aria-hidden="true">→</span>
+      </Link>
+
+      <div className={styles.countdownSingle}>
+        <span aria-hidden="true">◷</span>
+        Nuevo desafío en {timeLeft.hours} : {timeLeft.minutes} : {timeLeft.seconds}
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ import { ChallengeFilters } from "@/app/desafios/components/challenge-filters";
 import { ChallengesGrid } from "@/app/desafios/components/challenges-grid";
 import { UserChallengeProgressPanel } from "@/app/desafios/components/user-challenge-progress-panel";
 import { TopInterpretersPanel } from "@/app/desafios/components/top-interpreters-panel";
+import { HowItWorksPanel } from "@/app/desafios/components/how-it-works-panel";
 import { RewardsBanner } from "@/app/desafios/components/rewards-banner";
 import type {
   ChallengeCategory,
@@ -16,7 +17,7 @@ import type {
   UserProgressData,
 } from "@/app/desafios/components/types";
 import { toChallengeItem } from "@/app/desafios/components/challenge-mappers";
-import styles from "@/app/desafios/desafios.module.css";
+import styles from "@/app/desafios/desafios-hub.module.css";
 
 type ChallengesApiResponse = {
   items: ChallengeDetail[];
@@ -157,17 +158,19 @@ export function DesafiosPageClient() {
           <DailyChallengeCard challenge={dailyChallenge} onReset={() => setRefreshKey((prev) => prev + 1)} />
         )}
 
-        <section className={styles.availableCard}>
-          <h2 className={styles.sectionTitle}>✧ Desafíos disponibles</h2>
+        <section className={styles.availableSection}>
+          <h2 className={styles.availableTitle}>✦ ELIGE TU PRÓXIMO DESAFÍO</h2>
           <ChallengeFilters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
-          {loadingChallenges ? <p className={styles.loading}>Cargando desafíos...</p> : null}
-          {errorChallenges ? <p className={styles.error}>{errorChallenges}</p> : null}
-          {!loadingChallenges && !errorChallenges && filteredChallenges.length === 0 ? (
-            <p className={styles.emptyState}>No hay desafíos disponibles.</p>
-          ) : null}
+          <div className={styles.availableListContainer}>
+            {loadingChallenges ? <p className={styles.loading}>Cargando desafíos...</p> : null}
+            {errorChallenges ? <p className={styles.error}>{errorChallenges}</p> : null}
+            {!loadingChallenges && !errorChallenges && filteredChallenges.length === 0 ? (
+              <p className={styles.emptyState}>No hay desafíos disponibles.</p>
+            ) : null}
 
-          {!loadingChallenges && !errorChallenges ? <ChallengesGrid challenges={filteredChallenges} /> : null}
+            {!loadingChallenges && !errorChallenges ? <ChallengesGrid challenges={filteredChallenges} /> : null}
+          </div>
         </section>
       </section>
 
@@ -180,6 +183,7 @@ export function DesafiosPageClient() {
           loading={loadingRanking}
           error={errorRanking}
         />
+        <HowItWorksPanel />
       </aside>
 
     </section>

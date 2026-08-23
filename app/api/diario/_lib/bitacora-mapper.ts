@@ -57,6 +57,7 @@ export type ApiCreateRereadingBody = {
   reflection?: string;
   newInterpretation?: string;
   lessonLearned?: string;
+  recordType?: "REREADING" | "PERSONAL_INTERPRETATION";
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -168,6 +169,7 @@ function mapRereadings(items: BitacoraReReading[]): JournalRereading[] {
       reflection: item.reflection ?? decoded.comment ?? "",
       newPersonalInterpretation: item.newInterpretation ?? "",
       lessonLearned: item.lessonLearned ?? "",
+      recordType: (item.recordType as "REREADING" | "PERSONAL_INTERPRETATION") ?? "REREADING",
     };
   });
 }

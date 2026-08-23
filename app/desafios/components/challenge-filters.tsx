@@ -1,4 +1,4 @@
-import styles from "@/app/desafios/desafios.module.css";
+import styles from "@/app/desafios/desafios-hub.module.css";
 import type { ChallengeCategory } from "@/app/desafios/components/types";
 
 type ChallengeFiltersProps = {
@@ -17,7 +17,7 @@ const filterOptions: Array<{ key: ChallengeCategory; label: string }> = [
 
 export function ChallengeFilters({ activeFilter, onFilterChange }: ChallengeFiltersProps) {
   return (
-    <div className={styles.filtersRow} role="tablist" aria-label="Filtros de desafíos">
+    <div className={styles.filtersContainer} role="tablist" aria-label="Filtros de desafíos">
       {filterOptions.map((option) => (
         <button
           key={option.key}

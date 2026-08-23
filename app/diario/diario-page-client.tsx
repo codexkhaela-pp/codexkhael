@@ -9,9 +9,8 @@ export function DiarioPageClient() {
   const isNewEntryView = viewType === "new";
 
   return (
-    <main className="app-shell dashboard-preview-bg">
+    <main className="app-shell landing-page">
       <DashboardPageHeader
-        kicker="Bitácora"
         title={isNewEntryView ? "Registro de nueva entrada" : "Bitácora"}
         description={
           isNewEntryView
