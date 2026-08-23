@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, type ReactNode } from "react";
 import type { AuthSessionStatus } from "@/lib/use-auth-session";
@@ -6,6 +6,8 @@ import type { QuickInterpretationOutput, PositionReading } from "@/lib/quick-int
 import type { AiTarotReadingResponse } from "@/lib/ai-client";
 import type { ReadingStatus } from "@/app/tiradas/types";
 import type { TarotSpread, TarotSpreadPosition } from "@/src/data/tarotSpreads";
+import { CustomSelect } from "./custom-select";
+import styles from "./tiradas-laterales.module.css";
 
 type SpreadOption = {
   id: string;
@@ -187,15 +189,15 @@ export function ReadingExperienceShell({
   function renderPreparationContent(mode: "sidebar" | "tab") {
     return (
       <>
-        <div className="reading-prep-panel__header">
-          <span className="reading-panel-kicker">
-            {mode === "tab" ? "Preparación" : "Preparación de lectura"}
+        <div className={styles.sidePanelHeader}>
+          <span className={styles.sidePanelTitle}>
+            ✦ {mode === "tab" ? "Preparación" : "Preparación de lectura"}
           </span>
         </div>
 
-        <div className="reading-prep-panel__primary">
-          <label className="reading-field">
-            <span className="reading-field__label">Tu pregunta</span>
+        <div className={styles.sidePanelSection}>
+          <label className={styles.sidePanelSection}>
+            <span className={styles.sidePanelLabel}>Tu pregunta</span>
             <textarea
               value={isManualSpread ? manualQuestion : readingQuestion}
               onChange={(event) =>
@@ -203,34 +205,32 @@ export function ReadingExperienceShell({
                   ? onManualQuestionChange(event.target.value)
                   : onReadingQuestionChange(event.target.value)
               }
-              className="reading-field__control reading-field__control--textarea"
+              className={styles.sidePanelTextarea}
               placeholder="¿Qué necesitas comprender sobre esta situación?"
               rows={3}
               disabled={isManualSpread && manualIsFinalized}
             />
           </label>
 
-          <label className="reading-field">
-            <span className="reading-field__label">Tipo de tirada</span>
-            <select
+          <label className={styles.sidePanelSection}>
+            <span className={styles.sidePanelLabel}>Tipo de tirada</span>
+            <CustomSelect
               value={spreadId}
-              className="reading-field__control reading-field__control--select"
-              onChange={(event) => onSpreadChange(event.target.value)}
+              onChange={onSpreadChange}
               disabled={isBusy || authStatus === "loading"}
-            >
-              {spreadOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {renderText(option.name)}
-                  {option.isLocked && option.requiredPlan ? ` • ${renderText(option.requiredPlan)}` : ""}
-                </option>
-              ))}
-            </select>
+              options={spreadOptions.map(option => ({
+                id: option.id,
+                label: renderText(option.name),
+                disabled: option.isLocked,
+                meta: option.isLocked && option.requiredPlan ? renderText(option.requiredPlan) : undefined
+              }))}
+            />
           </label>
         </div>
 
         {isManualSpread ? (
-          <div className="reading-field reading-field--stacked reading-prep-panel__advanced">
-            <span className="reading-field__label">Configuración libre</span>
+          <div className={styles.sidePanelSection}>
+            <span className={styles.sidePanelLabel}>Configuración libre</span>
             <div className="manual-card-count-pills">
               {Array.from({ length: maxManualCards }, (_, index) => index + 1).map((count) => (
                 <button
@@ -251,59 +251,62 @@ export function ReadingExperienceShell({
                 onChange={(event) => onManualAllowRepeatedChange(event.target.checked)}
                 disabled={manualIsFinalized}
               />
-              <span>Permitir cartas repetidas</span>
+              <span style={{ color: "rgba(247,239,226,.8)", fontSize: "0.85rem" }}>Permitir cartas repetidas</span>
             </label>
           </div>
         ) : null}
 
-        <div className="reading-deck-panel reading-prep-panel__deck">
-          <div className="reading-deck-panel__copy">
-            <span className="reading-field__label">Mazo seleccionado</span>
-            <strong>Codex Khael Tarot</strong>
-            <small>Rider Waite</small>
+        <hr className={styles.sidePanelSeparator} />
+
+        <div className={styles.sidePanelDeck}>
+          <div className={styles.sidePanelDeckInfo}>
+            <span className={styles.sidePanelLabel}>Mazo seleccionado</span>
+            <h3 className={styles.sidePanelDeckName}>Codex Khael Tarot</h3>
+            <span className={styles.sidePanelDeckEdition}>Rider Waite</span>
           </div>
 
-          <div className="deck-stage">
+          <div className={styles.sidePanelDeckImageWrapper}>
             <div
               className={`deck-stack${status === "barajando" ? " deck-stack-shuffling" : ""}${
                 status === "revelando" ? " deck-stack-cut" : ""
               }`}
               aria-label="Mazo cerrado"
+              style={{ border: "none" }}
             >
-              <div className="deck-face" aria-hidden="true">
-                <img src="/decks/rider-waite/back.png" alt="" className="deck-face-image" />
+              <div className="deck-face" aria-hidden="true" style={{ border: "none", background: "transparent" }}>
+                <img src="/decks/carta_codex.png" alt="Codex Khael Back" className="deck-face-image" style={{ borderRadius: "13px" }} />
               </div>
-              <span className="deck-layer deck-layer-one" aria-hidden="true" />
-              <span className="deck-layer deck-layer-two" aria-hidden="true" />
-              <span className="deck-layer deck-layer-three" aria-hidden="true" />
-              <span className="deck-layer deck-layer-four" aria-hidden="true" />
-              <span className="deck-layer deck-layer-five" aria-hidden="true" />
+              <span className="deck-layer deck-layer-one" aria-hidden="true" style={{ backgroundImage: "url(/decks/carta_codex.png)", border: "none" }} />
+              <span className="deck-layer deck-layer-two" aria-hidden="true" style={{ backgroundImage: "url(/decks/carta_codex.png)", border: "none" }} />
+              <span className="deck-layer deck-layer-three" aria-hidden="true" style={{ backgroundImage: "url(/decks/carta_codex.png)", border: "none" }} />
+              <span className="deck-layer deck-layer-four" aria-hidden="true" style={{ backgroundImage: "url(/decks/carta_codex.png)", border: "none" }} />
+              <span className="deck-layer deck-layer-five" aria-hidden="true" style={{ backgroundImage: "url(/decks/carta_codex.png)", border: "none" }} />
             </div>
           </div>
 
-          <div className="reading-status-pill">
+          <div className={styles.sidePanelStatusBadge}>
             {authStatus === "loading"
               ? "Cargando sesión"
               : isManualSpread
                 ? manualIsFinalized
-                  ? "Lectura lista para interpretar"
-                  : "Tirada en construcción"
+                  ? "Lectura lista"
+                  : "En construcción"
                 : status === "inicial"
-                  ? "Mazo listo"
+                  ? <>Mazo listo <span className={styles.sidePanelStatusDot}></span></>
                   : status === "barajando"
-                    ? "Barajando"
+                    ? <>Barajando <span className={`${styles.sidePanelStatusDot} ${styles.sidePanelStatusDotPulse}`}></span></>
                     : status === "revelando"
-                      ? "Revelando"
+                      ? <>Revelando <span className={`${styles.sidePanelStatusDot} ${styles.sidePanelStatusDotPulse}`}></span></>
                       : "Lectura revelada"}
           </div>
         </div>
 
-        <div className="reading-actions reading-actions--ritual">
+        <div className={styles.sidePanelSection} style={{ marginTop: "auto" }}>
           {isManualSpread ? (
             <>
               <button
                 type="button"
-                className="btn btn-primary reading-actions__primary"
+                className={styles.sideBtnPrimary}
                 onClick={() => void onManualPrepare()}
                 disabled={
                   manualIsGenerating ||
@@ -313,40 +316,40 @@ export function ReadingExperienceShell({
                   manualIsFinalized
                 }
               >
-                {manualIsGenerating ? "Finalizando..." : "Finalizar Tirada"}
+                {manualIsGenerating ? "Finalizando..." : "✦ Finalizar Tirada"}
               </button>
               <button
                 type="button"
-                className="btn btn-secondary"
+                className={styles.sideBtnGhost}
                 onClick={onResetManualSpread}
                 disabled={manualIsGenerating || aiDepthState === "loading"}
               >
-                Nueva tirada
+                ↻ Nueva tirada
               </button>
             </>
           ) : (
             <>
               <button
                 type="button"
-                className="btn btn-primary reading-actions__primary"
+                className={styles.sideBtnPrimary}
                 onClick={onStartReading}
                 disabled={isBusy}
               >
-                {status === "barajando" ? "Barajando..." : "Barajar y Revelar"}
+                {status === "barajando" ? "Barajando..." : "✦ Barajar y Revelar"}
               </button>
               <button
                 type="button"
-                className="btn btn-secondary"
+                className={styles.sideBtnGhost}
                 onClick={onResetPresetReading}
                 disabled={isBusy}
               >
-                Nueva tirada
+                ↻ Nueva tirada
               </button>
             </>
           )}
         </div>
 
-        {manualError ? <p className="manual-error">{manualError}</p> : null}
+        {manualError ? <p className="manual-error" style={{ color: "#ef4444", fontSize: "0.85rem", textAlign: "center" }}>{manualError}</p> : null}
       </>
     );
   }
@@ -354,39 +357,37 @@ export function ReadingExperienceShell({
   function renderSummaryContent(mode: "sidebar" | "tab") {
     return (
       <>
-        <header className="reading-summary-panel__header">
-          <div>
-            <span className="reading-panel-kicker">
-              {mode === "tab" ? "Resumen" : "Resumen de tu tirada"}
-            </span>
-          </div>
-        </header>
+        <div className={styles.sidePanelHeader}>
+          <span className={styles.sidePanelTitle}>
+            ✦ {mode === "tab" ? "Resumen" : "Resumen de tu tirada"}
+          </span>
+        </div>
 
-        <div className="reading-summary-panel__list">
+        <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
           {revealedReadingItems.length > 0 ? (
             revealedReadingItems.map((item, index) => (
-              <details key={`${item.index}-${item.label}`} className="reading-summary-item" open={index === 0}>
-                <summary>
-                  <span className="reading-summary-item__number">{item.index}</span>
-                  <div className="reading-summary-item__copy">
-                    <strong>{renderText(item.label)}</strong>
-                    <span>
+              <details key={`${item.index}-${item.label}`} className={styles.sidePanelSummaryItem} open={index === 0}>
+                <summary className={styles.sidePanelSummarySummary}>
+                  <div className={styles.sidePanelSummaryNumber}>{item.index}</div>
+                  <div className={styles.sidePanelSummaryCopy}>
+                    <span className={styles.sidePanelSummaryPositionName}>{renderText(item.label)}</span>
+                    <span className={styles.sidePanelSummaryState}>
                       {item.cardName}
                       {item.orientation !== "Pendiente" ? ` (${item.orientation})` : ""}
                     </span>
                   </div>
-                  <span className="reading-summary-item__chevron" aria-hidden="true">
-                    ˅
+                  <span className={styles.sidePanelSummaryChevron} aria-hidden="true">
+                    ▼
                   </span>
                 </summary>
-                <div className="reading-summary-item__body">
-                  {item.subtitle ? <small>{renderText(item.subtitle)}</small> : null}
+                <div className={styles.sidePanelSummaryBody}>
+                  {item.subtitle ? <p style={{ margin: 0 }}>{renderText(item.subtitle)}</p> : null}
                 </div>
               </details>
             ))
           ) : (
-            <div className="reading-summary-empty">
-              <p>La mesa aún no ha sido revelada.</p>
+            <div className={styles.sidePanelEmpty}>
+              <p style={{ margin: 0 }}>La mesa aún no ha sido revelada.</p>
               <small>
                 {isManualSpread
                   ? "Finaliza la tirada para generar el resumen completo de posiciones."
@@ -396,41 +397,45 @@ export function ReadingExperienceShell({
           )}
         </div>
 
-        <div className="reading-summary-panel__footer">
+        <div className={styles.sidePanelSection} style={{ marginTop: "24px" }}>
           <button
             type="button"
-            className="btn btn-primary reading-summary-panel__cta"
+            className={styles.sideBtnPrimary}
             onClick={() => void onPrimaryInterpretationCta()}
             disabled={!canShowInterpretationCta || aiDepthState === "loading"}
           >
             {aiDepthState === "loading" ? "Activando..." : "✨ Activar Modo Mentor"}
+            {!canShowInterpretationCta && <span className={styles.sidePanelProBadge}>PRO</span>}
           </button>
-          <p>Una lectura más humana, profunda y personalizada desde tu tirada.</p>
+          <p className={styles.sidePanelMentorDesc}>Una lectura más humana, profunda y personalizada desde tu tirada.</p>
 
-          <div className="reading-post-actions">
+          <div className={styles.sidePanelActionsGrid}>
             <button
               type="button"
-              className="btn btn-secondary"
+              className={styles.sidePanelActionBtn}
               onClick={onSaveReadingDraft}
               disabled={!canShowInterpretationCta}
             >
-              Guardar en Bitácora
+              <svg className={styles.sidePanelActionIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+              <span>Guardar en<br />Bitácora</span>
             </button>
             <button
               type="button"
-              className="btn btn-secondary"
+              className={styles.sidePanelActionBtn}
               onClick={onExportPdf}
               disabled={!canShowInterpretationCta}
             >
-              Exportar PDF
+              <svg className={styles.sidePanelActionIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span>Exportar<br />PDF</span>
             </button>
             <button
               type="button"
-              className="btn btn-secondary"
+              className={styles.sidePanelActionBtn}
               onClick={() => void onShareReading()}
               disabled={!canShowInterpretationCta}
             >
-              Compartir lectura
+              <svg className={styles.sidePanelActionIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              <span>Compartir<br />lectura</span>
             </button>
           </div>
         </div>
@@ -461,7 +466,7 @@ export function ReadingExperienceShell({
       ) : null}
 
       <div className={`reading-board reading-board--immersive${readingRevealed ? " reading-board--revealed" : ""}`}>
-        <aside className="reading-prep-panel" aria-label="Preparación de la lectura">
+        <aside className={`reading-prep-panel ${styles.sidePanelWrapper}`} aria-label="Preparación de la lectura">
           {renderPreparationContent("sidebar")}
         </aside>
 
@@ -541,8 +546,36 @@ export function ReadingExperienceShell({
               </div>
             ) : null}
 
+          </div>
+        </section>
+        {!readingRevealed ? (
+          <aside className={`reading-summary-panel ${styles.sidePanelWrapper}`} aria-label="Resumen de tu tirada">
+            {renderSummaryContent("sidebar")}
+          </aside>
+        ) : null}
+      </div>
+
+      {readingRevealed ? (
+        <aside
+          id="reading-summary-panel"
+          className={`reading-summary-panel reading-summary-panel--drawer ${styles.sidePanelWrapper}${summaryDrawerOpen ? " is-open" : ""}`}
+          aria-label="Resumen de tu tirada"
+        >
+          <div className="reading-summary-panel__drawer-topbar">
+            <button
+              type="button"
+              className="reading-summary-panel__close"
+              onClick={() => setSummaryDrawerOpen(false)}
+              aria-label="Cerrar resumen"
+            >
+              ×
+            </button>
+          </div>
+          {renderSummaryContent("sidebar")}
+        </aside>
+      ) : null}
             {interpretationVisible && activeInterpretation ? (
-              <section className="interpretation-panel interpretation-panel--ritual" aria-label="Interpretación de la tirada">
+              <section className="interpretation-panel interpretation-panel--ritual" aria-label="Interpretación de la tirada" style={{ marginTop: "24px" }}>
                 <header className="interpretation-header interpretation-header--ritual">
                   <div>
                     <span className="reading-panel-kicker">INTERPRETACIÓN DE TU TIRADA</span>
@@ -696,34 +729,6 @@ export function ReadingExperienceShell({
                 </div>
               </section>
             ) : null}
-          </div>
-        </section>
-        {!readingRevealed ? (
-          <aside className="reading-summary-panel" aria-label="Resumen de tu tirada">
-            {renderSummaryContent("sidebar")}
-          </aside>
-        ) : null}
-      </div>
-
-      {readingRevealed ? (
-        <aside
-          id="reading-summary-panel"
-          className={`reading-summary-panel reading-summary-panel--drawer${summaryDrawerOpen ? " is-open" : ""}`}
-          aria-label="Resumen de tu tirada"
-        >
-          <div className="reading-summary-panel__drawer-topbar">
-            <button
-              type="button"
-              className="reading-summary-panel__close"
-              onClick={() => setSummaryDrawerOpen(false)}
-              aria-label="Cerrar resumen"
-            >
-              ×
-            </button>
-          </div>
-          {renderSummaryContent("sidebar")}
-        </aside>
-      ) : null}
     </section>
   );
 }
