@@ -374,10 +374,10 @@ export function PracticeQuizModal({
   };
 
   const modalContent = (
-    <div className={styles.practiceOverlay} onClick={onClose}>
+    <div className={`${styles.practiceOverlay} ${showResults ? styles['practiceOverlay--results'] : ''}`} onClick={onClose}>
       <div
         ref={shellRef}
-        className={styles.practiceModal}
+        className={`${styles.practiceModal} ${showResults ? styles['practiceModal--results'] : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="practice-modal-title"
@@ -406,88 +406,108 @@ export function PracticeQuizModal({
           </div>
         ) : showResults ? (
           <>
-            <header className={styles.practiceHeader}>
-              <div>
-                <p className={styles.practiceEyebrow}>Resultado de práctica</p>
-                <h2 id="practice-modal-title" className={styles.practiceTitle}>
+            <button
+              type="button"
+              className={styles.practiceResultTopClose}
+              onClick={onClose}
+              aria-label="Cerrar práctica"
+            >
+              ×
+            </button>
+            <div className={styles.practiceResultHeaderGrid}>
+              <div className={styles.practiceResultHeaderLeft}>
+                <p className={styles.practiceResultKicker}>✦ Resultado de práctica</p>
+                <h2 id="practice-modal-title" className={styles.practiceResultHeaderTitle}>
                   {quizState.payload.card.name}
                 </h2>
+                <p className={styles.practiceResultScoreNew}>
+                  <span className={styles.practiceResultScoreCorrect}>{resultSummary.correctAnswers}</span> / {resultSummary.totalQuestions} correctas
+                </p>
+                <p className={styles.practiceResultMasteryNew}>
+                  Dominio obtenido: <span className={styles.practiceResultMasteryValue}>{resultSummary.scorePercent}%</span>
+                </p>
               </div>
-              <button
-                type="button"
-                className={styles.practiceCloseButton}
-                onClick={onClose}
-                aria-label="Cerrar práctica"
-              >
-                ×
-              </button>
-            </header>
 
-            <div className={styles.practiceResultHero}>
-              <div>
-                <p className={styles.practiceResultScore}>
-                  {resultSummary.correctAnswers} / {resultSummary.totalQuestions} correctas
-                </p>
-                <p className={styles.practiceResultMastery}>
-                  Dominio obtenido: {resultSummary.scorePercent}%
-                </p>
+              <div className={styles.practiceResultCenter}>
+                <div className={styles.practiceResultImageWrapper}>
+                  <Image
+                    src={card.image}
+                    alt={quizState.payload.card.name}
+                    width={180}
+                    height={300}
+                    className={styles.practiceResultImage}
+                  />
+                </div>
               </div>
-              <div className={styles.practiceResultStatus}>
-                <span aria-hidden="true">{getStatusIcon(resultSummary.studyStatus)}</span>
-                <span>Estado: {getStatusLabel(resultSummary.studyStatus)}</span>
+
+              <div className={styles.practiceResultHeaderRight}>
+                <div className={styles.practiceResultStatusBadge}>
+                  <span className={styles.practiceResultStatusLabel}>
+                    <span aria-hidden="true">✦</span> Estado
+                  </span>
+                  <span className={styles.practiceResultStatusValue}>{getStatusLabel(resultSummary.studyStatus)}</span>
+                </div>
               </div>
             </div>
 
-            <div className={styles.practiceProgressTrack} aria-hidden="true">
-              <div
-                className={styles.practiceProgressFill}
-                style={{ width: `${resultSummary.scorePercent}%` }}
-              />
+            <div className={styles.practiceResultBarContainer} aria-hidden="true">
+              <div className={styles.practiceResultBarTrack}>
+                <div
+                  className={styles.practiceResultBarFill}
+                  style={{ width: `${resultSummary.scorePercent}%` }}
+                />
+              </div>
             </div>
 
-            <section className={styles.practiceResultSection}>
-              <h3>Resumen de respuestas</h3>
-              <div className={styles.practiceResultsList}>
+            <div className={styles.practiceResultScrollArea}>
+              <h3 className={styles.practiceResultSectionTitle}>
+                <span aria-hidden="true">⟡</span> Resumen de respuestas
+              </h3>
+              <div className={styles.practiceResultListNew}>
                 {results.map((result, index) => (
-                  <article
-                    key={result.questionId}
-                    className={[
-                      styles.practiceResultItem,
-                      result.isCorrect ? styles.practiceResultItemOk : styles.practiceResultItemError,
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    <div className={styles.practiceResultItemHeader}>
-                      <strong>Pregunta {index + 1}</strong>
-                      <span>{result.isCorrect ? "Correcta" : "Fallada"}</span>
+                  <article key={result.questionId} className={styles.practiceResultRowNew}>
+                    <div className={styles.practiceResultRowHeader}>
+                      <div className={styles.practiceResultRowTitleGroup}>
+                        <span className={styles.practiceResultRowNumber}>{index + 1}</span>
+                        <span className={styles.practiceResultRowQuestion}>Pregunta {index + 1}</span>
+                      </div>
+                      <div className={`${styles.practiceResultRowStatus} ${result.isCorrect ? styles.statusOk : styles.statusError}`}>
+                        <span aria-hidden="true" className={styles.statusIconWrapper}>
+                          {result.isCorrect ? "✓" : "✕"}
+                        </span>
+                        <span>{result.isCorrect ? "Correcta" : "Fallada"}</span>
+                      </div>
                     </div>
-                    {!result.isCorrect ? (
-                      <>
-                        <p>Tu respuesta: {result.selectedAnswer || "Sin respuesta"}</p>
-                        <p>Correcta: {result.correctAnswer}</p>
-                      </>
-                    ) : (
-                      <p>Respuesta correcta registrada.</p>
-                    )}
+                    <div className={styles.practiceResultRowDetail}>
+                      {!result.isCorrect ? (
+                        <>
+                          <p><span className={styles.detailLabel}>Tu respuesta:</span> {result.selectedAnswer || "Sin respuesta"}</p>
+                          <p><span className={styles.detailLabel}>Correcta:</span> {result.correctAnswer}</p>
+                        </>
+                      ) : (
+                        <p>Respuesta correcta registrada.</p>
+                      )}
+                    </div>
                   </article>
                 ))}
               </div>
-            </section>
 
-            {resultSummary.failedQuestions.length > 0 ? (
-              <section className={styles.practiceRecommendation}>
-                <strong>Recomendación</strong>
-                <p>Repasa los ámbitos donde hubo errores antes de volver a practicar.</p>
-              </section>
-            ) : null}
+              {resultSummary.failedQuestions.length > 0 ? (
+                <div className={styles.practiceResultRecommendationNew}>
+                  <h3 className={styles.practiceResultSectionTitle}>
+                    <span aria-hidden="true">✦</span> Recomendación
+                  </h3>
+                  <p>Repasa los ámbitos donde hubo errores antes de volver a practicar.</p>
+                </div>
+              ) : null}
+            </div>
 
-            <div className={styles.practiceActions}>
-              <button type="button" className={styles.practicePrimaryButton} onClick={handleRestart}>
-                Volver a practicar
+            <div className={styles.practiceResultFooter}>
+              <button type="button" className={styles.practiceResultCloseBtn} onClick={onClose}>
+                <span aria-hidden="true" style={{fontSize: "14px", marginRight: "4px"}}>↻</span> Cerrar
               </button>
-              <button type="button" className={styles.practiceSecondaryButton} onClick={onClose}>
-                Cerrar
+              <button type="button" className={styles.practiceResultRetryBtn} onClick={handleRestart}>
+                <span aria-hidden="true">✦</span> Volver a practicar
               </button>
             </div>
           </>
