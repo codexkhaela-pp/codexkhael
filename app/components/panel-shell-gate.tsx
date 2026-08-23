@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { DashboardShell } from "@/app/components/dashboard-shell";
-import { StudentMaintenanceModal } from "@/app/components/student-maintenance-modal";
+
 
 type PanelShellGateProps = {
   children: ReactNode;
@@ -44,10 +44,6 @@ export function PanelShellGate({ children, isStudent, isAdmin, isOnlyClient }: P
 
   if (isOnlyClient) {
     return null; // Evitar renderizar el layout mientras redirige
-  }
-
-  if (isStudent) {
-    return <StudentMaintenanceModal />;
   }
 
   return <DashboardShell isAdmin={isAdmin}>{children}</DashboardShell>;

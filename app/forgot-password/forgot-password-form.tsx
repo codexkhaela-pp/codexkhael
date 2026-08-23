@@ -1,6 +1,8 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { Mail } from "lucide-react";
+import styles from "./forgot-password.module.css";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -38,22 +40,28 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form className="auth-form" onSubmit={onSubmit}>
-      <label htmlFor="email">Correo electrónico</label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        autoComplete="email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        required
-      />
+    <form className={styles.form} onSubmit={onSubmit}>
+      <div className={styles.inputGroup}>
+        <label htmlFor="email" className={styles.label}>Correo electrónico</label>
+        <div className={styles.inputWrapper}>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            className={styles.input}
+          />
+          <Mail className={styles.inputIcon} size={20} />
+        </div>
+      </div>
 
-      {error ? <p className="auth-error">{error}</p> : null}
-      {successMessage ? <p style={{ color: "var(--success, #4ade80)", fontSize: "0.85rem", marginBottom: "1rem" }}>{successMessage}</p> : null}
+      {error ? <p className={styles.error}>{error}</p> : null}
+      {successMessage ? <p className={styles.success}>{successMessage}</p> : null}
 
-      <button className="btn btn-primary auth-submit" type="submit" disabled={isSubmitting}>
+      <button className={styles.submitBtn} type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Enviando..." : "Enviar instrucciones"}
       </button>
     </form>
